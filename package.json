@@ -1,0 +1,25 @@
+{
+	"name": "racle-meteo",
+	"type": "module",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"test": "node ./src/index.test.js"
+	},
+	"devDependencies": {
+		"wrangler": "3.52.0"
+	},
+	"dependencies": {
+		"html-entities": "^2.5.2",
+		"striptags": "^3.2.0"
+	},
+	"prettier": {
+		"tabWidth": 4,
+		"useTabs": true,
+		"semi": false,
+		"singleQuote": true,
+		"printWidth": 100
+	}
+}
