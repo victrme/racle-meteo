@@ -1,5 +1,5 @@
+import { htmlContentToStringArray } from './shared'
 import { decode } from 'html-entities'
-import striptags from 'striptags'
 
 /**
  * @param {string} html
@@ -134,21 +134,6 @@ export function parseContent(html) {
 	}
 
 	return result
-}
-
-/**
- * Slice relevent content, strip html tags, split strings.
- * Returns all non-empty tags in an array
- * @param {string} html
- * @param {number} start
- * @param {number} end
- * @returns {string[]}
- */
-function htmlContentToStringArray(html, start, end) {
-	html = html.slice(start, end)
-	html = striptags(html, undefined, '\n')
-	html = html.split('\n').filter((v) => v)
-	return html
 }
 
 // Requests

@@ -1,6 +1,6 @@
+import { htmlContentToStringArray } from './providers/shared'
 import * as accuweather from './providers/accuweather'
 import * as foreca from './providers/foreca'
-import striptags from 'striptags'
 
 export default { fetch: main }
 
@@ -11,9 +11,7 @@ async function main(request) {
 	const lat = url.searchParams.get('lat') ?? request.cf.latitude
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 
-	const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
-	const json = accuweather.parseContent(html)
-	const result = { lat, lon, ...json }
+	let result
 
 	const headers = {
 		'access-control-allow-methods': 'GET',
@@ -22,7 +20,53 @@ async function main(request) {
 		'cache-control': 'public, max-age=1800',
 	}
 
+	switch (url.pathname) {
+		case '/foreca/api':
+			const json = await foreca.getForecaData(lat, lon)
+			result = { lat, lon, ...json }
+			break
+
+		case '/foreca':
+		case '/foreca/':
+		case '/foreca/web': {
+			const html = await foreca.getWeatherHTML(lat, lon, lang, unit)
+			const json = foreca.parseContent(html)
+			result = { lat, lon, ...json }
+			break
+		}
+
+		case '/foreca/html': {
+			const html = await foreca.getWeatherHTML(lat, lon, lang, unit)
+			result = htmlContentToStringArray(
+				html,
+				html.indexOf('<body'),
+				html.lastIndexOf('</body')
+			)
+			break
+		}
+
+		case '/accuweather/html': {
+			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
+			result = htmlContentToStringArray(
+				html,
+				html.indexOf('<body'),
+				html.lastIndexOf('</body')
+			)
+			break
+		}
+
+		case '/accuweather':
+		case '/accuweather/':
+		case '/accuweather/web': {
+			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
+			const json = accuweather.parseContent(html)
+			result = { lat, lon, ...json }
+			break
+		}
+
+		default:
+			break
+	}
+
 	return new Response(JSON.stringify(result), { headers })
 }
-
-// Parse
