@@ -55,6 +55,12 @@ async function main(request) {
 			break
 		}
 
+		case '/accuweather/list': {
+			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
+			result = accuweather.parseContentWithList(html)
+			break
+		}
+
 		case '/accuweather':
 		case '/accuweather/':
 		case '/accuweather/web': {

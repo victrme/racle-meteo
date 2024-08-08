@@ -1,6 +1,61 @@
 import { htmlContentToStringArray } from './shared'
 import { decode } from 'html-entities'
 
+export function parseContentWithList(html) {
+	let list = (html = htmlContentToStringArray(
+		html,
+		html.indexOf('<body'),
+		html.lastIndexOf('</body')
+	))
+
+	const isEnglishLayout = list.includes("Tonight's Weather")
+
+	if (isEnglishLayout) {
+		list = [...list.slice(0, 39), ...list.slice(45)]
+	}
+
+	let date = new Date()
+	let hourly = []
+	let daily = []
+
+	for (let i = 62; i <= 97; i += 3) {
+		hourly.push({
+			timestamp: date.getTime(),
+			temp: parseInt(list[i + 1]),
+			rain: list[i + 2].replace(' ', ''),
+		})
+	}
+
+	for (let i = 101; i <= 170; i += 7) {
+		daily.push({
+			timestamp: date.getTime(),
+			low: parseInt(list[i + 0]),
+			high: parseInt(list[i + 1]),
+			day: list[i + 2],
+			night: list[i + 3],
+			rain: list[i + 4],
+		})
+	}
+
+	return {
+		city: list[1],
+		region: list[1],
+		now: {
+			temp: list[41],
+			feels: list[46],
+			description: list[43],
+			icon: undefined,
+		},
+		hourly: hourly,
+		daily: daily,
+		sun: {
+			duration: list[164],
+			rise: list[166],
+			set: list[168],
+		},
+	}
+}
+
 /**
  * @param {string} html
  * @returns {AccuWeather}
