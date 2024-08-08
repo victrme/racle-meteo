@@ -9,7 +9,7 @@
 		"test": "node ./src/index.test.js"
 	},
 	"devDependencies": {
-		"wrangler": "3.52.0"
+		"wrangler": "3.69.1"
 	},
 	"dependencies": {
 		"html-entities": "^2.5.2",
