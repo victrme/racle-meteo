@@ -35,7 +35,7 @@ async function main(request) {
 			break
 		}
 
-		case '/foreca/html': {
+		case '/foreca/raw': {
 			const html = await foreca.getWeatherHTML(lat, lon, lang, unit)
 			result = htmlContentToStringArray(
 				html,
@@ -45,7 +45,7 @@ async function main(request) {
 			break
 		}
 
-		case '/accuweather/html': {
+		case '/accuweather/raw': {
 			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
 			result = htmlContentToStringArray(
 				html,

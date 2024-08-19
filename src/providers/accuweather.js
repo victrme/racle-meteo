@@ -1,6 +1,34 @@
 import { htmlContentToStringArray } from './shared'
 import { decode } from 'html-entities'
 
+const hourlyIndexes = [
+	[62, 63, 64],
+	[65, 66, 67],
+	[68, 69, 70],
+	[71, 72, 73],
+	[74, 75, 76],
+	[77, 78, 79],
+	[80, 81, 82],
+	[83, 84, 85],
+	[86, 87, 88],
+	[89, 90, 91],
+	[92, 93, 94],
+	[95, 96, 97],
+]
+
+const dailyIndexes = [
+	[101, 102, 103, 106],
+	[108, 109, 110, 113],
+	[115, 116, 117, 120],
+	[122, 123, 124, 127],
+	[129, 130, 131, 134],
+	[136, 137, 138, 141],
+	[143, 144, 145, 148],
+	[150, 151, 152, 155],
+	[157, 158, 159, 162],
+	[164, 165, 166, 169],
+]
+
 export function parseContentWithList(html) {
 	let list = (html = htmlContentToStringArray(
 		html,
@@ -8,32 +36,26 @@ export function parseContentWithList(html) {
 		html.lastIndexOf('</body')
 	))
 
-	const isEnglishLayout = list.includes("Tonight's Weather")
-
-	if (isEnglishLayout) {
-		list = [...list.slice(0, 39), ...list.slice(45)]
-	}
-
 	let date = new Date()
 	let hourly = []
 	let daily = []
 
-	for (let i = 62; i <= 97; i += 3) {
+	for (const [_, temp, rain] of hourlyIndexes) {
 		hourly.push({
 			timestamp: date.getTime(),
-			temp: parseInt(list[i + 1]),
-			rain: list[i + 2].replace(' ', ''),
+			temp: list[temp],
+			rain: list[rain],
 		})
 	}
 
-	for (let i = 101; i <= 170; i += 7) {
+	for (const [_, high, low, rain] of dailyIndexes) {
 		daily.push({
 			timestamp: date.getTime(),
-			low: parseInt(list[i + 0]),
-			high: parseInt(list[i + 1]),
-			day: list[i + 2],
-			night: list[i + 3],
-			rain: list[i + 4],
+			high: list[high],
+			low: list[low],
+			day: list[low + 1],
+			night: list[low + 2],
+			rain: list[rain],
 		})
 	}
 
@@ -41,17 +63,17 @@ export function parseContentWithList(html) {
 		city: list[1],
 		region: list[1],
 		now: {
-			temp: list[41],
-			feels: list[46],
-			description: list[43],
+			temp: list[47],
+			feels: list[50],
+			description: list[49],
 			icon: undefined,
 		},
 		hourly: hourly,
 		daily: daily,
 		sun: {
-			duration: list[164],
-			rise: list[166],
-			set: list[168],
+			duration: list[171],
+			rise: list[173],
+			set: list[175],
 		},
 	}
 }
