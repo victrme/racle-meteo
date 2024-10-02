@@ -6,12 +6,14 @@ import striptags from 'striptags'
  * @param {string} html
  * @param {number} start
  * @param {number} end
+ * @param {[string[]]} allowed_tags
  * @returns {string[]}
  */
-export function htmlContentToStringArray(html, start, end) {
+export function htmlContentToStringArray(html, start, end, allowed_tags) {
 	html = html.slice(start, end)
-	html = striptags(html, undefined, '\n')
+	html = striptags(html, allowed_tags, '\n')
 	html = html.split('\n').filter((v) => v.trim())
+
 	return html
 }
 

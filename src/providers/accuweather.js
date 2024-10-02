@@ -30,11 +30,7 @@ const dailyIndexes = [
 ]
 
 export function parseContentWithList(html) {
-	let list = (html = htmlContentToStringArray(
-		html,
-		html.indexOf('<body'),
-		html.lastIndexOf('</body')
-	))
+	let list = htmlContentToStringArray(html, html.indexOf('<body'), html.lastIndexOf('</body'))
 
 	let date = new Date()
 	let hourly = []
@@ -59,14 +55,19 @@ export function parseContentWithList(html) {
 		})
 	}
 
+	const match = '/images/weathericons/'
+	const start = html.indexOf(match) + match.length
+	const end = html.indexOf('.svg', start)
+	const listIcon = htmlContentToStringArray(html, start, end, ['svg'])
+
 	return {
 		city: list[1],
 		region: list[1],
 		now: {
+			icon: listIcon[0],
 			temp: list[47],
 			feels: list[50],
 			description: list[49],
-			icon: undefined,
 		},
 		hourly: hourly,
 		daily: daily,
