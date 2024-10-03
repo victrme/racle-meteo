@@ -1,6 +1,6 @@
-import { htmlContentToStringArray } from './providers/shared'
-import * as accuweather from './providers/accuweather'
-import * as foreca from './providers/foreca'
+import striptags from 'striptags'
+import accuweather from './providers/accuweather.js'
+import * as foreca from './providers/foreca.js'
 
 export default { fetch: main }
 
@@ -11,68 +11,71 @@ async function main(request) {
 	const lat = url.searchParams.get('lat') ?? request.cf.latitude
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 
-	let result
+	let body = undefined
+	let status = 200
 
-	const headers = {
-		'access-control-allow-methods': 'GET',
-		'access-control-allow-origin': '*',
-		'content-type': 'application/json',
-		'cache-control': 'public, max-age=1800',
+	try {
+		switch (url.pathname) {
+			case '/foreca':
+			case '/foreca/':
+				body = JSON.stringify(await foreca.getForecaData(lat, lon))
+				break
+
+			case '':
+			case '/':
+			case '/accuweather':
+			case '/accuweather/': {
+				body = JSON.stringify(await accuweather(lat, lon, lang, unit))
+				break
+			}
+
+			default:
+				status = 404
+		}
+	} catch (error) {
+		console.error(error)
+		body = error.message
+		status = 503
 	}
 
-	switch (url.pathname) {
-		case '/foreca/api':
-			const json = await foreca.getForecaData(lat, lon)
-			result = { lat, lon, ...json }
-			break
+	return new Response(body, {
+		status,
+		headers: {
+			'access-control-allow-methods': 'GET',
+			'access-control-allow-origin': '*',
+			'content-type': 'application/json',
+			'cache-control': 'public, max-age=1800',
+		},
+	})
+}
 
-		case '/foreca':
-		case '/foreca/':
-		case '/foreca/web': {
-			const html = await foreca.getWeatherHTML(lat, lon, lang, unit)
-			const json = foreca.parseContent(html)
-			result = { lat, lon, ...json }
-			break
-		}
+// Helpers
 
-		case '/foreca/raw': {
-			const html = await foreca.getWeatherHTML(lat, lon, lang, unit)
-			result = htmlContentToStringArray(
-				html,
-				html.indexOf('<body'),
-				html.lastIndexOf('</body')
-			)
-			break
-		}
+/**
+ * Slice relevent content, strip html tags, split strings.
+ * Returns all non-empty tags in an array
+ * @param {string} html
+ * @param {number} start
+ * @param {number} end
+ * @param {[string[]]} allowed_tags
+ * @returns {string[]}
+ */
+export function htmlContentToStringArray(html, start, end, allowed_tags) {
+	html = html.slice(start, end)
+	html = striptags(html, allowed_tags, '\n')
+	html = html.split('\n').filter((v) => v.trim())
 
-		case '/accuweather/raw': {
-			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
-			result = htmlContentToStringArray(
-				html,
-				html.indexOf('<body'),
-				html.lastIndexOf('</body')
-			)
-			break
-		}
+	return html
+}
 
-		case '/accuweather/list': {
-			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
-			result = accuweather.parseContentWithList(html)
-			break
-		}
-
-		case '/accuweather':
-		case '/accuweather/':
-		case '/accuweather/web': {
-			const html = await accuweather.getWeatherHTML(lat, lon, lang, unit)
-			const json = accuweather.parseContent(html)
-			result = { lat, lon, ...json }
-			break
-		}
-
-		default:
-			break
-	}
-
-	return new Response(JSON.stringify(result), { headers })
+/**
+ * To use if the webpage changes somehow.
+ * Use it by uncommenting "console.log(locateNumbers(list))"
+ * @param {string[]} list
+ * @returns {number[]}
+ */
+export function locateNumbers(list) {
+	return list
+		.map((str, i) => (Number.isInteger(parseInt(str)) ? i : undefined))
+		.filter((val) => typeof val === 'number')
 }

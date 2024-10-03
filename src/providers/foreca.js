@@ -1,8 +1,7 @@
-import { htmlContentToStringArray } from './shared'
+import { htmlContentToStringArray } from '../index.js'
 import { decode } from 'html-entities'
 
 /**
- *
  * @param {string} html
  * @returns {string[]}
  */

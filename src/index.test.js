@@ -27,21 +27,11 @@ function compareTypes(obj, types) {
 
 function scraperTypes() {
 	return {
-		lat: 'string',
-		lon: 'string',
-		city: 'string',
-		region: 'string',
-		link: 'string',
 		now: {
 			icon: 'number',
 			temp: 'number',
 			feels: 'number',
 			description: 'string',
-		},
-		sun: {
-			duration: 'string',
-			rise: 'number',
-			set: 'number',
 		},
 		hourly: [
 			{
@@ -60,5 +50,9 @@ function scraperTypes() {
 				rain: 'string',
 			},
 		],
+		sun: {
+			rise: 'number',
+			set: 'number',
+		},
 	}
 }
