@@ -25,14 +25,69 @@ export default async function accuweather(lat, lon, lang, unit) {
  * @returns {AccuWeather}
  */
 function validateJson(json) {
-	const hourly = json.hourly.map((hour) => ({
-		timestamp: hour.timestamp,
-		temp: parseInt(hour.temp),
-		rain: hour.rain,
-	}))
+	let date = new Date()
 
+	const hourly = []
+	const daily = []
+
+	// 1. Hourly
+	date = new Date()
+	date.setMinutes(0)
+	date.setSeconds(0)
+	date.setMilliseconds(0)
+
+	for (const hour of json.hourly) {
+		hourly.push({
+			...hour,
+			timestamp: date.toLocaleTimeString(),
+			temp: parseInt(hour.temp),
+		})
+
+		date.setHours(date.getHours() + 1)
+	}
+
+	// 2. Daily
+	date = new Date()
+	date.setMinutes(0)
+	date.setSeconds(0)
+	date.setMilliseconds(0)
+
+	for (const day of json.daily) {
+		daily.push({
+			...day,
+			timestamp: date.toLocaleDateString(),
+			high: parseInt(day.high),
+			low: parseInt(day.low),
+		})
+
+		date.setDate(date.getDate() + 1)
+	}
+
+	// 3. Sun
+	date = new Date()
+	date.setSeconds(0)
+	date.setMilliseconds(0)
+
+	let [riseHour, riseMinute] = json.sun.rise.split(':')
+	let [setHour, setMinute] = json.sun.set.split(':')
+
+	if (json.sun.rise.includes('PM')) {
+		riseHour = (parseInt(riseHour) + 12).toString()
+	}
+	if (json.sun.set.includes('PM')) {
+		setHour = (parseInt(setHour) + 12).toString()
+	}
+
+	date.setHours(parseInt(riseHour))
+	date.setMinutes(parseInt(riseMinute))
+	const rise = date.toLocaleTimeString()
+
+	date.setHours(parseInt(setHour))
+	date.setMinutes(parseInt(setMinute))
+	const set = date.toLocaleTimeString()
+
+	// 4.
 	return {
-		...json,
 		now: {
 			icon: parseInt(json.now.icon),
 			temp: parseInt(json.now.temp),
@@ -40,6 +95,11 @@ function validateJson(json) {
 			description: json.now.description,
 		},
 		hourly: hourly,
+		daily: daily,
+		sun: {
+			rise: rise,
+			set: set,
+		},
 	}
 }
 
