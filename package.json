@@ -4,12 +4,8 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
+		"dev": "npx wrangler dev",
 		"test": "node ./src/index.test.js"
-	},
-	"devDependencies": {
-		"wrangler": "3.69.1"
 	},
 	"dependencies": {
 		"html-entities": "^2.5.2",
