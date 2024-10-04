@@ -198,6 +198,12 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
 	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
 
+	lang = lang.replace('-', '_').toLocaleLowerCase()
+
+	if (VALID_LANGUAGES.includes(lang) === false) {
+		throw new Error('Language is not valid')
+	}
+
 	const resp = await fetch(path, {
 		headers: {
 			Accept: 'text/html',
@@ -216,6 +222,9 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 
 	return text
 }
+
+const VALID_LANGUAGES =
+	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, he, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
 /**
  * @typedef {Object} AccuWeather

@@ -33,9 +33,9 @@ async function main(request) {
 				status = 404
 		}
 	} catch (error) {
+		status = error.message === 'Language is not valid' ? 400 : 503
+		body = `{"status": ${status}, "error": "${error.message}"}`
 		console.error(error)
-		body = error.message
-		status = 503
 	}
 
 	return new Response(body, {
