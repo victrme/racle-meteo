@@ -39,7 +39,7 @@ function validateJson(json) {
 	for (const hour of json.hourly) {
 		hourly.push({
 			...hour,
-			timestamp: date.toLocaleTimeString(),
+			timestamp: date.toLocaleString(),
 			temp: parseInt(hour.temp),
 		})
 
@@ -55,7 +55,7 @@ function validateJson(json) {
 	for (const day of json.daily) {
 		daily.push({
 			...day,
-			timestamp: date.toLocaleDateString(),
+			timestamp: date.toLocaleString(),
 			high: parseInt(day.high),
 			low: parseInt(day.low),
 		})
@@ -71,6 +71,9 @@ function validateJson(json) {
 	let [riseHour, riseMinute] = json.sun.rise.split(':')
 	let [setHour, setMinute] = json.sun.set.split(':')
 
+	riseHour = riseHour.replace('AM', '').replace('PM', '')
+	setHour = setHour.replace('AM', '').replace('PM', '')
+
 	if (json.sun.rise.includes('PM')) {
 		riseHour = (parseInt(riseHour) + 12).toString()
 	}
@@ -80,11 +83,11 @@ function validateJson(json) {
 
 	date.setHours(parseInt(riseHour))
 	date.setMinutes(parseInt(riseMinute))
-	const rise = date.toLocaleTimeString()
+	const rise = date.toLocaleString()
 
 	date.setHours(parseInt(setHour))
 	date.setMinutes(parseInt(setMinute))
-	const set = date.toLocaleTimeString()
+	const set = date.toLocaleString()
 
 	// 4.
 	return {
@@ -118,39 +121,52 @@ function removeEnglishOnlyContent(list) {
  * @returns {Record<string, unknown>}
  */
 function weatherHtmlToJson(html) {
-	const list_start = html.indexOf('<a class="cur-con-weather-card')
-	const list_end = html.lastIndexOf('</body')
-	const list = removeEnglishOnlyContent(htmlContentToStringArray(html, list_start, list_end))
+	const listStart = html.indexOf('<a class="cur-con-weather-card')
+	const listEnd = html.lastIndexOf('</body')
+	const list = removeEnglishOnlyContent(htmlContentToStringArray(html, listStart, listEnd))
 
-	const icon_match = '/images/weathericons/'
-	const icon_start = html.indexOf(icon_match) + icon_match.length
-	const icon_end = html.indexOf('.svg', icon_start)
-	const icon = html.slice(icon_start, icon_end)[0]
+	const iconMatch = '/images/weathericons/'
+	const iconStart = html.indexOf(iconMatch) + iconMatch.length
+	const iconEnd = html.indexOf('.svg', iconStart)
+	const icon = html.slice(iconStart, iconEnd)[0]
+
+	const hourlyStart = list.indexOf('Chevron left') + 1
+	const dailyStart = list.indexOf('Chevron right') + 3
+	const hourly = []
+	const daily = []
+	let count = 0
+
+	const sunStart = dailyStart + 10 * 7 + 2
+	const rise = list[sunStart]
+	const set = list[sunStart + 2]
 
 	// <!> Do not remove these, very useful
 	// console.log(list)
 	// console.log(locateNumbers(list))
 
-	const hourly = []
-	const daily = []
+	while (count < 10) {
+		const index = hourlyStart + count * 3
+		const timestamp = list[index]
+		const temp = list[index + 1]
+		const rain = list[index + 2]
+		count++
 
-	for (const [hour, temp, rain] of hourlyIndexes) {
-		hourly.push({
-			timestamp: list[hour],
-			temp: list[temp],
-			rain: list[rain],
-		})
+		hourly.push({ timestamp, temp, rain })
 	}
 
-	for (const [date, high, low, rain] of dailyIndexes) {
-		daily.push({
-			timestamp: list[date],
-			high: list[high],
-			low: list[low],
-			day: list[low + 1],
-			night: list[low + 2],
-			rain: list[rain],
-		})
+	count = 0
+
+	while (count < 10) {
+		const index = dailyStart + count * 7
+		const timestamp = list[index]
+		const high = list[index + 1]
+		const low = list[index + 2]
+		const day = list[index + 3]
+		const night = list[index + 4]
+		const rain = list[index + 5]
+		count++
+
+		daily.push({ timestamp, high, low, day, night, rain })
 	}
 
 	return {
@@ -163,8 +179,8 @@ function weatherHtmlToJson(html) {
 		hourly: hourly,
 		daily: daily,
 		sun: {
-			rise: list[125],
-			set: list[127],
+			rise: rise,
+			set: set,
 		},
 	}
 }
@@ -200,32 +216,6 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 
 	return text
 }
-
-const hourlyIndexes = [
-	[14, 15, 16],
-	[17, 18, 19],
-	[20, 21, 22],
-	[23, 24, 25],
-	[26, 27, 28],
-	[29, 30, 31],
-	[32, 33, 34],
-	[35, 36, 37],
-	[38, 39, 40],
-	[41, 42, 43],
-	[44, 45, 46],
-	[47, 48, 49],
-]
-
-const dailyIndexes = [
-	[53, 54, 55, 58],
-	[60, 61, 62, 65],
-	[67, 68, 69, 72],
-	[74, 75, 76, 79],
-	[81, 82, 83, 86],
-	[88, 89, 90, 93],
-	[95, 96, 97, 100],
-	[102, 103, 104, 107],
-]
 
 /**
  * @typedef {Object} AccuWeather
