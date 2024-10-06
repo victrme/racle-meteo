@@ -1,6 +1,7 @@
 import striptags from 'striptags'
+import index from './index.html'
+import foreca from './providers/foreca.js'
 import accuweather from './providers/accuweather.js'
-import * as foreca from './providers/foreca.js'
 
 export default { fetch: main }
 
@@ -13,20 +14,32 @@ async function main(request) {
 
 	let body = undefined
 	let status = 200
+	let contenttype = 'application/json'
 
 	try {
 		switch (url.pathname) {
 			case '/foreca':
 			case '/foreca/':
-				body = JSON.stringify(await foreca.getForecaData(lat, lon))
+				body = JSON.stringify(await foreca(lat, lon, lang, unit))
 				break
 
-			case '':
-			case '/':
 			case '/accuweather':
 			case '/accuweather/': {
 				body = JSON.stringify(await accuweather(lat, lon, lang, unit))
 				break
+			}
+
+			case '':
+			case '/': {
+				return new Response(index, {
+					status,
+					headers: {
+						'access-control-allow-methods': 'GET',
+						'access-control-allow-origin': '*',
+						'content-type': 'text/html',
+						'cache-control': 'nocache',
+					},
+				})
 			}
 
 			default:
@@ -43,7 +56,7 @@ async function main(request) {
 		headers: {
 			'access-control-allow-methods': 'GET',
 			'access-control-allow-origin': '*',
-			'content-type': 'application/json',
+			'content-type': contenttype,
 			'cache-control': 'public, max-age=1800',
 		},
 	})
