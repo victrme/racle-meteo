@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Racle météo - Landing page</title>
+	</head>
+	<body>
+		<h1>Racle météo</h1>
+
+		<p>
+			This service cleverly transforms weather web pages into a usable (and free!) rest API.
+			It uses <a href="https://accuweather.com">accuweather</a> and/or
+			<a href="https://foreca.com">foreca</a> under the hood.
+		</p>
+
+		<h2>Install</h2>
+
+		<p>
+			Deploy a <a href="https://developers.cloudflare.com/workers/">Cloudflare Worker</a> to
+			start using your own racle-meteo. You do not need any API key. Migrating to another
+			cloud provider or your own server will the automatic location, meaning the
+			<code>lat</code> and <code>lon</code> will be required.
+		</p>
+
+		<p>
+			<a href="https://github.com/victrme/racle-meteo">Source code</a>
+		</p>
+
+		<h2>Use</h2>
+
+		<p>Define a weather provider to start using the API.</p>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Query</th>
+					<th>Type</th>
+					<th>Required</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">provider</th>
+					<td>accuweather | foreca</td>
+					<td>required</td>
+					<td>
+						Choose the weather provider. By default returns a narrow schema, see
+						"schema".
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">lat</th>
+					<td>string</td>
+					<td>optional*</td>
+					<td>Location latitude. * Required when migrating from CF workers</td>
+				</tr>
+				<tr>
+					<th scope="row">lon</th>
+					<td>string</td>
+					<td>optional*</td>
+					<td>Location longitude. * Required when migrating from CF workers</td>
+				</tr>
+				<tr>
+					<th scope="row">lang</th>
+					<td>string</td>
+					<td>optional</td>
+					<td>
+						English by default. Some languages are only available on accuweather, see
+						language list below. Incorrect <code>lang</code> does not fallback to
+						english.
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">unit</th>
+					<td>C | F</td>
+					<td>optional</td>
+					<td>
+						Useful for accuweather or when using the API schema. Foreca always returns
+						celsius and farenheit.
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Schema</th>
+					<td>narrow | all</td>
+					<td>optional</td>
+					<td>
+						Select "all" to retrieve all the data from the provider's webpage. "narrow"
+						returns only data available for all providers. "narrow" by default.
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+
+	<style>
+		body {
+			font-family: system-ui;
+			max-width: 800px;
+			margin: 10vh auto;
+			color: #222;
+		}
+
+		a {
+			color: dodgerblue;
+		}
+
+		table {
+			border-collapse: collapse;
+			text-align: left;
+		}
+
+		th,
+		td {
+			border: 1px solid #bbb;
+			padding: 0.5em 1em;
+			max-width: 400px;
+		}
+
+		@media (prefers-color-scheme: dark) {
+			body {
+				color: #ddd;
+				background-color: #222;
+			}
+
+			th,
+			td {
+				border-color: #666;
+			}
+		}
+	</style>
+</html>
