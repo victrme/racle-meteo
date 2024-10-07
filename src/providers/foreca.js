@@ -22,7 +22,74 @@ export default async function foreca(lat, lon, lang, unit) {
  * @returns {unknown}
  */
 function validateJson(json) {
-	return json
+	const date = new Date()
+	const [riseHour, riseMinutes] = json.sun.rise?.split(':')
+	const [setHour, setMinutes] = json.sun.set?.split(':')
+
+	date.setMilliseconds(0)
+
+	date.setUTCHours(parseInt(riseHour))
+	date.setUTCMinutes(parseInt(riseMinutes))
+	const rise = date.toISOString()
+
+	date.setUTCHours(parseInt(setHour))
+	date.setUTCMinutes(parseInt(setMinutes))
+	const set = date.toISOString()
+
+	return {
+		city: json.city,
+		now: {
+			description: json.now.description,
+			temp: {
+				c: parseInt(json.now.temp.c),
+				f: parseInt(json.now.temp.f),
+			},
+			feels: {
+				c: parseInt(json.now.feels.c),
+				f: parseInt(json.now.feels.f),
+			},
+			min: {
+				c: parseInt(json.now.min.c),
+				f: parseInt(json.now.min.f),
+			},
+			max: {
+				c: parseInt(json.now.max.c),
+				f: parseInt(json.now.max.f),
+			},
+			wind: {
+				mps: parseInt(json.now.wind.mps),
+				mph: parseInt(json.now.wind.mph),
+				kmh: parseInt(json.now.wind.kmh),
+				bft: parseInt(json.now.wind.bft),
+			},
+			humid: json.now.humid + '%',
+			pressure: parseInt(json.now.pressure),
+		},
+		sun: {
+			rise: rise,
+			set: set,
+		},
+		daily: json.daily?.map((day) => ({
+			min: {
+				c: parseInt(day.min.c),
+				f: parseInt(day.min.f),
+			},
+			max: {
+				c: parseInt(day.max.c),
+				f: parseInt(day.max.f),
+			},
+			wind: {
+				mps: parseInt(day.wind.mps),
+				mph: parseInt(day.wind.mph),
+				kmh: parseInt(day.wind.kmh),
+				bft: parseInt(day.wind.bft),
+			},
+			rain: {
+				in: parseFloat(day.rain.in),
+				mm: parseFloat(day.rain.mm),
+			},
+		})),
+	}
 }
 
 /**
@@ -73,13 +140,13 @@ export function weatherHtmlToJson(html) {
 				f: list[5],
 			},
 			wind: {
-				ms: list[6],
+				mps: list[6],
 				mph: list[7],
 				kmh: list[8],
 				bft: list[9],
 			},
 			gust: {
-				ms: list[11],
+				mps: list[11],
 				mph: list[13],
 				kmh: list[15],
 				bft: list[17],
