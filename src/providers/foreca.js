@@ -4,6 +4,7 @@ import { decode } from 'html-entities'
 /**
  * @param {number} lat
  * @param {number} lon
+ * @returns {Foreca}
  */
 export default async function foreca(lat, lon, lang, unit) {
 	const html = await getWeatherHTML(lat, lon, lang, unit)
@@ -18,8 +19,8 @@ export default async function foreca(lat, lon, lang, unit) {
 }
 
 /**
- * @param {Record<string, string>} json
- * @returns {unknown}
+ * @param {Record<string, unknown>} json
+ * @returns {Foreca}
  */
 function validateJson(json) {
 	const date = new Date()
@@ -173,7 +174,6 @@ export function weatherHtmlToJson(html) {
 }
 
 /**
- *
  * @param {number} lat
  * @param {number} lon
  * @param {string} lang
@@ -230,7 +230,6 @@ export async function getForecaLocation(lat, lon) {
 }
 
 /**
- *
  * @param {number} lon
  * @param {number} lat
  * @returns {Promise<Record<string, ForecaNetApi[]>}
@@ -242,6 +241,56 @@ export async function getForecaData(lat, lon) {
 }
 
 /**
+ * Type returned when calling foreca as provider
+ *
+ * @typedef {Object} Foreca
+ * @prop {string} city
+ * @prop {Object} now
+ * @prop {string} now.description
+ * @prop {Temperature} now.temp
+ * @prop {Temperature} now.feels
+ * @prop {Temperature} now.min
+ * @prop {Temperature} now.max
+ * @prop {Wind} now.wind
+ * @prop {string} now.humid
+ * @prop {number} now.pressure
+ * @prop {Object} sun
+ * @prop {Date} sun.rise
+ * @prop {Date} sun.set
+ * @prop {Daily[]} daily
+ */
+
+/**
+ * @typedef {Object} Daily
+ * @prop {Temperature} daily.min
+ * @prop {Temperature} daily.max
+ * @prop {Wind} daily.wind
+ * @prop {Rain} daily.rain
+ */
+
+/**
+ * @typedef {Object} Temperature
+ * @prop {number} c
+ * @prop {number} f
+ */
+
+/**
+ * @typedef {Object} Wind
+ * @prop {number} mps
+ * @prop {number} mph
+ * @prop {number} kmh
+ * @prop {number} bft
+ */
+
+/**
+ * @typedef {Object} Rain
+ * @prop {number} in
+ * @prop {number} mm
+ */
+
+/**
+ * Ids found for a specific location by foreca to display correct weather
+ *
  * @typedef {Object} ForecaGeo
  * @prop {string} id
  * @prop {string} numeric_id
@@ -259,6 +308,8 @@ export async function getForecaData(lat, lon) {
  */
 
 /**
+ * Unprotected API available for all, thanks Foreca devs
+ *
  * @typedef {Object} ForecaNetApi
  * @prop {string} date
  * @prop {string} symb
