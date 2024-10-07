@@ -39,7 +39,7 @@ function validateJson(json) {
 	for (const hour of json.hourly) {
 		hourly.push({
 			...hour,
-			timestamp: date.toLocaleString(),
+			timestamp: date.toISOString(),
 			temp: parseInt(hour.temp),
 		})
 
@@ -55,7 +55,7 @@ function validateJson(json) {
 	for (const day of json.daily) {
 		daily.push({
 			...day,
-			timestamp: date.toLocaleString(),
+			timestamp: date.toISOString(),
 			high: parseInt(day.high),
 			low: parseInt(day.low),
 		})
@@ -83,11 +83,11 @@ function validateJson(json) {
 
 	date.setHours(parseInt(riseHour))
 	date.setMinutes(parseInt(riseMinute))
-	const rise = date.toLocaleString()
+	const rise = date.toISOString()
 
 	date.setHours(parseInt(setHour))
 	date.setMinutes(parseInt(setMinute))
-	const set = date.toLocaleString()
+	const set = date.toISOString()
 
 	// 4.
 	return {
