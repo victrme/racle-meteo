@@ -131,7 +131,7 @@ function weatherHtmlToJson(html) {
 	const icon = html.slice(iconStart, iconEnd)[0]
 
 	const hourlyStart = list.indexOf('Chevron left') + 1
-	const dailyStart = list.indexOf('Chevron right') + 3
+	const dailyStart = list.indexOf('Chevron right') + 2
 	const hourly = []
 	const daily = []
 	let count = 0
@@ -195,26 +195,37 @@ function weatherHtmlToJson(html) {
  * @returns {Promise<string>}
  */
 async function fetcherWeatherHtml(lat, lon, lang, unit) {
-	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
-	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
-
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
 	if (VALID_LANGUAGES.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 
-	const resp = await fetch(path, {
-		headers: {
-			Accept: 'text/html',
-			'Accept-Encoding': 'gzip',
-			'Accept-Language': lang,
-			'User-Agent': firefoxAndroid,
-			Cookie: `awx_user=tp:${unit}|lang:${lang};`,
-		},
-	})
+	let resp = undefined
+	let text = undefined
 
-	let text = await resp.text()
+	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
+	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
+	const headers = {
+		Accept: 'text/html',
+		'Accept-Encoding': 'gzip',
+		'Accept-Language': lang,
+		'User-Agent': firefoxAndroid,
+		Cookie: `awx_user=tp:${unit}|lang:${lang};`,
+	}
+
+	if (text === undefined) {
+		text = await (await fetch(path, { headers }))?.text()
+	}
+
+	if (text === undefined) {
+		await new Promise((r) => setTimeout(r, 400))
+		text = await (await fetch(path, { headers }))?.text()
+	}
+
+	if (text === undefined) {
+		throw new Error('Could not connect to accuweather.com')
+	}
 
 	text = text.slice(text.indexOf('</head>'))
 	text = text.replaceAll('\n', '').replaceAll('\t', '')

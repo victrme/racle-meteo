@@ -4,7 +4,7 @@ import { decode } from 'html-entities'
 /**
  * @param {number} lat
  * @param {number} lon
- * @returns {Foreca}
+ * @returns {Promise<Foreca>}
  */
 export default async function foreca(lat, lon, lang, unit) {
 	const html = await getWeatherHTML(lat, lon, lang, unit)

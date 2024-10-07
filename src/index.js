@@ -11,39 +11,31 @@ async function main(request) {
 	const lang = url.searchParams.get('lang') ?? 'en'
 	const lat = url.searchParams.get('lat') ?? request.cf.latitude
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
+	const provider = url.searchParams.get('provider') ?? ''
 
 	let body = undefined
 	let status = 200
-	let contenttype = 'application/json'
+	let contentType = 'application/json'
+	let cacheControl = 'public, max-age=1800'
 
 	try {
-		switch (url.pathname) {
-			case '/foreca':
-			case '/foreca/':
-				body = JSON.stringify(await foreca(lat, lon, lang, unit))
-				break
-
-			case '/accuweather':
-			case '/accuweather/': {
-				body = JSON.stringify(await accuweather(lat, lon, lang, unit))
-				break
-			}
-
-			case '':
-			case '/': {
-				return new Response(index, {
-					status,
-					headers: {
-						'access-control-allow-methods': 'GET',
-						'access-control-allow-origin': '*',
-						'content-type': 'text/html',
-						'cache-control': 'nocache',
-					},
-				})
-			}
-
-			default:
-				status = 404
+		if (url.pathname !== '/') {
+			status = 404
+			contentType = 'text/plain'
+			cacheControl = 'nocache'
+		}
+		//
+		else if (provider === 'accuweather') {
+			body = JSON.stringify(await accuweather(lat, lon, lang, unit))
+		}
+		//
+		else if (provider === 'foreca') {
+			body = JSON.stringify(await foreca(lat, lon, lang, unit))
+		}
+		//
+		else {
+			body = index
+			contentType = 'text/html'
 		}
 	} catch (error) {
 		status = error.message === 'Language is not valid' ? 400 : 503
@@ -56,8 +48,8 @@ async function main(request) {
 		headers: {
 			'access-control-allow-methods': 'GET',
 			'access-control-allow-origin': '*',
-			'content-type': contenttype,
-			'cache-control': 'public, max-age=1800',
+			'content-type': contentType,
+			'cache-control': cacheControl,
 		},
 	})
 }
