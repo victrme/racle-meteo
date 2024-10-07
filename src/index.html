@@ -4,6 +4,44 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Racle météo - Landing page</title>
+
+		<style>
+			body {
+				font-family: system-ui;
+				max-width: 800px;
+				margin: 10vh auto;
+				color: #222;
+			}
+
+			a {
+				color: dodgerblue;
+			}
+
+			table {
+				border-collapse: collapse;
+				text-align: left;
+				width: 100%;
+			}
+
+			th,
+			td {
+				border: 1px solid #bbb;
+				padding: 0.5em 1em;
+				max-width: 400px;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				body {
+					color: #ddd;
+					background-color: #222;
+				}
+
+				th,
+				td {
+					border-color: #666;
+				}
+			}
+		</style>
 	</head>
 	<body>
 		<h1>Racle météo</h1>
@@ -30,6 +68,13 @@
 		<h2>Use</h2>
 
 		<p>Define a weather provider to start using the API.</p>
+
+		<h3>Examples</h3>
+
+		<p><a href="/accuweather?lang=en&unit=f">accuweather?lang=en&unit=f</a></p>
+		<p><a href="/foreca?lang=pl">foreca?lang=pl</a></p>
+
+		<h3>Parameters</h3>
 
 		<table>
 			<thead>
@@ -93,45 +138,402 @@
 			</tbody>
 		</table>
 
-		<h3>Examples</h3>
-
-		<p><a href="/accuweather?lang=en&unit=f">accuweather?lang=en&unit=f</a></p>
+		<h3>Languages available</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>code</th>
+					<th>name</th>
+					<th>foreca</th>
+					<th>accuweather</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>en</th>
+					<td>English</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>es</th>
+					<td>Español</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>fr</th>
+					<td>Français</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>da</th>
+					<td>Dansk</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>pt-pt</th>
+					<td>Português</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>nl</th>
+					<td>Nederlands</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>no</th>
+					<td>Norsk</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>it</th>
+					<td>Italiano</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>de</th>
+					<td>Deutsch</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sv</th>
+					<td>Svenska</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>fi</th>
+					<td>Suomi</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>zh-hk</th>
+					<td>中文 (HK)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>zh-cn</th>
+					<td>中文 (SIM)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>zh-tw</th>
+					<td>中文 (Taiwan)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>es-ar</th>
+					<td>Español (Argentina)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>es-mx</th>
+					<td>Español (Latin America)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sk</th>
+					<td>Slovenčinu</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ro</th>
+					<td>Romana</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>cs</th>
+					<td>Čeština</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>hu</th>
+					<td>Magyar</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>pl</th>
+					<td>Polski</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ca</th>
+					<td>Català</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>pt-br</th>
+					<td>Português (Brazil)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>hi</th>
+					<td>हिन्दी</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ru</th>
+					<td>русский</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ar</th>
+					<td>عربي</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>el</th>
+					<td>Ελληνικά</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>en-gb</th>
+					<td>English (UK)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ja</th>
+					<td>日本語</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ko</th>
+					<td>한국어</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>tr</th>
+					<td>TÜRKÇE</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>fr-ca</th>
+					<td>Français (Canada)</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>he</th>
+					<td>עברית</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sl</th>
+					<td>Slovenski</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>uk</th>
+					<td>Українське</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>id</th>
+					<td>Bahasa Indonesia</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>bg</th>
+					<td>български</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>et</th>
+					<td>Eesti keeles</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>hr</th>
+					<td>Hrvatski</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>kk</th>
+					<td>Қазақша</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>lt</th>
+					<td>Lietuvių</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>lv</th>
+					<td>Latviski</td>
+					<td>true</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>mk</th>
+					<td>Македонски</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ms</th>
+					<td>Bahasa Melayu</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>tl</th>
+					<td>Tagalog</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sr</th>
+					<td>Srpski</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>th</th>
+					<td>ไทย</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>vi</th>
+					<td>Tiếng Việt</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>fa</th>
+					<td>فارسی</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>bn</th>
+					<td>বাংলা</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>bs</th>
+					<td>bosanski</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>is</th>
+					<td>íslenska</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sw</th>
+					<td>Kiswahili</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ur</th>
+					<td>اُردُو</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>sr-me</th>
+					<td>Crnogorski</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>uz</th>
+					<td>Oʻzbekcha</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>az</th>
+					<td>Azərbaycanca</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>ta</th>
+					<td>தமிழ்</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>gu</th>
+					<td>ગુજરાતી</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>kn</th>
+					<td>ಕನ್ನಡ</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>te</th>
+					<td>తెలుగు</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>mr</th>
+					<td>मराठी</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>pa</th>
+					<td>ਪੰਜਾਬੀ</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<th>my</th>
+					<td>မြန်မာဘာသာ</td>
+					<td></td>
+					<td>true</td>
+				</tr>
+			</tbody>
+		</table>
 	</body>
-
-	<style>
-		body {
-			font-family: system-ui;
-			max-width: 800px;
-			margin: 10vh auto;
-			color: #222;
-		}
-
-		a {
-			color: dodgerblue;
-		}
-
-		table {
-			border-collapse: collapse;
-			text-align: left;
-		}
-
-		th,
-		td {
-			border: 1px solid #bbb;
-			padding: 0.5em 1em;
-			max-width: 400px;
-		}
-
-		@media (prefers-color-scheme: dark) {
-			body {
-				color: #ddd;
-				background-color: #222;
-			}
-
-			th,
-			td {
-				border-color: #666;
-			}
-		}
-	</style>
 </html>
