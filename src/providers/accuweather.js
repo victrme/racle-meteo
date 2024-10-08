@@ -1,4 +1,3 @@
-import { htmlContentToStringArray, locateNumbers } from '../index.js'
 import * as htmlparser2 from 'htmlparser2'
 import * as cheerio from 'cheerio/slim'
 
@@ -11,38 +10,10 @@ import * as cheerio from 'cheerio/slim'
  */
 export default async function accuweather(lat, lon, lang, unit) {
 	const html = await fetcherWeatherHtml(lat, lon, lang, unit)
-	// const json = weatherHtmlToJson(html)
-	// const api = validateJson(json)
+	const json = weatherHtmlToJson(html)
+	const api = validateJson(json)
 
-	const dom = htmlparser2.parseDocument(html)
-	const $ = cheerio.load(dom)
-
-	const now_icon = $('.cur-con-weather-card .weather-icon')?.attr('data-src')
-	const now_temp = $('.cur-con-weather-card .temp-container')?.text()
-	const now_feel = $('.cur-con-weather-card .real-feel')?.text()
-	const now_desc = $('.cur-con-weather-card .phrase')?.text()
-
-	const sun_rise = $('.sunrise-sunset__times-value:nth(0)')?.text()
-	const sun_set = $('.sunrise-sunset__times-value:nth(1)')?.text()
-
-	console.log({
-		now: {
-			temp: now_temp,
-			feel: now_feel,
-			desc: now_desc,
-			icon: now_icon,
-		},
-		sun: {
-			rise: sun_rise,
-			set: sun_set,
-		},
-	})
-
-	// console.log(html)
-	// console.log(json)
-	// console.log(api)
-
-	return {}
+	return api
 }
 
 /**
@@ -64,7 +35,7 @@ function validateJson(json) {
 	for (const hour of json.hourly) {
 		hourly.push({
 			...hour,
-			timestamp: date.toISOString(),
+			time: date.toISOString(),
 			temp: parseInt(hour.temp),
 		})
 
@@ -80,7 +51,7 @@ function validateJson(json) {
 	for (const day of json.daily) {
 		daily.push({
 			...day,
-			timestamp: date.toISOString(),
+			time: date.toISOString(),
 			high: parseInt(day.high),
 			low: parseInt(day.low),
 		})
@@ -117,7 +88,7 @@ function validateJson(json) {
 	// 4.
 	return {
 		now: {
-			icon: parseInt(json.now.icon),
+			icon: parseInt(json.now.icon.replace('/images/weathericons/', '').replace('.svg', '')),
 			temp: parseInt(json.now.temp),
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
@@ -136,67 +107,60 @@ function validateJson(json) {
  * @returns {Record<string, unknown>}
  */
 function weatherHtmlToJson(html) {
-	const listStart = html.indexOf('<a class="cur-con-weather-card')
-	const listEnd = html.lastIndexOf('</body')
-	const list = htmlContentToStringArray(html, listStart, listEnd)
+	const dom = htmlparser2.parseDocument(html)
+	const $ = cheerio.load(dom)
 
-	const iconMatch = '/images/weathericons/'
-	const iconStart = html.indexOf(iconMatch) + iconMatch.length
-	const iconEnd = html.indexOf('.svg', iconStart)
-	const icon = html.slice(iconStart, iconEnd)[0]
+	const now_icon = $('.cur-con-weather-card .weather-icon')?.attr('data-src')
+	const now_temp = $('.cur-con-weather-card .temp-container')?.text()
+	const now_feels = $('.cur-con-weather-card .real-feel')?.text()
+	const now_description = $('.cur-con-weather-card .phrase')?.text()
 
-	const hourlyStart = list.indexOf('Chevron left') + 1
-	const dailyStart = list.indexOf('Chevron right') + 2
-	const hourly = []
-	const daily = []
-	let count = 0
+	const sun_rise = $('.sunrise-sunset__times-value:nth(0)')?.text()
+	const sun_set = $('.sunrise-sunset__times-value:nth(1)')?.text()
 
-	const sunStart = dailyStart + 10 * 7 + 2
-	const rise = list[sunStart]
-	const set = list[sunStart + 2]
+	const hourly = new Array(12).fill('').map((_, i) => {
+		const hourly_time = $(`.hourly-list__list__item-time:nth(${i})`)?.text()
+		const hourly_temp = $(`.hourly-list__list__item-temp:nth(${i})`)?.text()
+		const hourly_rain = $(`.hourly-list__list__item-precip:nth(${i})`)?.text()
 
-	// <!> Do not remove these, very useful
-	// console.log(list)
-	// console.log(locateNumbers(list))
+		return {
+			time: hourly_time,
+			temp: hourly_temp,
+			rain: hourly_rain,
+		}
+	})
 
-	while (count < 10) {
-		const index = hourlyStart + count * 3
-		const timestamp = list[index]
-		const temp = list[index + 1]
-		const rain = list[index + 2]
-		count++
+	const daily = new Array(10).fill('').map((_, i) => {
+		const daily_time = $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text()
+		const daily_max = $(`.daily-list-item:nth(${i}) .temp-hi`)?.text()
+		const daily_low = $(`.daily-list-item:nth(${i}) .temp-lo`)?.text()
+		const daily_day = $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text()
+		const daily_night = $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text()
+		const daily_rain = $(`.daily-list-item:nth(${i}) .precip`)?.text()
 
-		hourly.push({ timestamp, temp, rain })
-	}
-
-	count = 0
-
-	while (count < 10) {
-		const index = dailyStart + count * 7
-		const timestamp = list[index]
-		const high = list[index + 1]
-		const low = list[index + 2]
-		const day = list[index + 3]
-		const night = list[index + 4]
-		const rain = list[index + 5]
-		count++
-
-		daily.push({ timestamp, high, low, day, night, rain })
-	}
+		return {
+			time: daily_time,
+			high: daily_max,
+			low: daily_low,
+			day: daily_day,
+			night: daily_night,
+			rain: daily_rain,
+		}
+	})
 
 	return {
 		now: {
-			icon: icon,
-			temp: list[2],
-			feels: list[5],
-			description: list[4],
+			icon: now_icon,
+			temp: now_temp,
+			feels: now_feels,
+			description: now_description,
+		},
+		sun: {
+			rise: sun_rise,
+			set: sun_set,
 		},
 		hourly: hourly,
 		daily: daily,
-		sun: {
-			rise: rise,
-			set: set,
-		},
 	}
 }
 
@@ -216,7 +180,7 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 		throw new Error('Language is not valid')
 	}
 
-	let text = undefined
+	let text
 
 	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
 	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
@@ -241,7 +205,6 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 		throw new Error('Could not connect to accuweather.com')
 	}
 
-	text = text.slice(text.indexOf('</head>'))
 	text = text.replaceAll('\n', '').replaceAll('\t', '')
 
 	return text
@@ -268,14 +231,14 @@ const VALID_LANGUAGES =
 
 /**
  * @typedef {Object} Hourly
- * @prop {number} timestamp - Unix timestamp
+ * @prop {number} time - ISO date
  * @prop {number} temp - Classic temperature
  * @prop {string} rain - Percent chance of rain
  */
 
 /**
  * @typedef {Object} Daily
- * @prop {number} timestamp - Unix timestamp
+ * @prop {number} time - ISO date
  * @prop {number} high - Highest temperature this day
  * @prop {number} low - Lowest temperature this day
  * @prop {string} day - Weather description for the day
