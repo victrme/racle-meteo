@@ -1,5 +1,6 @@
 import { htmlContentToStringArray, locateNumbers } from '../index.js'
-import { decode } from 'html-entities'
+import * as htmlparser2 from 'htmlparser2'
+import * as cheerio from 'cheerio/slim'
 
 /**
  * @param {number} lat - Latitude coordinates
@@ -10,14 +11,38 @@ import { decode } from 'html-entities'
  */
 export default async function accuweather(lat, lon, lang, unit) {
 	const html = await fetcherWeatherHtml(lat, lon, lang, unit)
-	const json = weatherHtmlToJson(html)
-	const api = validateJson(json)
+	// const json = weatherHtmlToJson(html)
+	// const api = validateJson(json)
+
+	const dom = htmlparser2.parseDocument(html)
+	const $ = cheerio.load(dom)
+
+	const now_icon = $('.cur-con-weather-card .weather-icon')?.attr('data-src')
+	const now_temp = $('.cur-con-weather-card .temp-container')?.text()
+	const now_feel = $('.cur-con-weather-card .real-feel')?.text()
+	const now_desc = $('.cur-con-weather-card .phrase')?.text()
+
+	const sun_rise = $('.sunrise-sunset__times-value:nth(0)')?.text()
+	const sun_set = $('.sunrise-sunset__times-value:nth(1)')?.text()
+
+	console.log({
+		now: {
+			temp: now_temp,
+			feel: now_feel,
+			desc: now_desc,
+			icon: now_icon,
+		},
+		sun: {
+			rise: sun_rise,
+			set: sun_set,
+		},
+	})
 
 	// console.log(html)
 	// console.log(json)
 	// console.log(api)
 
-	return api
+	return {}
 }
 
 /**
@@ -106,16 +131,6 @@ function validateJson(json) {
 	}
 }
 
-/** @param {string[]} list */
-function removeEnglishOnlyContent(list) {
-	list = list.filter(
-		(el) =>
-			el !== 'Thank you for your patience as we work to get everything up and running again.'
-	)
-
-	return list
-}
-
 /**
  * @param {string} html
  * @returns {Record<string, unknown>}
@@ -123,7 +138,7 @@ function removeEnglishOnlyContent(list) {
 function weatherHtmlToJson(html) {
 	const listStart = html.indexOf('<a class="cur-con-weather-card')
 	const listEnd = html.lastIndexOf('</body')
-	const list = removeEnglishOnlyContent(htmlContentToStringArray(html, listStart, listEnd))
+	const list = htmlContentToStringArray(html, listStart, listEnd)
 
 	const iconMatch = '/images/weathericons/'
 	const iconStart = html.indexOf(iconMatch) + iconMatch.length
@@ -201,7 +216,6 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 		throw new Error('Language is not valid')
 	}
 
-	let resp = undefined
 	let text = undefined
 
 	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
@@ -229,7 +243,6 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 
 	text = text.slice(text.indexOf('</head>'))
 	text = text.replaceAll('\n', '').replaceAll('\t', '')
-	text = decode(text)
 
 	return text
 }

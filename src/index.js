@@ -1,6 +1,4 @@
-import striptags from 'striptags'
 import index from './index.html'
-import foreca from './providers/foreca.js'
 import accuweather from './providers/accuweather.js'
 
 export default { fetch: main }
