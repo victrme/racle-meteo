@@ -11,7 +11,7 @@ async function main(request) {
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 	const provider = url.searchParams.get('provider') ?? ''
 
-	let body = undefined
+	let body
 	let status = 200
 	let contentType = 'application/json'
 	let cacheControl = 'public, max-age=1800'
