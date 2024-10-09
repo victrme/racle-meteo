@@ -1,4 +1,3 @@
-import * as htmlparser2 from 'htmlparser2'
 import * as cheerio from 'cheerio/slim'
 
 /**
@@ -9,8 +8,8 @@ import * as cheerio from 'cheerio/slim'
  * @returns {Promise<AccuWeather>}
  */
 export default async function accuweather(lat, lon, lang, unit) {
-	const html = await fetcherWeatherHtml(lat, lon, lang, unit)
-	const json = weatherHtmlToJson(html)
+	const html = await fetchPageContent(lat, lon, lang, unit)
+	const json = transformToJson(html)
 	const api = validateJson(json)
 
 	return api
@@ -106,61 +105,33 @@ function validateJson(json) {
  * @param {string} html
  * @returns {Record<string, unknown>}
  */
-function weatherHtmlToJson(html) {
-	const dom = htmlparser2.parseDocument(html)
-	const $ = cheerio.load(dom)
-
-	const now_icon = $('.cur-con-weather-card .weather-icon')?.attr('data-src')
-	const now_temp = $('.cur-con-weather-card .temp-container')?.text()
-	const now_feels = $('.cur-con-weather-card .real-feel')?.text()
-	const now_description = $('.cur-con-weather-card .phrase')?.text()
-
-	const sun_rise = $('.sunrise-sunset__times-value:nth(0)')?.text()
-	const sun_set = $('.sunrise-sunset__times-value:nth(1)')?.text()
-
-	const hourly = new Array(12).fill('').map((_, i) => {
-		const hourly_time = $(`.hourly-list__list__item-time:nth(${i})`)?.text()
-		const hourly_temp = $(`.hourly-list__list__item-temp:nth(${i})`)?.text()
-		const hourly_rain = $(`.hourly-list__list__item-precip:nth(${i})`)?.text()
-
-		return {
-			time: hourly_time,
-			temp: hourly_temp,
-			rain: hourly_rain,
-		}
-	})
-
-	const daily = new Array(10).fill('').map((_, i) => {
-		const daily_time = $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text()
-		const daily_max = $(`.daily-list-item:nth(${i}) .temp-hi`)?.text()
-		const daily_low = $(`.daily-list-item:nth(${i}) .temp-lo`)?.text()
-		const daily_day = $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text()
-		const daily_night = $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text()
-		const daily_rain = $(`.daily-list-item:nth(${i}) .precip`)?.text()
-
-		return {
-			time: daily_time,
-			high: daily_max,
-			low: daily_low,
-			day: daily_day,
-			night: daily_night,
-			rain: daily_rain,
-		}
-	})
+function transformToJson(html) {
+	const $ = cheerio.load(html)
 
 	return {
 		now: {
-			icon: now_icon,
-			temp: now_temp,
-			feels: now_feels,
-			description: now_description,
+			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src'),
+			temp: $('.cur-con-weather-card .temp-container')?.text(),
+			feels: $('.cur-con-weather-card .real-feel')?.text(),
+			description: $('.cur-con-weather-card .phrase')?.text(),
 		},
 		sun: {
-			rise: sun_rise,
-			set: sun_set,
+			rise: $('.sunrise-sunset__times-value:nth(0)')?.text(),
+			set: $('.sunrise-sunset__times-value:nth(1)')?.text(),
 		},
-		hourly: hourly,
-		daily: daily,
+		hourly: new Array(12).fill('').map((_, i) => ({
+			time: $(`.hourly-list__list__item-time:nth(${i})`)?.text(),
+			temp: $(`.hourly-list__list__item-temp:nth(${i})`)?.text(),
+			rain: $(`.hourly-list__list__item-precip:nth(${i})`)?.text(),
+		})),
+		daily: new Array(10).fill('').map((_, i) => ({
+			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
+			max: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
+			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
+			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
+			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
+			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
+		})),
 	}
 }
 
@@ -173,7 +144,7 @@ function weatherHtmlToJson(html) {
  * @param {"C" | "F"} unit - Either celsius or football fields
  * @returns {Promise<string>}
  */
-async function fetcherWeatherHtml(lat, lon, lang, unit) {
+async function fetchPageContent(lat, lon, lang, unit) {
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
 	if (VALID_LANGUAGES.includes(lang) === false) {
