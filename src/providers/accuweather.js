@@ -66,23 +66,15 @@ function validateJson(json) {
 	let [riseHour, riseMinute] = json.sun.rise.split(':')
 	let [setHour, setMinute] = json.sun.set.split(':')
 
-	riseHour = riseHour.replace('AM', '').replace('PM', '')
-	setHour = setHour.replace('AM', '').replace('PM', '')
+	riseHour = parseInt(riseHour.replace('AM', '').replace('PM', ''))
+	setHour = parseInt(setHour.replace('AM', '').replace('PM', ''))
 
 	if (json.sun.rise.includes('PM')) {
-		riseHour = (parseInt(riseHour) + 12).toString()
+		riseHour = parseInt(riseHour) + 12
 	}
 	if (json.sun.set.includes('PM')) {
-		setHour = (parseInt(setHour) + 12).toString()
+		setHour = parseInt(setHour) + 12
 	}
-
-	date.setHours(parseInt(riseHour))
-	date.setMinutes(parseInt(riseMinute))
-	const rise = date.toISOString()
-
-	date.setHours(parseInt(setHour))
-	date.setMinutes(parseInt(setMinute))
-	const set = date.toISOString()
 
 	// 4.
 	return {
@@ -92,12 +84,12 @@ function validateJson(json) {
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
 		},
+		sun: {
+			rise: [riseHour, parseInt(riseMinute)],
+			set: [setHour, parseInt(setMinute)],
+		},
 		hourly: hourly,
 		daily: daily,
-		sun: {
-			rise: rise,
-			set: set,
-		},
 	}
 }
 
@@ -126,7 +118,7 @@ function transformToJson(html) {
 		})),
 		daily: new Array(10).fill('').map((_, i) => ({
 			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
-			max: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
+			high: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
 			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
 			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
 			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
@@ -219,6 +211,6 @@ const VALID_LANGUAGES =
 
 /**
  * @typedef {Object} Sun
- * @prop {number} rise - Sunrise timestamp today
- * @prop {number} set - Sunset timestamp today
+ * @prop {[number, number]} rise - Localized hour and minute sunrise
+ * @prop {[number, number]} set - Localized hour and minute sunset
  */

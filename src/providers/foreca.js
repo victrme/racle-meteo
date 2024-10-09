@@ -18,21 +18,10 @@ export default async function foreca(lat, lon, lang, unit) {
  * @returns {Foreca}
  */
 function validateJson(json) {
-	const date = new Date()
 	const [riseHour, riseMinutes] = json.sun.rise?.split(':')
 	const [setHour, setMinutes] = json.sun.set?.split(':')
 
-	date.setMilliseconds(0)
-
-	date.setUTCHours(parseInt(riseHour))
-	date.setUTCMinutes(parseInt(riseMinutes))
-	const rise = date.toISOString()
-
-	date.setUTCHours(parseInt(setHour))
-	date.setUTCMinutes(parseInt(setMinutes))
-	const set = date.toISOString()
-
-	return {
+	const result = {
 		city: json.city,
 		now: {
 			icon: json.now.icon.replace('/public/images/symbols/', '').replace('.svg', ''),
@@ -54,17 +43,17 @@ function validateJson(json) {
 			},
 		},
 		sun: {
-			rise: rise,
-			set: set,
+			rise: [parseInt(riseHour), parseInt(riseMinutes)],
+			set: [parseInt(setHour), parseInt(setMinutes)],
 		},
 		daily: json.daily?.map((day) => ({
-			min: {
-				c: parseInt(day.min.c),
-				f: parseInt(day.min.f),
+			low: {
+				c: parseInt(day.low.c),
+				f: parseInt(day.low.f),
 			},
-			max: {
-				c: parseInt(day.max.c),
-				f: parseInt(day.max.f),
+			high: {
+				c: parseInt(day.high.c),
+				f: parseInt(day.high.f),
 			},
 			wind: {
 				mps: parseInt(day.wind.mps),
@@ -78,6 +67,24 @@ function validateJson(json) {
 			},
 		})),
 	}
+
+	const date = new Date()
+	date.setMinutes(0)
+	date.setSeconds(0)
+	date.setMilliseconds(0)
+
+	result.daily = result.daily.map((day) => {
+		const time = date.toISOString()
+
+		date.setDate(date.getDate() + 1)
+
+		return {
+			time: time,
+			...day,
+		}
+	})
+
+	return result
 }
 
 /**
@@ -113,11 +120,11 @@ export function transformToJson(html) {
 			set: $('.nowcast .sun .time_24h:nth(1)').text(),
 		},
 		daily: new Array(5).fill('').map((_, i) => ({
-			max: {
+			high: {
 				c: $(`.daycontainer:nth(${i}) .tempmax .temp_c`).text(),
 				f: $(`.daycontainer:nth(${i}) .tempmax .temp_f`).text(),
 			},
-			min: {
+			low: {
 				c: $(`.daycontainer:nth(${i}) .tempmin .temp_c`).text(),
 				f: $(`.daycontainer:nth(${i}) .tempmin .temp_f`).text(),
 			},
@@ -155,11 +162,10 @@ export async function fetchPageContent(lat, lon, lang, unit) {
 
 	const userAgent =
 		'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0'
-
 	const cookies = `fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
+	const path = `https://www.foreca.com/${lang}/${id}/${defaultName}`
 
-	const forecaPath = `https://www.foreca.com/${lang}/${id}/${defaultName}`
-	const forecaResp = await fetch(forecaPath, {
+	const resp = await fetch(path, {
 		headers: {
 			Accept: 'text/html',
 			'Accept-Encoding': 'gzip',
@@ -169,8 +175,7 @@ export async function fetchPageContent(lat, lon, lang, unit) {
 		},
 	})
 
-	let html = await forecaResp.text()
-	html = html.slice(html.indexOf('<main>'), html.lastIndexOf('</main>'))
+	let html = await resp.text()
 	html = html.replaceAll('\n', '').replaceAll('\t', '')
 
 	return html
@@ -210,20 +215,20 @@ export async function getForecaData(lat, lon) {
  * @prop {string} now.description
  * @prop {Temperature} now.temp
  * @prop {Temperature} now.feels
- * @prop {Temperature} now.min
- * @prop {Temperature} now.max
+ * @prop {Temperature} now.low
+ * @prop {Temperature} now.high
  * @prop {Wind} now.wind
  * @prop {string} now.humid
  * @prop {Object} sun
- * @prop {Date} sun.rise
- * @prop {Date} sun.set
+ * @prop {[number, number]} sun.rise
+ * @prop {[number, number]} sun.set
  * @prop {Daily[]} daily
  */
 
 /**
  * @typedef {Object} Daily
- * @prop {Temperature} daily.min
- * @prop {Temperature} daily.max
+ * @prop {Temperature} daily.low
+ * @prop {Temperature} daily.high
  * @prop {Wind} daily.wind
  * @prop {Rain} daily.rain
  */

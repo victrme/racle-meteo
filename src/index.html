@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -91,8 +91,8 @@
 					<td>accuweather | foreca</td>
 					<td>required</td>
 					<td>
-						Choose the weather provider. By default returns a narrow schema, see
-						"schema".
+						Choose the weather provider. By default returns all available data, see
+						"data".
 					</td>
 				</tr>
 				<tr>
@@ -122,17 +122,17 @@
 					<td>C | F</td>
 					<td>optional</td>
 					<td>
-						Useful for accuweather or when using the API schema. Foreca always returns
+						Useful for accuweather or when using "simple" data. Foreca always returns
 						celsius and farenheit.
 					</td>
 				</tr>
 				<tr>
-					<th scope="row">Schema</th>
-					<td>narrow | all</td>
+					<th scope="row">data</th>
+					<td>all | simple</td>
 					<td>optional</td>
 					<td>
-						Select "all" to retrieve all the data from the provider's webpage. "narrow"
-						returns only data available for all providers. "narrow" by default.
+						Select "all" to retrieve all the data from the provider's webpage. "simple"
+						returns only data available for all providers. "all" by default.
 					</td>
 				</tr>
 			</tbody>
