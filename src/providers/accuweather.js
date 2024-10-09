@@ -1,5 +1,4 @@
-import { htmlContentToStringArray, locateNumbers } from '../index.js'
-import { decode } from 'html-entities'
+import * as cheerio from 'cheerio/slim'
 
 /**
  * @param {number} lat - Latitude coordinates
@@ -9,13 +8,9 @@ import { decode } from 'html-entities'
  * @returns {Promise<AccuWeather>}
  */
 export default async function accuweather(lat, lon, lang, unit) {
-	const html = await fetcherWeatherHtml(lat, lon, lang, unit)
-	const json = weatherHtmlToJson(html)
+	const html = await fetchPageContent(lat, lon, lang, unit)
+	const json = transformToJson(html)
 	const api = validateJson(json)
-
-	// console.log(html)
-	// console.log(json)
-	// console.log(api)
 
 	return api
 }
@@ -39,7 +34,7 @@ function validateJson(json) {
 	for (const hour of json.hourly) {
 		hourly.push({
 			...hour,
-			timestamp: date.toISOString(),
+			time: date.toISOString(),
 			temp: parseInt(hour.temp),
 		})
 
@@ -55,7 +50,7 @@ function validateJson(json) {
 	for (const day of json.daily) {
 		daily.push({
 			...day,
-			timestamp: date.toISOString(),
+			time: date.toISOString(),
 			high: parseInt(day.high),
 			low: parseInt(day.low),
 		})
@@ -92,7 +87,7 @@ function validateJson(json) {
 	// 4.
 	return {
 		now: {
-			icon: parseInt(json.now.icon),
+			icon: parseInt(json.now.icon.replace('/images/weathericons/', '').replace('.svg', '')),
 			temp: parseInt(json.now.temp),
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
@@ -106,82 +101,37 @@ function validateJson(json) {
 	}
 }
 
-/** @param {string[]} list */
-function removeEnglishOnlyContent(list) {
-	list = list.filter(
-		(el) =>
-			el !== 'Thank you for your patience as we work to get everything up and running again.'
-	)
-
-	return list
-}
-
 /**
  * @param {string} html
  * @returns {Record<string, unknown>}
  */
-function weatherHtmlToJson(html) {
-	const listStart = html.indexOf('<a class="cur-con-weather-card')
-	const listEnd = html.lastIndexOf('</body')
-	const list = removeEnglishOnlyContent(htmlContentToStringArray(html, listStart, listEnd))
-
-	const iconMatch = '/images/weathericons/'
-	const iconStart = html.indexOf(iconMatch) + iconMatch.length
-	const iconEnd = html.indexOf('.svg', iconStart)
-	const icon = html.slice(iconStart, iconEnd)[0]
-
-	const hourlyStart = list.indexOf('Chevron left') + 1
-	const dailyStart = list.indexOf('Chevron right') + 2
-	const hourly = []
-	const daily = []
-	let count = 0
-
-	const sunStart = dailyStart + 10 * 7 + 2
-	const rise = list[sunStart]
-	const set = list[sunStart + 2]
-
-	// <!> Do not remove these, very useful
-	// console.log(list)
-	// console.log(locateNumbers(list))
-
-	while (count < 10) {
-		const index = hourlyStart + count * 3
-		const timestamp = list[index]
-		const temp = list[index + 1]
-		const rain = list[index + 2]
-		count++
-
-		hourly.push({ timestamp, temp, rain })
-	}
-
-	count = 0
-
-	while (count < 10) {
-		const index = dailyStart + count * 7
-		const timestamp = list[index]
-		const high = list[index + 1]
-		const low = list[index + 2]
-		const day = list[index + 3]
-		const night = list[index + 4]
-		const rain = list[index + 5]
-		count++
-
-		daily.push({ timestamp, high, low, day, night, rain })
-	}
+function transformToJson(html) {
+	const $ = cheerio.load(html)
 
 	return {
 		now: {
-			icon: icon,
-			temp: list[2],
-			feels: list[5],
-			description: list[4],
+			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src'),
+			temp: $('.cur-con-weather-card .temp-container')?.text(),
+			feels: $('.cur-con-weather-card .real-feel')?.text(),
+			description: $('.cur-con-weather-card .phrase')?.text(),
 		},
-		hourly: hourly,
-		daily: daily,
 		sun: {
-			rise: rise,
-			set: set,
+			rise: $('.sunrise-sunset__times-value:nth(0)')?.text(),
+			set: $('.sunrise-sunset__times-value:nth(1)')?.text(),
 		},
+		hourly: new Array(12).fill('').map((_, i) => ({
+			time: $(`.hourly-list__list__item-time:nth(${i})`)?.text(),
+			temp: $(`.hourly-list__list__item-temp:nth(${i})`)?.text(),
+			rain: $(`.hourly-list__list__item-precip:nth(${i})`)?.text(),
+		})),
+		daily: new Array(10).fill('').map((_, i) => ({
+			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
+			max: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
+			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
+			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
+			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
+			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
+		})),
 	}
 }
 
@@ -194,15 +144,14 @@ function weatherHtmlToJson(html) {
  * @param {"C" | "F"} unit - Either celsius or football fields
  * @returns {Promise<string>}
  */
-async function fetcherWeatherHtml(lat, lon, lang, unit) {
+async function fetchPageContent(lat, lon, lang, unit) {
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
 	if (VALID_LANGUAGES.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 
-	let resp = undefined
-	let text = undefined
+	let text
 
 	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
 	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
@@ -227,9 +176,7 @@ async function fetcherWeatherHtml(lat, lon, lang, unit) {
 		throw new Error('Could not connect to accuweather.com')
 	}
 
-	text = text.slice(text.indexOf('</head>'))
 	text = text.replaceAll('\n', '').replaceAll('\t', '')
-	text = decode(text)
 
 	return text
 }
@@ -255,14 +202,14 @@ const VALID_LANGUAGES =
 
 /**
  * @typedef {Object} Hourly
- * @prop {number} timestamp - Unix timestamp
+ * @prop {number} time - ISO date
  * @prop {number} temp - Classic temperature
  * @prop {string} rain - Percent chance of rain
  */
 
 /**
  * @typedef {Object} Daily
- * @prop {number} timestamp - Unix timestamp
+ * @prop {number} time - ISO date
  * @prop {number} high - Highest temperature this day
  * @prop {number} low - Lowest temperature this day
  * @prop {string} day - Weather description for the day

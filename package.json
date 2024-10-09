@@ -4,12 +4,16 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "npx wrangler dev",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
 		"test": "node ./src/index.test.js"
 	},
+	"devDependencies": {
+		"prettier": "^3.3.3",
+		"wrangler": "3.80.1"
+	},
 	"dependencies": {
-		"html-entities": "^2.5.2",
-		"striptags": "^3.2.0"
+		"cheerio": "^1.0.0"
 	},
 	"prettier": {
 		"tabWidth": 4,
