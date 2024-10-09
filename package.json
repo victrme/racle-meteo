@@ -13,8 +13,7 @@
 		"wrangler": "3.80.1"
 	},
 	"dependencies": {
-		"cheerio": "^1.0.0",
-		"htmlparser2": "^9.1.0"
+		"cheerio": "^1.0.0"
 	},
 	"prettier": {
 		"tabWidth": 4,
