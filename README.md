@@ -4,7 +4,7 @@ This service cleverly transforms weather web pages into a usable (and free!) res
 
 ## Install
 
-Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key. Migrating to another cloud provider or your own server will the automatic location, meaning the `lat` and `lon` will be required.
+Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key. Migrating to another cloud provider or your own server will remove the automatic location, meaning the `lat` and `lon` will be required.
 
 ## Use
 
