@@ -13,7 +13,7 @@ async function main(request) {
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const queries = { lat, lon, lang, unit, provider, data }
+	const params = { lat, lon, lang, unit, provider, data }
 
 	let body
 	let json
@@ -51,7 +51,7 @@ async function main(request) {
 	}
 
 	if (data === 'simple' && json) {
-		json = toSimpleWeather(json, queries)
+		json = toSimpleWeather(json, params)
 		body = JSON.stringify(json)
 	}
 
@@ -68,11 +68,11 @@ async function main(request) {
 
 /**
  * @param {Record<string, unknown>} json
- * @param {Queries} queries
+ * @param {Params} params
  * @returns {SimpleWeather}
  */
-function toSimpleWeather(json, queries) {
-	const { provider, unit } = queries
+function toSimpleWeather(json, params) {
+	const { provider, unit } = params
 
 	const simple = {
 		now: {
@@ -127,7 +127,7 @@ function toSimpleWeather(json, queries) {
 ******************/
 
 /**
- * @typedef {Object} Queries
+ * @typedef {Object} Params
  * @prop {"accuweather" | "foreca"} provider
  * @prop {"C" | "F"} unit
  * @prop {string} lang
