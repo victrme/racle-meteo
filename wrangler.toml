@@ -1,3 +1,5 @@
 name = "racle-meteo"
 main = "src/index.js"
 compatibility_date = "2024-04-23"
+
+minify = true
