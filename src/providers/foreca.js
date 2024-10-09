@@ -1,5 +1,4 @@
-import { htmlContentToStringArray } from '../index.js'
-import { decode } from 'html-entities'
+import * as cheerio from 'cheerio/slim'
 
 /**
  * @param {number} lat
@@ -7,13 +6,9 @@ import { decode } from 'html-entities'
  * @returns {Promise<Foreca>}
  */
 export default async function foreca(lat, lon, lang, unit) {
-	const html = await getWeatherHTML(lat, lon, lang, unit)
-	const json = weatherHtmlToJson(html)
+	const html = await fetchPageContent(lat, lon, lang, unit)
+	const json = transformToJson(html)
 	const api = validateJson(json)
-
-	// console.log(html)
-	// console.log(json)
-	// console.log(api)
 
 	return api
 }
@@ -40,7 +35,9 @@ function validateJson(json) {
 	return {
 		city: json.city,
 		now: {
+			icon: json.now.icon.replace('/public/images/symbols/', '').replace('.svg', ''),
 			description: json.now.description,
+			humid: json.now.humid + '%',
 			temp: {
 				c: parseInt(json.now.temp.c),
 				f: parseInt(json.now.temp.f),
@@ -49,22 +46,12 @@ function validateJson(json) {
 				c: parseInt(json.now.feels.c),
 				f: parseInt(json.now.feels.f),
 			},
-			min: {
-				c: parseInt(json.now.min.c),
-				f: parseInt(json.now.min.f),
-			},
-			max: {
-				c: parseInt(json.now.max.c),
-				f: parseInt(json.now.max.f),
-			},
 			wind: {
 				mps: parseInt(json.now.wind.mps),
 				mph: parseInt(json.now.wind.mph),
 				kmh: parseInt(json.now.wind.kmh),
 				bft: parseInt(json.now.wind.bft),
 			},
-			humid: json.now.humid + '%',
-			pressure: parseInt(json.now.pressure),
 		},
 		sun: {
 			rise: rise,
@@ -97,79 +84,54 @@ function validateJson(json) {
  * @param {string} html
  * @returns {Record<string, unknown>}
  */
-export function weatherHtmlToJson(html) {
-	const list = (html = htmlContentToStringArray(
-		html,
-		html.indexOf('<main'),
-		html.lastIndexOf('</main')
-	))
-
-	const daily = []
-
-	for (let i = 46; i < 131; i += 17) {
-		daily.push({
-			max: {
-				c: list[i],
-				f: list[i + 1],
-			},
-			min: {
-				c: list[i + 3],
-				f: list[i + 4],
-			},
-			wind: {
-				mph: list[i + 5],
-				kmh: list[i + 7],
-				bft: list[i + 9],
-				mps: list[i + 11],
-			},
-			rain: {
-				in: list[i + 13],
-				mm: list[i + 14],
-			},
-		})
-	}
+export function transformToJson(html) {
+	const $ = cheerio.load(html)
 
 	return {
-		city: list[0],
+		city: $('h1').text(),
 		now: {
 			temp: {
-				c: list[1],
-				f: list[2],
+				c: $('.nowcast .temp p:nth(0) .temp_c').text(),
+				f: $('.nowcast .temp p:nth(0) .temp_f').text(),
 			},
 			feels: {
-				c: list[4],
-				f: list[5],
+				c: $('.nowcast .temp p:nth(1) .temp_c').text(),
+				f: $('.nowcast .temp p:nth(1) .temp_f').text(),
 			},
 			wind: {
-				mps: list[6],
-				mph: list[7],
-				kmh: list[8],
-				bft: list[9],
+				kmh: $('.nowcast .wind .wind_kmh').text(),
+				mph: $('.nowcast .wind .wind_mph').text(),
+				bft: $('.nowcast .wind .wind_bft').text(),
+				mps: $('.nowcast .wind .wind_ms').text(),
 			},
-			gust: {
-				mps: list[11],
-				mph: list[13],
-				kmh: list[15],
-				bft: list[17],
-			},
-			description: list[19],
-			humid: list[25],
-			pressure: list[28],
-
-			max: {
-				c: list[46],
-				f: list[47],
-			},
-			min: {
-				c: list[49],
-				f: list[50],
-			},
+			icon: $('.nowcast .symb img').attr('src'),
+			description: $('.nowcast .wx').text(),
+			humid: $('.nowcast .rhum em').text(),
 		},
 		sun: {
-			rise: list[36],
-			set: list[40],
+			rise: $('.nowcast .sun .time_24h:nth(0)').text(),
+			set: $('.nowcast .sun .time_24h:nth(1)').text(),
 		},
-		daily: daily,
+		daily: new Array(5).fill('').map((_, i) => ({
+			max: {
+				c: $(`.daycontainer:nth(${i}) .tempmax .temp_c`).text(),
+				f: $(`.daycontainer:nth(${i}) .tempmax .temp_f`).text(),
+			},
+			min: {
+				c: $(`.daycontainer:nth(${i}) .tempmin .temp_c`).text(),
+				f: $(`.daycontainer:nth(${i}) .tempmin .temp_f`).text(),
+			},
+			wind: {
+				mph: $(`.daycontainer:nth(${i}) .wind_mph`).text(),
+				kmh: $(`.daycontainer:nth(${i}) .wind_kmh`).text(),
+				bft: $(`.daycontainer:nth(${i}) .wind_bft`).text(),
+				mps: $(`.daycontainer:nth(${i}) .wind_ms`).text(),
+			},
+			rain: {
+				in: $(`.daycontainer:nth(${i}) .rain_in`).text(),
+				mm: $(`.daycontainer:nth(${i}) .rain_mm`).text(),
+			},
+		})),
 	}
 }
 
@@ -180,7 +142,7 @@ export function weatherHtmlToJson(html) {
  * @param {"C" | "F"} unit
  * @returns {Promise<string>}
  */
-export async function getWeatherHTML(lat, lon, lang, unit) {
+export async function fetchPageContent(lat, lon, lang, unit) {
 	if (VALID_LANGUAGES.indexOf(lang) === -1) {
 		throw new Error('Language is not valid')
 	}
@@ -208,9 +170,8 @@ export async function getWeatherHTML(lat, lon, lang, unit) {
 	})
 
 	let html = await forecaResp.text()
-	html = html.slice(html.indexOf('</head>'))
+	html = html.slice(html.indexOf('<main>'), html.lastIndexOf('</main>'))
 	html = html.replaceAll('\n', '').replaceAll('\t', '')
-	html = decode(html)
 
 	return html
 }
@@ -253,7 +214,6 @@ export async function getForecaData(lat, lon) {
  * @prop {Temperature} now.max
  * @prop {Wind} now.wind
  * @prop {string} now.humid
- * @prop {number} now.pressure
  * @prop {Object} sun
  * @prop {Date} sun.rise
  * @prop {Date} sun.set
