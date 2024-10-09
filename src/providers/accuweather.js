@@ -1,5 +1,7 @@
 import * as cheerio from 'cheerio/slim'
 
+/** @typedef {import('../types').AccuWeather} AccuWeather */
+
 /**
  * @param {number} lat - Latitude coordinates
  * @param {number} lon - Longitude coordinates
@@ -175,42 +177,3 @@ async function fetchPageContent(lat, lon, lang, unit) {
 
 const VALID_LANGUAGES =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, he, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
-
-/**
- * @typedef {Object} AccuWeather
- * @prop {Now} now - Current weather information, with felt temperature
- * @prop {Sun} sun - Current day sun time information
- * @prop {Hourly[]} hourly - 12 hours of hourly forecasted temperature and rain
- * @prop {Daily[]} daily - 10 days of daily forecast
- */
-
-/**
- * @typedef {Object} Now
- * @prop {number} icon - Icon ID, more here: https://developer.accuweather.com/weather-icons
- * @prop {number} temp - Classic temperature
- * @prop {number} feels - Felt temperature, using RealFeel® tech
- * @prop {string} description - Short weather description
- */
-
-/**
- * @typedef {Object} Hourly
- * @prop {number} time - ISO date
- * @prop {number} temp - Classic temperature
- * @prop {string} rain - Percent chance of rain
- */
-
-/**
- * @typedef {Object} Daily
- * @prop {number} time - ISO date
- * @prop {number} high - Highest temperature this day
- * @prop {number} low - Lowest temperature this day
- * @prop {string} day - Weather description for the day
- * @prop {string} night - Weather description for the night
- * @prop {string} rain - Percent chance of rain
- */
-
-/**
- * @typedef {Object} Sun
- * @prop {[number, number]} rise - Localized hour and minute sunrise
- * @prop {[number, number]} set - Localized hour and minute sunset
- */

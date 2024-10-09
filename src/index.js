@@ -2,6 +2,9 @@ import index from './index.html'
 import foreca from './providers/foreca.js'
 import accuweather from './providers/accuweather.js'
 
+/** @typedef {import('./types.js').SimpleWeather} SimpleWeather */
+/** @typedef {import('./types.js').QueryParams} QueryParams */
+
 export default { fetch: main }
 
 async function main(request) {
@@ -25,7 +28,7 @@ async function main(request) {
 		if (url.pathname !== '/') {
 			status = 404
 			contentType = 'text/plain'
-			cacheControl = 'nocache'
+			cacheControl = 'no-cache'
 		}
 		//
 		else if (provider === 'accuweather') {
@@ -68,7 +71,7 @@ async function main(request) {
 
 /**
  * @param {Record<string, unknown>} json
- * @param {Params} params
+ * @param {QueryParams} params
  * @returns {SimpleWeather}
  */
 function toSimpleWeather(json, params) {
@@ -120,61 +123,4 @@ function toSimpleWeather(json, params) {
 	}
 
 	return simple
-}
-
-/*****************
-	JSDoc Types
-******************/
-
-/**
- * @typedef {Object} Params
- * @prop {"accuweather" | "foreca"} provider
- * @prop {"C" | "F"} unit
- * @prop {string} lang
- * @prop {string} lat
- * @prop {string} lon
- */
-
-/**
- * @typedef {Object} SimpleWeather
- * @prop {Object} now - Current weather information, with felt temperature
- * @prop {number} now.icon - Icon ID
- * @prop {number} now.temp - Classic temperature
- * @prop {number} now.feels - Felt temperature, using RealFeel® tech
- * @prop {string} description - Short weather description
- * @prop {Object} sun - Current day sun time information
- * @prop {Date} rise - Sunrise ISO date
- * @prop {Date} set - Sunset ISO date
- * @prop {Daily[]} daily - 5 days of daily forecast
- */
-
-/**
- * @typedef {Object} Daily
- * @prop {number} time - ISO date
- * @prop {number} high - Highest temperature this day
- * @prop {number} low - Lowest temperature this day
- */
-
-/********************
-	JSON Type def
-*********************/
-
-const SIMPLE_WEATHER_TYPEDEF = {
-	now: {
-		icon: 'string',
-		temp: 'number',
-		feels: 'number',
-		description: 'string',
-	},
-	sun: {
-		rise: ['number', 'number'],
-		set: ['number', 'number'],
-	},
-	daily: [
-		{
-			time: 'Date',
-			high: 'number',
-			low: 'number',
-		},
-	],
 }

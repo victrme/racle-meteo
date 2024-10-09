@@ -1,5 +1,9 @@
 import * as cheerio from 'cheerio/slim'
 
+/** @typedef {import('../types').ForecaNetApi} ForecaNetApi */
+/** @typedef {import('../types').ForecaGeo} ForecaGeo */
+/** @typedef {import('../types').Foreca} Foreca */
+
 /**
  * @param {number} lat
  * @param {number} lon
@@ -38,8 +42,6 @@ function validateJson(json) {
 			wind: {
 				mps: parseInt(json.now.wind.mps),
 				mph: parseInt(json.now.wind.mph),
-				kmh: parseInt(json.now.wind.kmh),
-				bft: parseInt(json.now.wind.bft),
 			},
 		},
 		sun: {
@@ -58,8 +60,6 @@ function validateJson(json) {
 			wind: {
 				mps: parseInt(day.wind.mps),
 				mph: parseInt(day.wind.mph),
-				kmh: parseInt(day.wind.kmh),
-				bft: parseInt(day.wind.bft),
 			},
 			rain: {
 				in: parseFloat(day.rain.in),
@@ -108,8 +108,6 @@ export function transformToJson(html) {
 			wind: {
 				kmh: $('.nowcast .wind .wind_kmh').text(),
 				mph: $('.nowcast .wind .wind_mph').text(),
-				bft: $('.nowcast .wind .wind_bft').text(),
-				mps: $('.nowcast .wind .wind_ms').text(),
 			},
 			icon: $('.nowcast .symb img').attr('src'),
 			description: $('.nowcast .wx').text(),
@@ -131,8 +129,6 @@ export function transformToJson(html) {
 			wind: {
 				mph: $(`.daycontainer:nth(${i}) .wind_mph`).text(),
 				kmh: $(`.daycontainer:nth(${i}) .wind_kmh`).text(),
-				bft: $(`.daycontainer:nth(${i}) .wind_bft`).text(),
-				mps: $(`.daycontainer:nth(${i}) .wind_ms`).text(),
 			},
 			rain: {
 				in: $(`.daycontainer:nth(${i}) .rain_in`).text(),
@@ -205,91 +201,3 @@ export async function getForecaData(lat, lon) {
 	const resp = await fetch(`https://api.foreca.net/data/favorites/${id}.json`)
 	return await resp.json()
 }
-
-/**
- * Type returned when calling foreca as provider
- *
- * @typedef {Object} Foreca
- * @prop {string} city
- * @prop {Object} now
- * @prop {string} now.description
- * @prop {Temperature} now.temp
- * @prop {Temperature} now.feels
- * @prop {Temperature} now.low
- * @prop {Temperature} now.high
- * @prop {Wind} now.wind
- * @prop {string} now.humid
- * @prop {Object} sun
- * @prop {[number, number]} sun.rise
- * @prop {[number, number]} sun.set
- * @prop {Daily[]} daily
- */
-
-/**
- * @typedef {Object} Daily
- * @prop {Temperature} daily.low
- * @prop {Temperature} daily.high
- * @prop {Wind} daily.wind
- * @prop {Rain} daily.rain
- */
-
-/**
- * @typedef {Object} Temperature
- * @prop {number} c
- * @prop {number} f
- */
-
-/**
- * @typedef {Object} Wind
- * @prop {number} mps
- * @prop {number} mph
- * @prop {number} kmh
- * @prop {number} bft
- */
-
-/**
- * @typedef {Object} Rain
- * @prop {number} in
- * @prop {number} mm
- */
-
-/**
- * Ids found for a specific location by foreca to display correct weather
- *
- * @typedef {Object} ForecaGeo
- * @prop {string} id
- * @prop {string} numeric_id
- * @prop {number} lon
- * @prop {number} lat
- * @prop {number} elevation
- * @prop {number} population
- * @prop {string} continentId
- * @prop {string} countryId
- * @prop {string} timezone
- * @prop {string} name
- * @prop {string} countryName
- * @prop {string} defaultName
- * @prop {string} defaultCountryName
- */
-
-/**
- * Unprotected API available for all, thanks Foreca devs
- *
- * @typedef {Object} ForecaNetApi
- * @prop {string} date
- * @prop {string} symb
- * @prop {number} tmin
- * @prop {number} tmax
- * @prop {number} rain
- * @prop {number} rainp
- * @prop {number} snowp
- * @prop {number} snowff
- * @prop {number} rhum
- * @prop {number} windd
- * @prop {number} winds
- * @prop {string} sunrise
- * @prop {string} sunset
- * @prop {string} daylen
- * @prop {number} uvi
- * @prop {string} updated
- */
