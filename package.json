@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "wrangler dev",
 		"deploy": "wrangler deploy",
-		"test": "node ./src/index.tests.js"
+		"test": "node ./src/index.test.js"
 	},
 	"devDependencies": {
 		"prettier": "^3.3.3",

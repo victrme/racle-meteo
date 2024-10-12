@@ -1,19 +1,32 @@
-import scraper from './index.js'
+import { ACCUWEATHER_STRUCT, FORECA_STRUCT, SIMPLE_STRUCT } from './structs.js'
+import main from './index.js'
 
 await test()
 
 async function test() {
-	const url = 'https://example.com?lang=fr&lat=48.8582&lon=2.2944'
-	const resp = await scraper.fetch(new Request(url))
-	const json = await resp.json()
-	const types = scraperTypes()
+	let result
 
-	compareTypes(json, types)
-	console.log('✅ Type test passed', '\n')
+	result = await getData('?lat=48.8582&lon=2.2944&provider=accuweather')
+	compareTypes(result, ACCUWEATHER_STRUCT)('Basic Accuweather')
+
+	result = await getData('?lat=48.8582&lon=2.2944&provider=foreca')
+	compareTypes(result, FORECA_STRUCT)('Basic Foreca')
+
+	result = await getData('?lat=48.8582&lon=2.2944&provider=accuweather&data=simple')
+	compareTypes(result, SIMPLE_STRUCT)('Simple data with accuweather')
+
+	result = await getData('?lat=48.8582&lon=2.2944&provider=foreca&data=simple')
+	compareTypes(result, SIMPLE_STRUCT)('Simple data with foreca')
 }
 
-function compareTypes(obj, types) {
-	for (const [key, type] of Object.entries(types)) {
+async function getData(query) {
+	const resp = await main.fetch(new Request('https://example.com/' + query))
+	const json = await resp.json()
+	return json
+}
+
+function compareTypes(obj, struct) {
+	for (const [key, type] of Object.entries(struct)) {
 		if (typeof type === 'object') {
 			compareTypes(obj[key], type)
 			continue
@@ -23,36 +36,6 @@ function compareTypes(obj, types) {
 			throw `"${key}" should be of type "${type}", but got "${typeof obj[key]}"`
 		}
 	}
-}
 
-function scraperTypes() {
-	return {
-		now: {
-			icon: 'number',
-			temp: 'number',
-			feels: 'number',
-			description: 'string',
-		},
-		hourly: [
-			{
-				timestamp: 'number',
-				temp: 'number',
-				rain: 'string',
-			},
-		],
-		daily: [
-			{
-				timestamp: 'number',
-				high: 'number',
-				low: 'number',
-				day: 'string',
-				night: 'string',
-				rain: 'string',
-			},
-		],
-		sun: {
-			rise: 'number',
-			set: 'number',
-		},
-	}
+	return (log) => console.log('✅ ' + log, '\n')
 }

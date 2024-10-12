@@ -1,7 +1,6 @@
-import index from './index.html'
-import foreca from './_foreca.js'
-import accuweather from './_accuweather.js'
-import { toSimpleWeather } from './_simple.js'
+import foreca from './providers/foreca.js'
+import accuweather from './providers/accuweather.js'
+import { toSimpleWeather } from './providers/simple.js'
 
 export default { fetch: main }
 
@@ -34,11 +33,11 @@ async function main(request) {
 		}
 		//
 		else if (provider === 'foreca') {
-			json = await foreca(lat, lon, lang, unit)
+			json = await foreca(params)
 		}
 		//
 		else {
-			body = index
+			body = await import('./index.html').default
 			contentType = 'text/html'
 		}
 	} catch (error) {

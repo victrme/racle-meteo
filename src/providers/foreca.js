@@ -43,7 +43,7 @@ function validateJson(json) {
 				f: parseInt(json.now.feels.f),
 			},
 			wind: {
-				mps: parseInt(json.now.wind.mps),
+				kmh: parseInt(json.now.wind.kmh),
 				mph: parseInt(json.now.wind.mph),
 			},
 		},
@@ -61,7 +61,7 @@ function validateJson(json) {
 				f: parseInt(day.high.f),
 			},
 			wind: {
-				mps: parseInt(day.wind.mps),
+				kmh: parseInt(day.wind.kmh),
 				mph: parseInt(day.wind.mph),
 			},
 			rain: {
@@ -148,7 +148,7 @@ export function transformToJson(html) {
 export async function fetchPageContent(params) {
 	const { lang, unit, lat, lon } = params
 
-	if (FORECA_LANGS.indexOf(lang) === -1) {
+	if (FORECA_LANGS.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 

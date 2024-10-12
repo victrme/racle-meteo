@@ -21,8 +21,8 @@ export const SIMPLE_STRUCT = {
 export const ACCUWEATHER_STRUCT = {
 	now: {
 		icon: 'string',
-		temp: 'string',
-		feels: 'string',
+		temp: 'number',
+		feels: 'number',
 		description: 'string',
 	},
 	sun: {
@@ -32,7 +32,7 @@ export const ACCUWEATHER_STRUCT = {
 	hourly: [
 		{
 			time: 'string',
-			temp: 'string',
+			temp: 'number',
 			rain: 'string',
 		},
 	],
@@ -55,7 +55,7 @@ export const FORECA_STRUCT = {
 		description: 'string',
 		temp: { c: 'number', f: 'number' },
 		feels: { c: 'number', f: 'number' },
-		wind: { mps: 'number', mph: 'number' },
+		wind: { kmh: 'number', mph: 'number' },
 	},
 	sun: {
 		rise: ['number', 'number'],
@@ -65,7 +65,7 @@ export const FORECA_STRUCT = {
 		{
 			low: { c: 'number', f: 'number' },
 			high: { c: 'number', f: 'number' },
-			wind: { mps: 'number', mph: 'number' },
+			wind: { kmh: 'number', mph: 'number' },
 			rain: { in: 'number', mm: 'number' },
 		},
 	],
