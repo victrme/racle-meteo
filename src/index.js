@@ -37,7 +37,7 @@ async function main(request) {
 		}
 		//
 		else {
-			body = await import('./index.html').default
+			body = (await import('./index.html')).default
 			contentType = 'text/html'
 		}
 	} catch (error) {

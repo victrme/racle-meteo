@@ -26,6 +26,7 @@ export function toSimpleWeather(json, params) {
 	if (provider === 'foreca') {
 		const degrees = unit === 'F' ? 'f' : 'c'
 
+		simple.now.icon = transformToSimpleIcon(simple.now.icon, 'foreca')
 		simple.now.temp = json.now.temp[degrees]
 		simple.now.feels = json.now.feels[degrees]
 
@@ -41,7 +42,7 @@ export function toSimpleWeather(json, params) {
 	}
 
 	if (provider === 'accuweather') {
-		simple.now.icon = json.now.icon.toString()
+		simple.now.icon = transformToSimpleIcon(simple.now.icon, 'accuweather')
 		simple.now.temp = json.now.temp
 		simple.now.feels = json.now.feels
 
@@ -59,6 +60,23 @@ export function toSimpleWeather(json, params) {
 	return simple
 }
 
+/**
+ * @param {string} iconId
+ * @param {"accuweather" | "foreca"} provider
+ * @returns {string}
+ */
+function transformToSimpleIcon(id, provider) {
+	for (const [simpleId, providerIds] of Object.entries(SIMPLE_ICONS)) {
+		const list = providerIds[provider]
+
+		if (list.includes(id)) {
+			return simpleId
+		}
+	}
+
+	return id
+}
+
 export const SIMPLE_ICON_NAMES = Object.freeze([
 	'clearsky',
 	'fewclouds',
@@ -74,43 +92,43 @@ export const SIMPLE_ICON_NAMES = Object.freeze([
 
 export const SIMPLE_ICONS = Object.freeze({
 	clearsky: {
-		accu: '1, 2, 33, 34',
+		accuweather: '1, 2, 33, 34',
 		foreca: 'd000, d100, n000, n100',
 	},
 	fewclouds: {
-		accu: '3, 4, 5, 35, 36, 37',
+		accuweather: '3, 4, 5, 35, 36, 37',
 		foreca: 'd200, d500, n200, n500',
 	},
 	brokenclouds: {
-		accu: '6, 7, 38',
+		accuweather: '6, 7, 38',
 		foreca: 'd300, n300',
 	},
 	overcastclouds: {
-		accu: '8',
+		accuweather: '8',
 		foreca: 'd400, n400',
 	},
 	sunnyrain: {
-		accu: '14, 17',
+		accuweather: '14, 17',
 		foreca: 'd210, n210',
 	},
 	lightrain: {
-		accu: '12, 13, 39',
+		accuweather: '12, 13, 39',
 		foreca: 'd310, d410, d240, n310, n410, n240',
 	},
 	rain: {
-		accu: '18, 19, 29, 40',
+		accuweather: '18, 19, 29, 40',
 		foreca: 'd320, d420, d430, n320, n420, n430',
 	},
 	thunderstorm: {
-		accu: '15, 16, 41, 42',
+		accuweather: '15, 16, 41, 42',
 		foreca: 'd340, d440, n340, n440',
 	},
 	snow: {
-		accu: '20, 21, 22, 23, 24, 25, 26, 43, 44',
+		accuweather: '20, 21, 22, 23, 24, 25, 26, 43, 44',
 		foreca: 'd221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432',
 	},
 	mist: {
-		accu: '11',
+		accuweather: '11',
 		foreca: 'd600, n600',
 	},
 })
