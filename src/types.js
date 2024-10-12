@@ -1,18 +1,8 @@
 'use strict'
 
-/************
-	JSDoc
-*************/
-
-/**
- * @typedef {Object} QueryParams
- * @prop {"accuweather" | "foreca"} provider
- * @prop {"all" | "simple"} data
- * @prop {"C" | "F"} unit
- * @prop {string} lang
- * @prop {string} lat
- * @prop {string} lon
- */
+/*************
+	Simple
+**************/
 
 /**
  * @typedef {Object} SimpleWeather
@@ -27,10 +17,14 @@
  * @prop {{time: string, high: number, low: number}[]} daily - 5 days of daily forecast
  */
 
+/*****************
+	Accuweather
+******************/
+
 /**
  * @typedef {Object} AccuWeather
  * @prop {Object} now - Current weather information
- * @prop {number} now.icon - Icon ID, more here: https://developer.accuweather.com/weather-icons
+ * @prop {string} now.icon - Icon ID, more here: https://developer.accuweather.com/weather-icons
  * @prop {number} now.temp - Classic temperature
  * @prop {number} now.feels - Felt temperature, using RealFeel® tech
  * @prop {string} now.description - Short weather description
@@ -40,6 +34,10 @@
  * @prop {{time: string, high: number, low: number}[]} hourly - 12 hours of hourly forecasted temperature and rain
  * @prop {{time: string, high: number, low: number, day: string, night: string, rain: string}[]} daily - 10 days of daily forecast
  */
+
+/*************
+	Foreca
+**************/
 
 /**
  * @typedef {Object} Foreca
@@ -59,7 +57,6 @@
 
 /**
  * Ids found for a specific location by foreca to display correct weather
- *
  * @typedef {Object} ForecaGeo
  * @prop {string} id
  * @prop {string} numeric_id
@@ -78,7 +75,6 @@
 
 /**
  * Unprotected API available for all, thanks Foreca devs
- *
  * @typedef {Object} ForecaNetApi
  * @prop {string} date
  * @prop {string} symb
@@ -97,29 +93,5 @@
  * @prop {number} uvi
  * @prop {string} updated
  */
-
-/******************
-	JSON Typedef
-*******************/
-
-const SIMPLE_WEATHER = {
-	now: {
-		icon: 'string',
-		temp: 'number',
-		feels: 'number',
-		description: 'string',
-	},
-	sun: {
-		rise: ['number', 'number'],
-		set: ['number', 'number'],
-	},
-	daily: [
-		{
-			time: 'Date',
-			high: 'number',
-			low: 'number',
-		},
-	],
-}
 
 export {}

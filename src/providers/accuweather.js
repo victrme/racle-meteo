@@ -1,16 +1,17 @@
 import * as cheerio from 'cheerio/slim'
 
-/** @typedef {import('../types').AccuWeather} AccuWeather */
+/** @typedef {import('./accuweather/types').AccuWeather} AccuWeather */
+/** @typedef {import('../index').QueryParams} QueryParams */
+
+const ACCUWEATHER_LANGS =
+	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, he, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
 /**
- * @param {number} lat - Latitude coordinates
- * @param {number} lon - Longitude coordinates
- * @param {string} lang - Content language, "en" by default
- * @param {"C" | "F"} unit - Either celsius or football fields
+ * @param {QueryParams} params
  * @returns {Promise<AccuWeather>}
  */
-export default async function accuweather(lat, lon, lang, unit) {
-	const html = await fetchPageContent(lat, lon, lang, unit)
+export default async function accuweather(params) {
+	const html = await fetchPageContent(params)
 	const json = transformToJson(html)
 	const api = validateJson(json)
 
@@ -81,7 +82,7 @@ function validateJson(json) {
 	// 4.
 	return {
 		now: {
-			icon: parseInt(json.now.icon.replace('/images/weathericons/', '').replace('.svg', '')),
+			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
 			temp: parseInt(json.now.temp),
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
@@ -132,16 +133,14 @@ function transformToJson(html) {
 /**
  * Return accuweather.com HTML page with all the necessery information
  *
- * @param {number} lat - Latitude coordinates
- * @param {number} lon - Longitude coordinates
- * @param {string} lang - Content language, "en" by default
- * @param {"C" | "F"} unit - Either celsius or football fields
+ * @param {QueryParams} params
  * @returns {Promise<string>}
  */
-async function fetchPageContent(lat, lon, lang, unit) {
+async function fetchPageContent(params) {
+	let { lat, lon, lang, unit } = params
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
-	if (VALID_LANGUAGES.includes(lang) === false) {
+	if (ACCUWEATHER_LANGS.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 
@@ -174,249 +173,3 @@ async function fetchPageContent(lat, lon, lang, unit) {
 
 	return text
 }
-
-const VALID_LANGUAGES =
-	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, he, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
-
-const ACCUWEATHER_ICONS = [
-	{
-		name: '1',
-		text: 'Sunny',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '2',
-		text: 'Mostly Sunny',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '3',
-		text: 'Partly Sunny',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '4',
-		text: 'Intermittent Clouds',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '5',
-		text: 'Hazy Sunshine',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '6',
-		text: 'Mostly Cloudy',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '7',
-		text: 'Cloudy',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '8',
-		text: 'Dreary (Overcast)',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '11',
-		text: 'Fog',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '12',
-		text: 'Showers',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '13',
-		text: 'Mostly Cloudy w/ Showers',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '14',
-		text: 'Partly Sunny w/ Showers',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '15',
-		text: 'T-Storms',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '16',
-		text: 'Mostly Cloudy w/ T-Storms',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '17',
-		text: 'Partly Sunny w/ T-Storms',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '18',
-		text: 'Rain',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '19',
-		text: 'Flurries',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '20',
-		text: 'Mostly Cloudy w/ Flurries',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '21',
-		text: 'Partly Sunny w/ Flurries',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '22',
-		text: 'Snow',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '23',
-		text: 'Mostly Cloudy w/ Snow',
-		day: 'Yes',
-		night: 'No',
-	},
-	{
-		name: '24',
-		text: 'Ice',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '25',
-		text: 'Sleet',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '26',
-		text: 'Freezing Rain',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '29',
-		text: 'Rain and Snow',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '30',
-		text: 'Hot',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '31',
-		text: 'Cold',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '32',
-		text: 'Windy',
-		day: 'Yes',
-		night: 'Yes',
-	},
-	{
-		name: '33',
-		text: 'Clear',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '34',
-		text: 'Mostly Clear',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '35',
-		text: 'Partly Cloudy',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '36',
-		text: 'Intermittent Clouds',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '37',
-		text: 'Hazy Moonlight',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '38',
-		text: 'Mostly Cloudy',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '39',
-		text: 'Partly Cloudy w/ Showers',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '40',
-		text: 'Mostly Cloudy w/ Showers',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '41',
-		text: 'Partly Cloudy w/ T-Storms',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '42',
-		text: 'Mostly Cloudy w/ T-Storms',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '43',
-		text: 'Mostly Cloudy w/ Flurries',
-		day: 'No',
-		night: 'Yes',
-	},
-	{
-		name: '44',
-		text: 'Mostly Cloudy w/ Snow',
-		day: 'No',
-		night: 'Yes',
-	},
-]

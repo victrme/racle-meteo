@@ -1,9 +1,7 @@
 import index from './index.html'
-import foreca from './providers/foreca.js'
-import accuweather from './providers/accuweather.js'
-
-/** @typedef {import('./types.js').SimpleWeather} SimpleWeather */
-/** @typedef {import('./types.js').QueryParams} QueryParams */
+import foreca from './_foreca.js'
+import accuweather from './_accuweather.js'
+import { toSimpleWeather } from './_simple.js'
 
 export default { fetch: main }
 
@@ -32,7 +30,7 @@ async function main(request) {
 		}
 		//
 		else if (provider === 'accuweather') {
-			json = await accuweather(lat, lon, lang, unit)
+			json = await accuweather(params)
 		}
 		//
 		else if (provider === 'foreca') {
@@ -70,57 +68,11 @@ async function main(request) {
 }
 
 /**
- * @param {Record<string, unknown>} json
- * @param {QueryParams} params
- * @returns {SimpleWeather}
+ * @typedef {Object} QueryParams
+ * @prop {"accuweather" | "foreca"} provider
+ * @prop {"all" | "simple"} data
+ * @prop {"C" | "F"} unit
+ * @prop {string} lang
+ * @prop {string} lat
+ * @prop {string} lon
  */
-function toSimpleWeather(json, params) {
-	const { provider, unit } = params
-
-	const simple = {
-		now: {
-			icon: json.now.icon,
-			description: json.now.description,
-		},
-		sun: {
-			rise: json.sun.rise,
-			set: json.sun.set,
-		},
-		daily: [],
-	}
-
-	if (provider === 'foreca') {
-		const degrees = unit === 'F' ? 'f' : 'c'
-
-		simple.now.temp = json.now.temp[degrees]
-		simple.now.feels = json.now.feels[degrees]
-
-		for (let i = 0; i < 5; i++) {
-			const day = json.daily[i]
-
-			simple.daily.push({
-				time: day.time,
-				high: day.high[degrees],
-				low: day.low[degrees],
-			})
-		}
-	}
-
-	if (provider === 'accuweather') {
-		simple.now.icon = json.now.icon.toString()
-		simple.now.temp = json.now.temp
-		simple.now.feels = json.now.feels
-
-		for (let i = 0; i < 5; i++) {
-			const day = json.daily[i]
-
-			simple.daily.push({
-				time: day.time,
-				high: day.high,
-				low: day.low,
-			})
-		}
-	}
-
-	return simple
-}

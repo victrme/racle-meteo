@@ -1,16 +1,19 @@
 import * as cheerio from 'cheerio/slim'
 
+/** @typedef {import('../index').QueryParams} QueryParams */
 /** @typedef {import('../types').ForecaNetApi} ForecaNetApi */
 /** @typedef {import('../types').ForecaGeo} ForecaGeo */
 /** @typedef {import('../types').Foreca} Foreca */
 
+const FORECA_LANGS =
+	'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
+
 /**
- * @param {number} lat
- * @param {number} lon
+ * @param {QueryParams} params
  * @returns {Promise<Foreca>}
  */
-export default async function foreca(lat, lon, lang, unit) {
-	const html = await fetchPageContent(lat, lon, lang, unit)
+export default async function foreca(params) {
+	const html = await fetchPageContent(params)
 	const json = transformToJson(html)
 	const api = validateJson(json)
 
@@ -139,14 +142,13 @@ export function transformToJson(html) {
 }
 
 /**
- * @param {number} lat
- * @param {number} lon
- * @param {string} lang
- * @param {"C" | "F"} unit
+ * @param {QueryParams} params
  * @returns {Promise<string>}
  */
-export async function fetchPageContent(lat, lon, lang, unit) {
-	if (VALID_LANGUAGES.indexOf(lang) === -1) {
+export async function fetchPageContent(params) {
+	const { lang, unit, lat, lon } = params
+
+	if (FORECA_LANGS.indexOf(lang) === -1) {
 		throw new Error('Language is not valid')
 	}
 
@@ -177,136 +179,6 @@ export async function fetchPageContent(lat, lon, lang, unit) {
 	return html
 }
 
-const VALID_LANGUAGES =
-	'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
-
-const FORECA_ICONS = [
-	{
-		name: 'd000',
-		text: 'Clear',
-	},
-	{
-		name: 'd100',
-		text: 'Mostly clear',
-	},
-	{
-		name: 'd200',
-		text: '',
-	},
-	{
-		name: 'd300',
-		text: '',
-	},
-	{
-		name: 'd400',
-		text: '',
-	},
-	{
-		name: 'd500',
-		text: 'Thin upper cloud',
-	},
-	{
-		name: 'd600',
-		text: 'Fog',
-	},
-	{
-		name: 'd210',
-		text: 'Partly cloudy and light rain',
-	},
-	{
-		name: 'd310',
-		text: 'Cloudy and light rain',
-	},
-	{
-		name: 'd410',
-		text: 'Overcast and light rain',
-	},
-	{
-		name: 'd220',
-		text: 'Partly cloudy and showers',
-	},
-	{
-		name: 'd320',
-		text: '',
-	},
-	{
-		name: 'd420',
-		text: '',
-	},
-	{
-		name: 'd430',
-		text: '',
-	},
-	{
-		name: 'd240',
-		text: 'Partly cloudy, thunderstorms with rain',
-	},
-	{
-		name: 'd340',
-		text: 'Cloudy, thunderstorms with rain',
-	},
-	{
-		name: 'd440',
-		text: '',
-	},
-	{
-		name: 'd211',
-		text: 'Partly cloudy and light wet snow',
-	},
-	{
-		name: 'd311',
-		text: 'Cloudy and light wet snow',
-	},
-	{
-		name: 'd411',
-		text: '',
-	},
-	{
-		name: 'd221',
-		text: 'Partly cloudy and wet snow showers',
-	},
-	{
-		name: 'd321',
-		text: 'Cloudy and wet snow showers',
-	},
-	{
-		name: 'd421',
-		text: 'Overcast and wet snow showers',
-	},
-	{
-		name: 'd431',
-		text: 'Overcast and wet snow',
-	},
-	{
-		name: 'd212',
-		text: 'Partly cloudy and light snow',
-	},
-	{
-		name: 'd312',
-		text: 'Cloudy and light snow',
-	},
-	{
-		name: 'd412',
-		text: 'Overcast and light snow',
-	},
-	{
-		name: 'd222',
-		text: 'Partly cloudy and snow showers',
-	},
-	{
-		name: 'd322',
-		text: 'Cloudy and snow showers',
-	},
-	{
-		name: 'd422',
-		text: 'Overcast and snow showers',
-	},
-	{
-		name: 'd432',
-		text: 'Overcast and snow',
-	},
-]
-
 /**
  * @param {number} lat
  * @param {number} lon
@@ -318,13 +190,13 @@ export async function getForecaLocation(lat, lon) {
 	return json
 }
 
-/**
- * @param {number} lon
- * @param {number} lat
- * @returns {Promise<Record<string, ForecaNetApi[]>}
- */
-export async function getForecaData(lat, lon) {
-	const { id } = await getForecaLocation(lat, lon)
-	const resp = await fetch(`https://api.foreca.net/data/favorites/${id}.json`)
-	return await resp.json()
-}
+// /**
+//  * @param {number} lon
+//  * @param {number} lat
+//  * @returns {Promise<Record<string, ForecaNetApi[]>}
+//  */
+// export async function getForecaData(lat, lon) {
+// 	const { id } = await getForecaLocation(lat, lon)
+// 	const resp = await fetch(`https://api.foreca.net/data/favorites/${id}.json`)
+// 	return await resp.json()
+// }
