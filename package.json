@@ -10,7 +10,7 @@
 	},
 	"devDependencies": {
 		"prettier": "^3.3.3",
-		"wrangler": "3.80.1"
+		"wrangler": "3.80.4"
 	},
 	"dependencies": {
 		"cheerio": "^1.0.0"
