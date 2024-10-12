@@ -13,7 +13,7 @@ async function main(request) {
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const params = { lat, lon, lang, unit, provider, data }
+	const params = sanitizeParams({ lat, lon, lang, unit, provider, data })
 
 	let body
 	let json
@@ -64,6 +64,43 @@ async function main(request) {
 			'cache-control': cacheControl,
 		},
 	})
+}
+
+/**
+ * @param {QueryParams} params
+ * @returns {QueryParams}
+ */
+function sanitizeParams(params) {
+	let { provider, lang, unit, data } = params
+
+	const providerList = ['accuweather', 'foreca', '']
+	const dataList = ['all', 'simple']
+	const unitList = ['C', 'F']
+
+	provider = provider.toLowerCase()
+	lang = lang.toLowerCase().replace('-', '_')
+	unit = unit.toUpperCase()
+	data = data.toLowerCase()
+
+	if (!providerList.includes(provider)) {
+		provider = ''
+	}
+	if (unitList.includes(unit)) {
+		unit = 'C'
+	}
+	if (dataList.includes(data)) {
+		data = 'all'
+	}
+	if (provider === 'foreca') {
+		lang = lang.slice(0, 2)
+	}
+	if (provider === 'accuweather') {
+		if (lang === 'pt') {
+			lang = 'pt_pt'
+		}
+	}
+
+	return params
 }
 
 /**
