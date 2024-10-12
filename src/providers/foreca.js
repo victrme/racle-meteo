@@ -1,9 +1,9 @@
 import * as cheerio from 'cheerio/slim'
 
-/** @typedef {import('../index').QueryParams} QueryParams */
-/** @typedef {import('../types').ForecaNetApi} ForecaNetApi */
-/** @typedef {import('../types').ForecaGeo} ForecaGeo */
-/** @typedef {import('../types').Foreca} Foreca */
+/** @typedef {import('../index.js').QueryParams} QueryParams */
+/** @typedef {import('../types.js').ForecaNetApi} ForecaNetApi */
+/** @typedef {import('../types.js').ForecaGeo} ForecaGeo */
+/** @typedef {import('../types.js').Foreca} Foreca */
 
 const FORECA_LANGS =
 	'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'

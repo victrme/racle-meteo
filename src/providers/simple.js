@@ -1,7 +1,7 @@
-/** @typedef {import('../index').QueryParams} QueryParams */
-/** @typedef {import('../types').SimpleWeather} SimpleWeather */
-/** @typedef {import('../types').AccuWeather} AccuWeather */
-/** @typedef {import('../types').Foreca} Foreca */
+/** @typedef {import('../index.js').QueryParams} QueryParams */
+/** @typedef {import('../types.js').SimpleWeather} SimpleWeather */
+/** @typedef {import('../types.js').AccuWeather} AccuWeather */
+/** @typedef {import('../types.js').Foreca} Foreca */
 
 /**
  * @param {AccuWeather | Foreca} json
