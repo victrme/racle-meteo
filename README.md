@@ -38,10 +38,13 @@ Define a weather provider to start using the API.
 
 ### Accuweather
 
+#### Queries
+
 |  provider   | lang | unit | data |
 |-------------|------|------|------|
 | accuweather | en   | C    | all  |
 
+#### Response
 ```json
 {
   "now": {
@@ -87,10 +90,12 @@ Define a weather provider to start using the API.
 
 ### Foreca
 
+#### Queries
 | provider | lang | unit | data |
 |----------|------|------|------|
 | foreca   | fr   | C    | all  |
 
+#### Response
 ```json
 {
   "city": "Paris",
@@ -119,9 +124,13 @@ Define a weather provider to start using the API.
 
 ### Simple data
 
+#### Queries
+
 | provider | lang | unit | data    |
 |----------|------|------|---------|
 | foreca   | fr   | C    | simple  |
+
+#### Response
 
 ```json
 {
