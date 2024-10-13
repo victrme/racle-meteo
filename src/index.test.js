@@ -32,7 +32,7 @@ function compareTypes(obj, struct) {
 			continue
 		}
 
-		if (typeof obj[key] !== type) {
+		if (typeof type !== 'string' && typeof obj[key] !== type) {
 			throw `"${key}" should be of type "${type}", but got "${typeof obj[key]}"`
 		}
 	}
