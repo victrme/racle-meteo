@@ -24,7 +24,7 @@
 
 			input,
 			select {
-				max-width: 100px;
+				max-width: 140px;
 			}
 
 			table {
@@ -106,15 +106,23 @@
 			</p>
 
 			<p>
-				GPS coordinates <br />
 				<label>
-					Latitude
+					Latitude <br />
 					<input type="number" name="lat" value="48.853" />
 				</label>
-				<br />
+			</p>
+
+			<p>
 				<label>
-					Longitude
+					Longitude <br />
 					<input type="number" name="lon" value="2.348" />
+				</label>
+			</p>
+
+			<p>
+				<label>
+					Query <br />
+					<input type="text" name="query" placeholder="Paris,FR" />
 				</label>
 			</p>
 
@@ -131,9 +139,9 @@
 				</label>
 			</p>
 
-			<div>
+			<p>
 				<button type="submit">Send query</button>
-			</div>
+			</p>
 		</form>
 
 		<h2>Parameters</h2>
@@ -157,6 +165,15 @@
 					<td>
 						Choose the weather provider. By default returns all available data, see
 						"data".
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">query</th>
+					<td>string</td>
+					<td>optional</td>
+					<td>
+						Matches a location based on your query. Best to use as "City,CountryCode".
+						Adding "query" overrides "lat" & "lon" parameters.
 					</td>
 				</tr>
 				<tr>

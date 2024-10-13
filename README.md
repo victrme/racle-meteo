@@ -25,14 +25,15 @@ Define a weather provider to start using the API.
 
 ### Parameters
 
-| Parameter | Type                | Required   | Description                                                                                      |
-| --------- | ------------------- |----------- | ------------------------------------------------------------------------------------------------ |
-| provider  | accuweather, foreca | required   | Choose the weather provider. By default returns all available data, see "data".                  |
-| lat       | string              | optional\* | Location latitude. \* Required when migrating from CF workers                                    |
-| lon       | string              | optional\* | Location longitude. \* Required when migrating from CF workers                                   |
+| Parameter | Type                | Required   | Description                                                                                                                                   |
+| --------- | ------------------- |----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| provider  | accuweather, foreca | required   | Choose the weather provider. By default returns all available data, see "data".                                                               |
+| provider  | string              | optional   | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
+| lat       | string              | optional\* | Location latitude. \* Required when migrating from CF workers                                                                                 |
+| lon       | string              | optional\* | Location longitude. \* Required when migrating from CF workers                                                                                |
 | lang      | string              | optional   | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` does not fallback to english. |
-| unit      | C, F                | optional   | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit. |
-| data      | all, simple         | optional   | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default. |
+| unit      | C, F                | optional   | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
+| data      | all, simple         | optional   | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
 
 ## Response examples
 
@@ -48,14 +49,14 @@ Define a weather provider to start using the API.
 ```json
 {
   "meta": {
-    "url": "https://accuweather.com/en/fr/notre-dame/2608456/weather-forecast/2608456",
+    "url": "https://accuweather.com/en/fr/paris/2608456/weather-forecast/2608456",
     "lang": "en",
     "provider": "accuweather"
   },
   "geo": {
     "lat": 48.853,
     "lon": 2.348,
-    "city": "notre dame",
+    "city": "paris",
     "country": "FR"
   },
   "now": {

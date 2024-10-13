@@ -114,14 +114,13 @@ function validateJson(json, params) {
 
 /**
  * @param {string} html
- * @returns {Record<string, unknown>}
- */
+ * @returns {Record<string, unknown>} */
 function transformToJson(html) {
 	const $ = cheerio.load(html)
 
 	return {
 		meta: {
-			url: 'https://accuweather.com' + $('.header-city-link').attr('href'),
+			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href')),
 		},
 		now: {
 			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src'),
@@ -150,39 +149,39 @@ function transformToJson(html) {
 }
 
 /**
- * Return accuweather.com HTML page with all the necessery information
- *
  * @param {QueryParams} params
- * @returns {Promise<string>}
- */
+ * @returns {Promise<string>} */
 async function fetchPageContent(params) {
-	let { lat, lon, lang, unit } = params
+	let { lat, lon, lang, unit, query } = params
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
 	if (ACCUWEATHER_LANGS.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 
-	let text
+	let path = 'https://www.accuweather.com/'
 
-	const path = `https://www.accuweather.com/${lang}/search-locations?query=${lat},${lon}`
-	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
 	const headers = {
 		Accept: 'text/html',
 		'Accept-Encoding': 'gzip',
 		'Accept-Language': lang,
-		'User-Agent': firefoxAndroid,
+		'User-Agent': 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0',
 		Cookie: `awx_user=tp:${unit}|lang:${lang};`,
 	}
 
-	if (text === undefined) {
-		text = await (await fetch(path, { headers }))?.text()
+	if (query) {
+		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us`
+		const autocompleteHeaders = { ...headers, cookie: `awx_user=tp:C|lang:en-US;` }
+		const autocompleteResponse = await fetch(autocompleteURL, { headers: autocompleteHeaders })
+		const autocompleteResult = await autocompleteResponse?.json()
+		const key = autocompleteResult[0]?.key
+
+		path += `web-api/three-day-redirect?key=${key}`
+	} else {
+		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
 
-	if (text === undefined) {
-		await new Promise((r) => setTimeout(r, 400))
-		text = await (await fetch(path, { headers }))?.text()
-	}
+	let text = await (await fetch(path, { headers }))?.text()
 
 	if (text === undefined) {
 		throw new Error('Could not connect to accuweather.com')

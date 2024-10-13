@@ -9,11 +9,12 @@ async function main(request) {
 	const unit = url.searchParams.get('unit') ?? 'C'
 	const lang = url.searchParams.get('lang') ?? 'en'
 	const data = url.searchParams.get('data') ?? 'all'
+	const query = url.searchParams.get('query') ?? ''
 	const lat = url.searchParams.get('lat') ?? request.cf.latitude
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const params = sanitizeParams({ lat, lon, lang, unit, provider, data })
+	const params = sanitizeParams({ lat, lon, lang, unit, provider, data, query })
 
 	let body
 	let json
@@ -108,6 +109,7 @@ function sanitizeParams(params) {
  * @prop {"accuweather" | "foreca"} provider
  * @prop {"all" | "simple"} data
  * @prop {"C" | "F"} unit
+ * @prop {string} query
  * @prop {string} lang
  * @prop {string} lat
  * @prop {string} lon

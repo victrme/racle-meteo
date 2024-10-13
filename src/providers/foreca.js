@@ -159,14 +159,12 @@ export function transformToJson(html) {
  * @param {QueryParams} params
  * @returns {Promise<string>}
  */
-export async function fetchPageContent(params) {
-	const { lang, unit, lat, lon } = params
-
+export async function fetchPageContent({ lang, unit, lat, lon, query }) {
 	if (FORECA_LANGS.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
 
-	const { id, defaultName, countryId } = await getForecaLocation(lat, lon)
+	const { id, defaultName, countryId } = await getForecaLocation({ lat, lon, query })
 
 	if (!id || !defaultName) {
 		throw new Error('Cannot get foreca ID or name')
@@ -197,15 +195,21 @@ export async function fetchPageContent(params) {
 }
 
 /**
- * @param {number} lat
- * @param {number} lon
+ * @param {QueryParams} params
  * @returns {Promise<ForecaGeo>}
  */
-export async function getForecaLocation(lat, lon) {
-	const resp = await fetch(`https://api.foreca.net/locations/${lon},${lat}.json`)
-	const json = await resp.json()
-
-	return json
+export async function getForecaLocation({ lat, lon, query }) {
+	if (query) {
+		const path = `https://api.foreca.net/locations/search/${query}.json`
+		const resp = await fetch(path)
+		const json = await resp.json()
+		return json.results[0]
+	} else {
+		const path = `https://api.foreca.net/locations/${lon},${lat}.json`
+		const resp = await fetch(path)
+		const json = await resp.json()
+		return json
+	}
 }
 
 // /**
