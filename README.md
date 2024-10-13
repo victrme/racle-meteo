@@ -47,6 +47,17 @@ Define a weather provider to start using the API.
 #### Response
 ```json
 {
+  "meta": {
+    "url": "https://accuweather.com/en/fr/notre-dame/2608456/weather-forecast/2608456",
+    "lang": "en",
+    "provider": "accuweather"
+  },
+  "geo": {
+    "lat": 48.853,
+    "lon": 2.348,
+    "city": "notre dame",
+    "country": "FR"
+  },
   "now": {
     "icon": "12",
     "temp": 14,
@@ -98,7 +109,17 @@ Define a weather provider to start using the API.
 #### Response
 ```json
 {
-  "city": "Paris",
+  "meta": {
+    "url": "https://www.foreca.com/en/102988507/Paris",
+    "lang": "en",
+    "provider": "foreca"
+  },
+  "geo": {
+    "lat": 48.853,
+    "lon": 2.348,
+    "city": "Paris",
+    "country": "FR"
+  },
   "now": {
     "icon": "d430",
     "description": "Overcast and rain",
@@ -134,6 +155,17 @@ Define a weather provider to start using the API.
 
 ```json
 {
+  "meta": {
+    "url": "https://www.foreca.com/en/102988507/Paris",
+    "lang": "en",
+    "provider": "foreca"
+  },
+  "geo": {
+    "lat": 48.853,
+    "lon": 2.348,
+    "city": "Paris",
+    "country": "FR"
+  },
   "now": {
     "icon": "rain",
     "description": "Overcast and rain",
