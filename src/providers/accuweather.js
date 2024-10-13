@@ -13,16 +13,17 @@ const ACCUWEATHER_LANGS =
 export default async function accuweather(params) {
 	const html = await fetchPageContent(params)
 	const json = transformToJson(html)
-	const api = validateJson(json)
+	const api = validateJson(json, params)
 
 	return api
 }
 
 /**
  * @param {Record<string, unknown>} json
+ * @param {QueryParams} params
  * @returns {AccuWeather}
  */
-function validateJson(json) {
+function validateJson(json, params) {
 	let date = new Date()
 
 	const hourly = []
@@ -80,7 +81,22 @@ function validateJson(json) {
 	}
 
 	// 4.
+	const { pathname } = new URL(json.meta.url)
+	const [_, __, country, city] = pathname.split('/')
+
+	// 5.
 	return {
+		meta: {
+			url: json.meta.url,
+			lang: params.lang,
+			provider: 'accuweather',
+		},
+		geo: {
+			lat: parseFloat(params.lat),
+			lon: parseFloat(params.lon),
+			city: city.replaceAll('-', ' '),
+			country: country.toUpperCase(),
+		},
 		now: {
 			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
 			temp: parseInt(json.now.temp),
@@ -104,6 +120,9 @@ function transformToJson(html) {
 	const $ = cheerio.load(html)
 
 	return {
+		meta: {
+			url: 'https://accuweather.com' + $('.header-city-link').attr('href'),
+		},
 		now: {
 			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src'),
 			temp: $('.cur-con-weather-card .temp-container')?.text(),

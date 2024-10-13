@@ -12,6 +12,12 @@ export function toSimpleWeather(json, params) {
 	const { provider, unit } = params
 
 	const simple = {
+		meta: {
+			...json.meta,
+		},
+		geo: {
+			...json.geo,
+		},
 		now: {
 			icon: json.now.icon,
 			description: json.now.description,

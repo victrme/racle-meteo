@@ -1,4 +1,15 @@
 export const SIMPLE_STRUCT = {
+	meta: {
+		url: 'string',
+		lang: 'string',
+		provider: 'string',
+	},
+	geo: {
+		lat: 'number',
+		lon: 'number',
+		city: 'string',
+		country: 'string',
+	},
 	now: {
 		icon: 'string',
 		temp: 'number',
@@ -19,6 +30,17 @@ export const SIMPLE_STRUCT = {
 }
 
 export const ACCUWEATHER_STRUCT = {
+	meta: {
+		url: 'string',
+		lang: 'string',
+		provider: 'string',
+	},
+	geo: {
+		lat: 'number',
+		lon: 'number',
+		city: 'string',
+		country: 'string',
+	},
 	now: {
 		icon: 'string',
 		temp: 'number',
@@ -48,7 +70,17 @@ export const ACCUWEATHER_STRUCT = {
 }
 
 export const FORECA_STRUCT = {
-	city: 'string',
+	meta: {
+		url: 'string',
+		lang: 'string',
+		provider: 'string',
+	},
+	geo: {
+		lat: 'number',
+		lon: 'number',
+		city: 'string',
+		country: 'string',
+	},
 	now: {
 		icon: 'string',
 		humid: 'string',

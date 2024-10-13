@@ -6,6 +6,15 @@
 
 /**
  * @typedef {Object} SimpleWeather
+ * @prop {Object} meta - Information about the request itself
+ * @prop {string} meta.url - The URL from which the data comes from
+ * @prop {string} meta.lang - Returns the lang used for this request
+ * @prop {"accuweather" | "foreca"} meta.provider - Weather provider used to resolve this request
+ * @prop {Object} geo - Geolocation information
+ * @prop {number} geo.lat - Requested latitude
+ * @prop {number} geo.lon - Requested longitude
+ * @prop {string} geo.city - Found city based on GPS coordinates
+ * @prop {string} geo.country - Found country based on GPS coordinates
  * @prop {Object} now - Current weather information, with felt temperature
  * @prop {number} now.icon - Icon ID
  * @prop {number} now.temp - Classic temperature
@@ -23,6 +32,15 @@
 
 /**
  * @typedef {Object} AccuWeather
+ * @prop {Object} meta - Information about the request itself
+ * @prop {string} meta.url - The URL from which the data comes from
+ * @prop {string} meta.lang - Returns the lang used for this request
+ * @prop {"accuweather" | "foreca"} meta.provider - Weather provider used to resolve this request
+ * @prop {Object} geo - Geolocation information
+ * @prop {number} geo.lat - Requested latitude
+ * @prop {number} geo.lon - Requested longitude
+ * @prop {string} geo.city - Found city based on GPS coordinates
+ * @prop {string} geo.country - Found country based on GPS coordinates
  * @prop {Object} now - Current weather information
  * @prop {string} now.icon - Icon ID, more here: https://developer.accuweather.com/weather-icons
  * @prop {number} now.temp - Classic temperature
@@ -41,7 +59,15 @@
 
 /**
  * @typedef {Object} Foreca
- * @prop {string} city - Found city using coordinates
+ * @prop {Object} meta - Information about the request itself
+ * @prop {string} meta.url - The URL from which the data comes from
+ * @prop {string} meta.lang - Returns the lang used for this request
+ * @prop {"accuweather" | "foreca"} meta.provider - Weather provider used to resolve this request
+ * @prop {Object} geo - Geolocation information
+ * @prop {number} geo.lat - Requested latitude
+ * @prop {number} geo.lon - Requested longitude
+ * @prop {string} geo.city - Found city based on GPS coordinates
+ * @prop {string} geo.country - Found country based on GPS coordinates
  * @prop {Object} now - Current weather information
  * @prop {string} now.icon - Icon ID, more here: https://developer.foreca.com/resources
  * @prop {string} now.humid - Humidity in pourcentage

@@ -8,6 +8,10 @@ import * as cheerio from 'cheerio/slim'
 const FORECA_LANGS =
 	'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
 
+let pageURL = ''
+let foundCity = ''
+let foundCountry = ''
+
 /**
  * @param {QueryParams} params
  * @returns {Promise<Foreca>}
@@ -15,21 +19,32 @@ const FORECA_LANGS =
 export default async function foreca(params) {
 	const html = await fetchPageContent(params)
 	const json = transformToJson(html)
-	const api = validateJson(json)
+	const api = validateJson(json, params)
 
 	return api
 }
 
 /**
  * @param {Record<string, unknown>} json
+ * @param {QueryParams} params
  * @returns {Foreca}
  */
-function validateJson(json) {
+function validateJson(json, params) {
 	const [riseHour, riseMinutes] = json.sun.rise?.split(':')
 	const [setHour, setMinutes] = json.sun.set?.split(':')
 
 	const result = {
-		city: json.city,
+		meta: {
+			url: pageURL,
+			lang: params.lang,
+			provider: 'foreca',
+		},
+		geo: {
+			lat: parseFloat(params.lat),
+			lon: parseFloat(params.lon),
+			city: foundCity,
+			country: foundCountry.toUpperCase(),
+		},
 		now: {
 			icon: json.now.icon.replace('/public/images/symbols/', '').replace('.svg', ''),
 			description: json.now.description,
@@ -98,7 +113,6 @@ export function transformToJson(html) {
 	const $ = cheerio.load(html)
 
 	return {
-		city: $('h1').text(),
 		now: {
 			temp: {
 				c: $('.nowcast .temp p:nth(0) .temp_c').text(),
@@ -152,7 +166,7 @@ export async function fetchPageContent(params) {
 		throw new Error('Language is not valid')
 	}
 
-	const { id, defaultName } = await getForecaLocation(lat, lon)
+	const { id, defaultName, countryId } = await getForecaLocation(lat, lon)
 
 	if (!id || !defaultName) {
 		throw new Error('Cannot get foreca ID or name')
@@ -161,9 +175,12 @@ export async function fetchPageContent(params) {
 	const userAgent =
 		'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0'
 	const cookies = `fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
-	const path = `https://www.foreca.com/${lang}/${id}/${defaultName}`
 
-	const resp = await fetch(path, {
+	pageURL = `https://www.foreca.com/${lang}/${id}/${defaultName}`
+	foundCity = defaultName
+	foundCountry = countryId
+
+	const resp = await fetch(pageURL, {
 		headers: {
 			Accept: 'text/html',
 			'Accept-Encoding': 'gzip',
@@ -187,6 +204,7 @@ export async function fetchPageContent(params) {
 export async function getForecaLocation(lat, lon) {
 	const resp = await fetch(`https://api.foreca.net/locations/${lon},${lat}.json`)
 	const json = await resp.json()
+
 	return json
 }
 
