@@ -9,7 +9,7 @@ async function main(request) {
 	const unit = url.searchParams.get('unit') ?? 'C'
 	const lang = url.searchParams.get('lang') ?? 'en'
 	const data = url.searchParams.get('data') ?? 'all'
-	const query = url.searchParams.get('query') ?? ''
+	const query = url.searchParams.get('query') ?? url.searchParams.get('q') ?? ''
 	const lat = url.searchParams.get('lat') ?? request.cf.latitude
 	const lon = url.searchParams.get('lon') ?? request.cf.longitude
 	const provider = url.searchParams.get('provider') ?? ''
@@ -23,7 +23,7 @@ async function main(request) {
 	let cacheControl = 'public, max-age=1800'
 
 	try {
-		if (url.pathname !== '/') {
+		if (url.pathname !== '/' && url.pathname !== '/weather') {
 			status = 404
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
