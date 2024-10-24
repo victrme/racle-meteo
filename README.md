@@ -1,22 +1,45 @@
 # Racle météo
 
-This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses [accuweather](https://accuweather.com) and/or [foreca](https://foreca.com) under the hood.
+This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses [accuweather](https://accuweather.com) and/or
+[foreca](https://foreca.com) under the hood.
 
 - Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
 - Flexible: Easy to update with cheerio as HTML parser
-- Compatible: Pure javascript and small dependencies means you can install it almost anywhere
+- Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
 
 ## Install
 
-Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key. Migrating to another cloud provider or your own server will remove the automatic location, meaning the `lat` and `lon` will be required.
+Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key. Migrating to another
+cloud provider or your own server will remove the automatic location, meaning the `lat` and `lon` will be required.
+
+### Using NPM
 
 ```bash
 npm install
-# added 101 packages, and audited 102 packages in 1m
+# added 21 packages, and audited 22 packages in 2s
+
+npm run dev
+# ⎔ Starting local server...
+# [wrangler:inf] Ready on http://127.0.0.1:8787
 
 npm run deploy
 # Total Upload: 179.64 KiB / gzip: 60.84 KiB
 # Uploaded racle-meteo (25.80 sec)
+```
+
+### Using Deno
+
+Wrangler is not yet fully compatible with Deno and requires some npm. Need to come back here when Wrangler supports Deno.
+
+```bash
+deno install
+# ...
+
+deno task dev
+# error: unexpected argument '--experimental-vm-modules' found
+
+deno test --allow-net
+# ok | 4 passed | 0 failed (3s)
 ```
 
 ## Use
@@ -26,7 +49,7 @@ Define a weather provider to start using the API.
 ### Parameters
 
 | Parameter | Type                | Required   | Description                                                                                                                                   |
-| --------- | ------------------- |----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------- | ------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | provider  | accuweather, foreca | required   | Choose the weather provider. By default returns all available data, see "data".                                                               |
 | provider  | string              | optional   | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
 | lat       | string              | optional\* | Location latitude. \* Required when migrating from CF workers                                                                                 |
@@ -41,12 +64,13 @@ Define a weather provider to start using the API.
 
 #### Queries
 
-|  provider   | lang | unit | data |
-|-------------|------|------|------|
+| provider    | lang | unit | data |
+| ----------- | ---- | ---- | ---- |
 | accuweather | en   | C    | all  |
 
 #### Response
-```json
+
+```jsonc
 {
   "meta": {
     "url": "https://accuweather.com/en/fr/paris/2608456/weather-forecast/2608456",
@@ -70,32 +94,36 @@ Define a weather provider to start using the API.
     "set": [19, 6]
   },
   "hourly": [
-    { "time": "2024-10-12T11:00:00.000Z", "temp": 14, "rain": "40%" },
-    { "time": "2024-10-12T12:00:00.000Z", "temp": 14, "rain": "37%" },
-    { "time": "2024-10-12T13:00:00.000Z", "temp": 15, "rain": "33%" },
-    { "time": "2024-10-12T14:00:00.000Z", "temp": 15, "rain": "32%" },
-    { "time": "2024-10-12T15:00:00.000Z", "temp": 16, "rain": "32%" },
-    { "time": "2024-10-12T16:00:00.000Z", "temp": 16, "rain": "23%" },
-    { "time": "2024-10-12T17:00:00.000Z", "temp": 15, "rain": "6%" },
-    { "time": "2024-10-12T18:00:00.000Z", "temp": 15, "rain": "6%" },
-    { "time": "2024-10-12T19:00:00.000Z", "temp": 14, "rain": "6%" },
-    { "time": "2024-10-12T20:00:00.000Z", "temp": 14, "rain": "6%" },
-    { "time": "2024-10-12T21:00:00.000Z", "temp": 14, "rain": "6%" },
-    { "time": "2024-10-12T22:00:00.000Z", "temp": 13, "rain": "4%"
+    {
+      "time": "2024-10-12T11:00:00.000Z",
+      "temp": 14,
+      "rain": "40%"
+    },
+    {
+      "time": "2024-10-12T12:00:00.000Z",
+      "temp": 14,
+      "rain": "37%"
     }
+    // ...
   ],
   "daily": [
-    { "time": "2024-10-12T11:00:00.000Z", "high": 16, "low": 9, "day": "Brief showers this morning", "night": "Night: Cloudy", "rain": "80%" },
-    { "time": "2024-10-13T11:00:00.000Z", "high": 15, "low": 9, "day": "Sun through high clouds", "night": "Mostly cloudy", "rain": "1%" },
-    { "time": "2024-10-14T11:00:00.000Z", "high": 19, "low": 11, "day": "Partly sunny", "night": "Low clouds", "rain": "4%" },
-    { "time": "2024-10-15T11:00:00.000Z", "high": 19, "low": 15, "day": "Cloudy", "night": "A shower early; partly cloudy", "rain": "8%" },
-    { "time": "2024-10-16T11:00:00.000Z", "high": 23, "low": 15, "day": "An afternoon shower or two", "night": "Early rain; cloudy, mild", "rain": "70%" },
-    { "time": "2024-10-17T11:00:00.000Z", "high": 21, "low": 13, "day": "Cloudy, a shower in the p.m.", "night": "Evening rain; clouds", "rain": "65%" },
-    { "time": "2024-10-18T11:00:00.000Z", "high": 17, "low": 10, "day": "Clouds and sun; less humid", "night": "Rain becoming steadier", "rain": "8%" },
-    { "time": "2024-10-19T11:00:00.000Z", "high": 17, "low": 10, "day": "A morning shower in spots", "night": "Mainly clear", "rain": "40%" },
-    { "time": "2024-10-20T11:00:00.000Z", "high": 18, "low": 11, "day": "Cloudy with afternoon rain", "night": "Partly cloudy", "rain": "85%" },
-    { "time": "2024-10-21T11:00:00.000Z", "high": 19, "low": 11, "day": "Cloudy with afternoon rain", "night": "A little evening rain", "rain": "81%"
+    {
+      "time": "2024-10-12T11:00:00.000Z",
+      "high": 16,
+      "low": 9,
+      "day": "Brief showers this morning",
+      "night": "Night: Cloudy",
+      "rain": "80%"
+    },
+    {
+      "time": "2024-10-13T11:00:00.000Z",
+      "high": 15,
+      "low": 9,
+      "day": "Sun through high clouds",
+      "night": "Mostly cloudy",
+      "rain": "1%"
     }
+    // ...
   ]
 }
 ```
@@ -103,11 +131,13 @@ Define a weather provider to start using the API.
 ### Foreca
 
 #### Queries
+
 | provider | lang | unit | data |
-|----------|------|------|------|
+| -------- | ---- | ---- | ---- |
 | foreca   | fr   | C    | all  |
 
 #### Response
+
 ```json
 {
   "meta": {
@@ -134,23 +164,32 @@ Define a weather provider to start using the API.
     "set": [19, 5]
   },
   "daily": [
-    { "time": "2024-10-12T11:00:00.000Z", "low": { "c": 14, "f": 57 }, "high": { "c": 16, "f": 61 }, "wind": { "kmh": 11, "mph": 7 }, "rain": { "in": 0.16, "mm": 4 }},
-    { "time": "2024-10-13T11:00:00.000Z", "low": { "c": 10, "f": 50 }, "high": { "c": 14, "f": 57 }, "wind": { "kmh": 7, "mph": 4 }, "rain": { "in": 0, "mm": 0 }},
-    { "time": "2024-10-14T11:00:00.000Z", "low": { "c": 9, "f": 48 }, "high": { "c": 18, "f": 64 }, "wind": { "kmh": 7, "mph": 4 }, "rain": { "in": 0.03, "mm": 0.8 }},
-    { "time": "2024-10-15T11:00:00.000Z", "low": { "c": 12, "f": 54 }, "high": { "c": 19, "f": 66 }, "wind": { "kmh": 11, "mph": 7 }, "rain": { "in": 0.02, "mm": 0.4 }},
-    { "time": "2024-10-16T11:00:00.000Z", "low": { "c": 16, "f": 61 }, "high": { "c": 22, "f": 72 }, "wind": { "kmh": 11, "mph": 7 }, "rain": { "in": 0.25, "mm": 6.4 }}
+    {
+      "time": "2024-10-12T11:00:00.000Z",
+      "low": { "c": 14, "f": 57 },
+      "high": { "c": 16, "f": 61 },
+      "wind": { "kmh": 11, "mph": 7 },
+      "rain": { "in": 0.16, "mm": 4 }
+    },
+    {
+      "time": "2024-10-13T11:00:00.000Z",
+      "low": { "c": 10, "f": 50 },
+      "high": { "c": 14, "f": 57 },
+      "wind": { "kmh": 7, "mph": 4 },
+      "rain": { "in": 0, "mm": 0 }
+    }
+    // ...
   ]
 }
 ```
-
 
 ### Simple data
 
 #### Queries
 
-| provider | lang | unit | data    |
-|----------|------|------|---------|
-| foreca   | fr   | C    | simple  |
+| provider | lang | unit | data   |
+| -------- | ---- | ---- | ------ |
+| foreca   | fr   | C    | simple |
 
 #### Response
 
@@ -174,15 +213,21 @@ Define a weather provider to start using the API.
     "feels": 13
   },
   "sun": {
-    "rise": [8,7],
-    "set": [19,5]
+    "rise": [8, 7],
+    "set": [19, 5]
   },
   "daily": [
-    {"time": "2024-10-12T11:00:00.000Z","high": 16,"low": 13},
-    {"time": "2024-10-13T11:00:00.000Z","high": 14,"low": 10},
-    {"time": "2024-10-14T11:00:00.000Z","high": 18,"low": 9},
-    {"time": "2024-10-15T11:00:00.000Z","high": 19,"low": 12},
-    {"time": "2024-10-16T11:00:00.000Z","high": 22,"low": 16}
+    {
+      "time": "2024-10-12T11:00:00.000Z",
+      "high": 16,
+      "low": 13
+    },
+    {
+      "time": "2024-10-13T11:00:00.000Z",
+      "high": 14,
+      "low": 10
+    }
+    // ...
   ]
 }
 ```
@@ -193,11 +238,13 @@ Define a weather provider to start using the API.
 - Foreca: https://developer.foreca.com/resources
 
 As a union:
+
 ```plaintext
 clearsky | fewclouds | brokenclouds | overcastclouds | sunnyrain | lightrain | rain | thunderstorm | snow | mist
 ```
 
 Equivalence between other providers:
+
 ```json
 {
   "clearsky": {
@@ -277,7 +324,7 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | pl    | Polski                  | true   | true        |
 | ca    | Català                  |        | true        |
 | pt-br | Português (Brazil)      |        | true        |
-| hi    | हिन्दी                  |        | true        |
+| hi    | हिन्दी                   |        | true        |
 | ru    | русский                 | true   | true        |
 | ar    | عربي                    |        | true        |
 | el    | Ελληνικά                | true   | true        |
@@ -303,18 +350,18 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | th    | ไทย                     |        | true        |
 | vi    | Tiếng Việt              |        | true        |
 | fa    | فارسی                   |        | true        |
-| bn    | বাংলা                   |        | true        |
+| bn    | বাংলা                     |        | true        |
 | bs    | bosanski                |        | true        |
 | is    | íslenska                |        | true        |
 | sw    | Kiswahili               |        | true        |
-| ur    | اُردُو                  |        | true        |
+| ur    | اُردُو                    |        | true        |
 | sr-me | Crnogorski              |        | true        |
 | uz    | Oʻzbekcha               |        | true        |
 | az    | Azərbaycanca            |        | true        |
-| ta    | தமிழ்                   |        | true        |
-| gu    | ગુજરાતી                 |        | true        |
-| kn    | ಕನ್ನಡ                   |        | true        |
-| te    | తెలుగు                  |        | true        |
+| ta    | தமிழ்                    |        | true        |
+| gu    | ગુજરાતી                  |        | true        |
+| kn    | ಕನ್ನಡ                    |        | true        |
+| te    | తెలుగు                   |        | true        |
 | mr    | मराठी                   |        | true        |
-| pa    | ਪੰਜਾਬੀ                  |        | true        |
-| my    | မြန်မာဘာသာ              |        | true        |
+| pa    | ਪੰਜਾਬੀ                   |        | true        |
+| my    | မြန်မာဘာသာ               |        | true        |

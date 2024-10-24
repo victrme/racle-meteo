@@ -1,35 +1,29 @@
-/** @typedef {import('../index.js').QueryParams} QueryParams */
-/** @typedef {import('../types.js').SimpleWeather} SimpleWeather */
-/** @typedef {import('../types.js').AccuWeather} AccuWeather */
-/** @typedef {import('../types.js').Foreca} Foreca */
+import type { AccuWeather, Foreca, QueryParams, SimpleWeather } from '../types.ts'
+import { isAccuweather, isForeca } from '../types.ts'
 
-/**
- * @param {AccuWeather | Foreca} json
- * @param {QueryParams} params
- * @returns {SimpleWeather}
- */
-export function toSimpleWeather(json, params) {
+export default function toSimpleWeather(
+	json: AccuWeather | Foreca,
+	params: QueryParams,
+): SimpleWeather {
 	const { provider, unit } = params
 
-	const simple = {
-		meta: {
-			...json.meta,
-		},
-		geo: {
-			...json.geo,
-		},
+	const simple: SimpleWeather = {
+		meta: { ...json.meta },
+		geo: { ...json.geo },
 		now: {
 			icon: json.now.icon,
 			description: json.now.description,
+			temp: 0,
+			feels: 0,
 		},
 		sun: {
 			rise: json.sun.rise,
 			set: json.sun.set,
 		},
-		daily: [],
+		daily: [] as SimpleWeather['daily'],
 	}
 
-	if (provider === 'foreca') {
+	if (provider === 'foreca' && isForeca(json)) {
 		const degrees = unit === 'F' ? 'f' : 'c'
 
 		simple.now.icon = transformToSimpleIcon(simple.now.icon, 'foreca')
@@ -47,7 +41,7 @@ export function toSimpleWeather(json, params) {
 		}
 	}
 
-	if (provider === 'accuweather') {
+	if (provider === 'accuweather' && isAccuweather(json)) {
 		simple.now.icon = transformToSimpleIcon(simple.now.icon, 'accuweather')
 		simple.now.temp = json.now.temp
 		simple.now.feels = json.now.feels
@@ -66,12 +60,10 @@ export function toSimpleWeather(json, params) {
 	return simple
 }
 
-/**
- * @param {string} iconId
- * @param {"accuweather" | "foreca"} provider
- * @returns {string}
- */
-function transformToSimpleIcon(id, provider) {
+function transformToSimpleIcon(
+	id: string,
+	provider: 'accuweather' | 'foreca',
+): string {
 	for (const [simpleId, providerIds] of Object.entries(SIMPLE_ICONS)) {
 		const list = providerIds[provider]
 
@@ -131,7 +123,8 @@ export const SIMPLE_ICONS = Object.freeze({
 	},
 	snow: {
 		accuweather: '20, 21, 22, 23, 24, 25, 26, 43, 44',
-		foreca: 'd221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432',
+		foreca:
+			'd221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432',
 	},
 	mist: {
 		accuweather: '11',

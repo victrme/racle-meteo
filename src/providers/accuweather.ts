@@ -1,16 +1,13 @@
 import * as cheerio from 'cheerio/slim'
 
-/** @typedef {import('../types.js').AccuWeather} AccuWeather */
-/** @typedef {import('../index.js').QueryParams} QueryParams */
+import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, he, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
-/**
- * @param {QueryParams} params
- * @returns {Promise<AccuWeather>}
- */
-export default async function accuweather(params) {
+export default async function accuweather(
+	params: QueryParams,
+): Promise<AccuWeather> {
 	const html = await fetchPageContent(params)
 	const json = transformToJson(html)
 	const api = validateJson(json, params)
@@ -18,16 +15,14 @@ export default async function accuweather(params) {
 	return api
 }
 
-/**
- * @param {Record<string, unknown>} json
- * @param {QueryParams} params
- * @returns {AccuWeather}
- */
-function validateJson(json, params) {
+function validateJson(
+	json: AccuweatherContent,
+	params: QueryParams,
+): AccuWeather {
 	let date = new Date()
 
-	const hourly = []
-	const daily = []
+	const hourly: AccuWeather['hourly'] = []
+	const daily: AccuWeather['daily'] = []
 
 	// 1. Hourly
 	date = new Date()
@@ -37,9 +32,9 @@ function validateJson(json, params) {
 
 	for (const hour of json.hourly) {
 		hourly.push({
-			...hour,
 			time: date.toISOString(),
 			temp: parseInt(hour.temp),
+			rain: hour.rain,
 		})
 
 		date.setHours(date.getHours() + 1)
@@ -67,17 +62,17 @@ function validateJson(json, params) {
 	date.setSeconds(0)
 	date.setMilliseconds(0)
 
-	let [riseHour, riseMinute] = json.sun.rise.split(':')
-	let [setHour, setMinute] = json.sun.set.split(':')
+	const [riseHour, riseMinute] = json.sun.rise.split(':')
+	const [setHour, setMinute] = json.sun.set.split(':')
 
-	riseHour = parseInt(riseHour.replace('AM', '').replace('PM', ''))
-	setHour = parseInt(setHour.replace('AM', '').replace('PM', ''))
+	let riseHourInt = parseInt(riseHour.replace('AM', '').replace('PM', ''))
+	let setHourInt = parseInt(setHour.replace('AM', '').replace('PM', ''))
 
 	if (json.sun.rise.includes('PM')) {
-		riseHour = parseInt(riseHour) + 12
+		riseHourInt = parseInt(riseHour) + 12
 	}
 	if (json.sun.set.includes('PM')) {
-		setHour = parseInt(setHour) + 12
+		setHourInt = parseInt(setHour) + 12
 	}
 
 	// 4.
@@ -98,32 +93,33 @@ function validateJson(json, params) {
 			country: country.toUpperCase(),
 		},
 		now: {
-			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
+			icon: json.now.icon.replace('/images/weathericons/', '').replace(
+				'.svg',
+				'',
+			),
 			temp: parseInt(json.now.temp),
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
 		},
 		sun: {
-			rise: [riseHour, parseInt(riseMinute)],
-			set: [setHour, parseInt(setMinute)],
+			rise: [riseHourInt, parseInt(riseMinute)],
+			set: [setHourInt, parseInt(setMinute)],
 		},
 		hourly: hourly,
 		daily: daily,
 	}
 }
 
-/**
- * @param {string} html
- * @returns {Record<string, unknown>} */
-function transformToJson(html) {
+function transformToJson(html: string): AccuweatherContent {
 	const $ = cheerio.load(html)
 
 	return {
 		meta: {
-			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href')),
+			url: 'https://accuweather.com' +
+				encodeURI($('.header-city-link').attr('href') ?? ''),
 		},
 		now: {
-			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src'),
+			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src') ?? '',
 			temp: $('.cur-con-weather-card .temp-container')?.text(),
 			feels: $('.cur-con-weather-card .real-feel')?.text(),
 			description: $('.cur-con-weather-card .phrase')?.text(),
@@ -148,10 +144,7 @@ function transformToJson(html) {
 	}
 }
 
-/**
- * @param {QueryParams} params
- * @returns {Promise<string>} */
-async function fetchPageContent(params) {
+async function fetchPageContent(params: QueryParams): Promise<string> {
 	let { lat, lon, lang, unit, query } = params
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
@@ -171,8 +164,13 @@ async function fetchPageContent(params) {
 
 	if (query) {
 		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us`
-		const autocompleteHeaders = { ...headers, cookie: `awx_user=tp:C|lang:en-US;` }
-		const autocompleteResponse = await fetch(autocompleteURL, { headers: autocompleteHeaders })
+		const autocompleteHeaders = {
+			...headers,
+			cookie: `awx_user=tp:C|lang:en-US;`,
+		}
+		const autocompleteResponse = await fetch(autocompleteURL, {
+			headers: autocompleteHeaders,
+		})
 		const autocompleteResult = await autocompleteResponse?.json()
 		const key = autocompleteResult[0]?.key
 

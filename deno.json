@@ -1,0 +1,12 @@
+{
+    "tasks": {
+        "test": "deno test --allow-net"
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "useTabs": true,
+        "semiColons": false,
+        "singleQuote": true,
+        "lineWidth": 144
+    }
+}
