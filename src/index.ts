@@ -32,7 +32,7 @@ async function main(request: Request) {
 	const unit = url.searchParams.get('unit') ?? 'C'
 	const lang = url.searchParams.get('lang') ?? 'en'
 	const data = url.searchParams.get('data') ?? 'all'
-	const query = url.searchParams.get('query') ?? ''
+	const query = url.searchParams.get('query') ?? url.searchParams.get('q') ?? ''
 	const lat = url.searchParams.get('lat') ?? cf_latitude ?? '0'
 	const lon = url.searchParams.get('lon') ?? cf_longitude ?? '0'
 	const provider = url.searchParams.get('provider') ?? ''
@@ -54,7 +54,7 @@ async function main(request: Request) {
 	let json: AccuWeather | Foreca | undefined = undefined
 
 	try {
-		if (url.pathname !== '/') {
+		if (url.pathname !== '/' && url.pathname !== '/weather') {
 			status = 404
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
