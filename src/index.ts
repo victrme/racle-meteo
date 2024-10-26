@@ -81,11 +81,11 @@ async function main(request: Request) {
 		console.error(err)
 	}
 
-	if (data === 'all' && json) {
+	if (params.data === 'all' && json) {
 		body = JSON.stringify(json)
 	}
 
-	if (data === 'simple' && json) {
+	if (params.data === 'simple' && json) {
 		if (isAccuweather(json) || isForeca(json)) {
 			body = JSON.stringify(toSimpleWeather(json, params))
 		}
@@ -139,6 +139,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 
 async function tryNoCatch<Result>(fn: (_: QueryParams) => Promise<Result>, args: QueryParams): Promise<Result | undefined> {
 	try {
+		console.log(args)
 		return await fn(args)
 	} catch (_) {
 		return undefined
