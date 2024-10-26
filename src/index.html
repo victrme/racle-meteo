@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -57,7 +57,8 @@
 		<h1>Racle météo</h1>
 
 		<p>
-			This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses <a href="https://accuweather.com">accuweather</a>
+			This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses
+			<a href="https://accuweather.com">accuweather</a>
 			and/or
 			<a href="https://foreca.com">foreca</a> under the hood.
 			<a href="github.com/victrme/racle-meteo">source code</a>
@@ -69,7 +70,12 @@
 			<p>
 				Provider <br />
 				<label>
-					<input type="radio" name="provider" value="accuweather" checked />
+					<input type="radio" name="provider" value="auto" checked />
+					Auto
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="provider" value="accuweather" />
 					Accuweather
 				</label>
 				<br />
@@ -162,16 +168,15 @@
 					<th scope="row">provider</th>
 					<td>accuweather, foreca</td>
 					<td>required</td>
-					<td>
-						Choose the weather provider. By default returns all available data, see "data".
-					</td>
+					<td>Choose the weather provider. By default returns all available data, see "data".</td>
 				</tr>
 				<tr>
 					<th scope="row">query</th>
 					<td>string</td>
 					<td>optional</td>
 					<td>
-						Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.
+						Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon"
+						parameters.
 					</td>
 				</tr>
 				<tr>
@@ -191,7 +196,8 @@
 					<td>string</td>
 					<td>optional</td>
 					<td>
-						English by default. Some languages are only available on accuweather, see language list below. Incorrect <code>lang</code>
+						English by default. Some languages are only available on accuweather, see language list below. Incorrect
+						<code>lang</code>
 						does not fallback to english.
 					</td>
 				</tr>
@@ -199,17 +205,15 @@
 					<th scope="row">unit</th>
 					<td>C, F</td>
 					<td>optional</td>
-					<td>
-						Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.
-					</td>
+					<td>Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.</td>
 				</tr>
 				<tr>
 					<th scope="row">data</th>
 					<td>all, simple</td>
 					<td>optional</td>
 					<td>
-						Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by
-						default.
+						Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all
+						providers. "all" by default.
 					</td>
 				</tr>
 			</tbody>

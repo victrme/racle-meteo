@@ -7,7 +7,7 @@ export function isForeca(json: AccuWeather | Foreca): json is Foreca {
 }
 
 export interface QueryParams {
-	provider: 'accuweather' | 'foreca' | ''
+	provider: 'accuweather' | 'foreca' | 'auto' | ''
 	data: 'all' | 'simple'
 	unit: 'C' | 'F'
 	query: string

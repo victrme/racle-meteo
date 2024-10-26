@@ -3,9 +3,9 @@
 This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses [accuweather](https://accuweather.com) and/or
 [foreca](https://foreca.com) under the hood.
 
-- Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
-- Flexible: Easy to update with cheerio as HTML parser
-- Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
+-   Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
+-   Flexible: Easy to update with cheerio as HTML parser
+-   Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
 
 ## Install
 
@@ -29,14 +29,21 @@ npm run deploy
 
 ### Using Deno
 
-Wrangler is not yet fully compatible with Deno and requires some npm. Need to come back here when Wrangler supports Deno.
+Wrangler is not yet fully compatible with Deno and requires some npm. Need to come back here when Wrangler supports Deno. Uses `npx` for now.
 
 ```bash
 deno install
 # ...
 
 deno task dev
-# error: unexpected argument '--experimental-vm-modules' found
+# Task dev npx wrangler dev
+# ⎔ Starting local server...
+# [wrangler:inf] Ready on http://localhost:8787
+
+deno task deploy
+# Task deploy npx wrangler deploy
+# Total Upload: 179.64 KiB / gzip: 60.84 KiB
+# Uploaded racle-meteo (25.80 sec)
 
 deno test --allow-net
 # ok | 4 passed | 0 failed (3s)
@@ -48,15 +55,15 @@ Define a weather provider to start using the API.
 
 ### Parameters
 
-| Parameter | Type                | Required   | Description                                                                                                                                   |
-| --------- | ------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| provider  | accuweather, foreca | required   | Choose the weather provider. By default returns all available data, see "data".                                                               |
-| provider  | string              | optional   | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
-| lat       | string              | optional\* | Location latitude. \* Required when migrating from CF workers                                                                                 |
-| lon       | string              | optional\* | Location longitude. \* Required when migrating from CF workers                                                                                |
-| lang      | string              | optional   | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` does not fallback to english. |
-| unit      | C, F                | optional   | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
-| data      | all, simple         | optional   | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
+| Parameter | Type                      | Required   | Description                                                                                                                                   |
+| --------- | ------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| provider  | accuweather, foreca, auto | required   | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                        |
+| provider  | string                    | optional   | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
+| lat       | string                    | optional\* | Location latitude. \* Required when migrating from CF workers                                                                                 |
+| lon       | string                    | optional\* | Location longitude. \* Required when migrating from CF workers                                                                                |
+| lang      | string                    | optional   | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` does not fallback to english. |
+| unit      | C, F                      | optional   | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
+| data      | all, simple               | optional   | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
 
 ## Response examples
 
@@ -75,35 +82,35 @@ Define a weather provider to start using the API.
   "meta": {
     "url": "https://accuweather.com/en/fr/paris/2608456/weather-forecast/2608456",
     "lang": "en",
-    "provider": "accuweather"
+    "provider": "accuweather",
   },
   "geo": {
     "lat": 48.853,
     "lon": 2.348,
     "city": "paris",
-    "country": "FR"
+    "country": "FR",
   },
   "now": {
     "icon": "12",
     "temp": 14,
     "feels": 11,
-    "description": "Light rain"
+    "description": "Light rain",
   },
   "sun": {
     "rise": [8, 7],
-    "set": [19, 6]
+    "set": [19, 6],
   },
   "hourly": [
     {
       "time": "2024-10-12T11:00:00.000Z",
       "temp": 14,
-      "rain": "40%"
+      "rain": "40%",
     },
     {
       "time": "2024-10-12T12:00:00.000Z",
       "temp": 14,
-      "rain": "37%"
-    }
+      "rain": "37%",
+    },
     // ...
   ],
   "daily": [
@@ -113,7 +120,7 @@ Define a weather provider to start using the API.
       "low": 9,
       "day": "Brief showers this morning",
       "night": "Night: Cloudy",
-      "rain": "80%"
+      "rain": "80%",
     },
     {
       "time": "2024-10-13T11:00:00.000Z",
@@ -121,10 +128,10 @@ Define a weather provider to start using the API.
       "low": 9,
       "day": "Sun through high clouds",
       "night": "Mostly cloudy",
-      "rain": "1%"
-    }
+      "rain": "1%",
+    },
     // ...
-  ]
+  ],
 }
 ```
 
@@ -234,8 +241,8 @@ Define a weather provider to start using the API.
 
 ## Simple icon equivalences
 
-- Accuweather: https://developer.accuweather.com/weather-icons
-- Foreca: https://developer.foreca.com/resources
+-   Accuweather: https://developer.accuweather.com/weather-icons
+-   Foreca: https://developer.foreca.com/resources
 
 As a union:
 
@@ -294,10 +301,10 @@ Equivalence between other providers:
 
 Language codes are following the ISO-639 standard. A wrong language throws an error. Sanitized so that:
 
-- `lang` is case insensitive
-- `-` or `_` works
-- `pt` resolves to `pt-pt`
-- localization (-XX) is removed with `foreca`
+-   `lang` is case insensitive
+-   `-` or `_` works
+-   `pt` resolves to `pt-pt`
+-   localization (-XX) is removed with `foreca`
 
 | code  | name                    | foreca | accuweather |
 | ----- | ----------------------- | ------ | ----------- |
@@ -324,7 +331,7 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | pl    | Polski                  | true   | true        |
 | ca    | Català                  |        | true        |
 | pt-br | Português (Brazil)      |        | true        |
-| hi    | हिन्दी                   |        | true        |
+| hi    | हिन्दी                  |        | true        |
 | ru    | русский                 | true   | true        |
 | ar    | عربي                    |        | true        |
 | el    | Ελληνικά                | true   | true        |
@@ -350,18 +357,18 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | th    | ไทย                     |        | true        |
 | vi    | Tiếng Việt              |        | true        |
 | fa    | فارسی                   |        | true        |
-| bn    | বাংলা                     |        | true        |
+| bn    | বাংলা                   |        | true        |
 | bs    | bosanski                |        | true        |
 | is    | íslenska                |        | true        |
 | sw    | Kiswahili               |        | true        |
-| ur    | اُردُو                    |        | true        |
+| ur    | اُردُو                  |        | true        |
 | sr-me | Crnogorski              |        | true        |
 | uz    | Oʻzbekcha               |        | true        |
 | az    | Azərbaycanca            |        | true        |
-| ta    | தமிழ்                    |        | true        |
-| gu    | ગુજરાતી                  |        | true        |
-| kn    | ಕನ್ನಡ                    |        | true        |
-| te    | తెలుగు                   |        | true        |
+| ta    | தமிழ்                   |        | true        |
+| gu    | ગુજરાતી                 |        | true        |
+| kn    | ಕನ್ನಡ                   |        | true        |
+| te    | తెలుగు                  |        | true        |
 | mr    | मराठी                   |        | true        |
-| pa    | ਪੰਜਾਬੀ                   |        | true        |
-| my    | မြန်မာဘာသာ               |        | true        |
+| pa    | ਪੰਜਾਬੀ                  |        | true        |
+| my    | မြန်မာဘာသာ              |        | true        |

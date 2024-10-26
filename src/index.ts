@@ -59,6 +59,10 @@ async function main(request: Request) {
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
 		} //
+		else if (params.provider === 'auto') {
+			if (json === undefined) json = await tryNoCatch(accuweather, params)
+			if (json === undefined) json = await tryNoCatch(foreca, params)
+		} //
 		else if (params.provider === 'accuweather') {
 			json = await accuweather(params)
 		} //
@@ -107,6 +111,10 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	let provider: QueryParams['provider'] = ''
 	if (params.provider === 'accuweather') provider = 'accuweather'
 	if (params.provider === 'foreca') provider = 'foreca'
+	if (params.provider === 'auto') {
+		params.data = 'simple'
+		provider = 'auto'
+	}
 
 	if (provider === 'foreca') {
 		params.lang = params.lang.slice(0, 2)
@@ -126,5 +134,13 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		data: params.data === 'simple' ? 'simple' : 'all',
 		unit: params.unit === 'F' ? 'F' : 'C',
 		provider: provider,
+	}
+}
+
+async function tryNoCatch<Result>(fn: (_: QueryParams) => Promise<Result>, args: QueryParams): Promise<Result | undefined> {
+	try {
+		return await fn(args)
+	} catch (_) {
+		return undefined
 	}
 }

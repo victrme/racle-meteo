@@ -37,10 +37,7 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 			country: foundCountry.toUpperCase(),
 		},
 		now: {
-			icon: json.now.icon.replace('/public/images/symbols/', '').replace(
-				'.svg',
-				'',
-			),
+			icon: json.now.icon.replace('/public/images/symbols/', '').replace('.svg', ''),
 			description: json.now.description,
 			humid: json.now.humid + '%',
 			temp: {
@@ -133,13 +130,7 @@ export function transformToJson(html: string): ForecaContent {
 	}
 }
 
-export async function fetchPageContent({
-	lat,
-	lon,
-	query,
-	lang,
-	unit,
-}: QueryParams): Promise<string> {
+export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryParams): Promise<string> {
 	if (FORECA_LANGS.includes(lang) === false) {
 		throw new Error('Language is not valid')
 	}
@@ -155,8 +146,7 @@ export async function fetchPageContent({
 	}
 
 	const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0'
-	const cookies =
-		`fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
+	const cookies = `fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
 
 	pageURL = `https://www.foreca.com/${lang}/${id}/${defaultName}`
 	foundCity = defaultName
@@ -178,11 +168,7 @@ export async function fetchPageContent({
 	return html
 }
 
-export async function getForecaLocation({
-	lat,
-	lon,
-	query,
-}: Partial<QueryParams>): Promise<ForecaGeo> {
+export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams>): Promise<ForecaGeo> {
 	if (query) {
 		const path = `https://api.foreca.net/locations/search/${query}.json`
 		const resp = await fetch(path)
