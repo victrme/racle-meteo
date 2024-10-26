@@ -4,8 +4,6 @@ import { isAccuweather, isForeca } from '../types.ts'
 export default function toSimpleWeather(json: AccuWeather | Foreca, params: QueryParams): SimpleWeather {
 	const { provider, unit } = params
 
-	console.log(json)
-
 	const simple: SimpleWeather = {
 		meta: { ...json.meta },
 		geo: { ...json.geo },

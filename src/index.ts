@@ -139,7 +139,6 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 
 async function tryNoCatch<Result>(fn: (_: QueryParams) => Promise<Result>, args: QueryParams): Promise<Result | undefined> {
 	try {
-		console.log(args)
 		return await fn(args)
 	} catch (_) {
 		return undefined
