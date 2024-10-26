@@ -1,4 +1,5 @@
 import foreca from './providers/foreca.ts'
+import weathercom from './providers/weathercom.ts'
 import accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
 
@@ -69,6 +70,9 @@ async function main(request: Request) {
 		else if (params.provider === 'foreca') {
 			json = await foreca(params)
 		} //
+		else if (params.provider === 'weathercom') {
+			json = await weathercom(params)
+		} //
 		else {
 			const html = await import('./index.html' as string)
 			body = html.default
@@ -110,6 +114,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 
 	let provider: QueryParams['provider'] = ''
 	if (params.provider === 'accuweather') provider = 'accuweather'
+	if (params.provider === 'weathercom') provider = 'weathercom'
 	if (params.provider === 'foreca') provider = 'foreca'
 	if (params.provider === 'auto') {
 		params.data = 'simple'
