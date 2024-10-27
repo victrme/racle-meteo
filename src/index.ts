@@ -27,7 +27,7 @@ async function main(request: Request) {
 	// https://developers.cloudflare.com/workers/runtime-apis/request/#options
 	type CFRequest = Request & { cf: { latitude?: string; longitude?: string } }
 	const cf_latitude = (request as CFRequest)?.cf?.latitude
-	const cf_longitude = (request as CFRequest)?.cf?.latitude
+	const cf_longitude = (request as CFRequest)?.cf?.longitude
 
 	const url = new URL(request.url)
 	const unit = url.searchParams.get('unit') ?? 'C'
