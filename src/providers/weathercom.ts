@@ -20,30 +20,23 @@ function transformToJson(html: string): unknown {
 
 	return {
 		meta: {
-			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
+			url: 'https://weather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
 		},
 		now: {
-			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src') ?? '',
+			icon: $('.CurrentConditions--wxIcon--BOjPq')?.attr('skycode') ?? '',
 			temp: $('.CurrentConditions--tempValue--zUBSz')?.text(),
-			feels: $('.cur-con-weather-card .real-feel')?.text(),
-			description: $('.cur-con-weather-card .phrase')?.text(),
+			feels: $('.TodayDetailsCard--feelsLikeTempValue--8WgHV')?.text(),
+			description: $('.CurrentConditions--phraseValue---VS-k')?.text(),
 		},
 		sun: {
-			rise: $('.sunrise-sunset__times-value:nth(0)')?.text(),
-			set: $('.sunrise-sunset__times-value:nth(1)')?.text(),
+			rise: $('.TwcSunChart--sunriseDateItem--Os-KL')?.text(),
+			set: $('.TwcSunChart--sunsetDateItem--y9wq2')?.text(),
 		},
-		hourly: new Array(12).fill('').map((_, i) => ({
-			time: $(`.hourly-list__list__item-time:nth(${i})`)?.text(),
-			temp: $(`.hourly-list__list__item-temp:nth(${i})`)?.text(),
-			rain: $(`.hourly-list__list__item-precip:nth(${i})`)?.text(),
-		})),
 		daily: new Array(10).fill('').map((_, i) => ({
-			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
-			high: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
-			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
-			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
-			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
-			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
+			description: $(`.DailyForecast--CardContent--y6e2w .DailyContent--narrative--jqi6P:nth(${i})`)?.text(),
+			high: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--highTempValue--VHKaO:nth(${i})`)?.text(),
+			low: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--lowTempValue--ogrzb:nth(${i})`)?.text(),
+			rain: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--precip--YXw9t:nth(${i})`)?.text(),
 		})),
 	}
 }
@@ -78,14 +71,22 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	const data = Object.values(json.dal.getSunV3LocationSearchUrlConfig)[0].data
 	const placeId = data.location.placeId[0]
 
-	const firefoxAndroid = 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0'
-	const path = `https://weather.com/weather/today/l/${placeId}?unit=${params.unit}`
-	const htmlResp = await fetch(path, { headers: { 'User-Agent': firefoxAndroid } })
-	let html = await htmlResp.text()
+	const headers = {
+		'User-Agent': 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0',
+	}
 
-	html = html.slice(html.indexOf('</head>'), html.indexOf('</footer>'))
+	const responses = await Promise.all([
+		fetch(`https://weather.com/${params.lang}/weather/today/l/${placeId}?unit=${params.unit}`, { headers }),
+		fetch(`https://weather.com/${params.lang}/weather/tenday/l/${placeId}?unit=${params.unit}`, { headers }),
+	])
 
-	return html
+	let today = await responses[0].text()
+	let tenday = await responses[1].text()
+
+	today = today.slice(today.indexOf('</head>'), today.indexOf('</footer>'))
+	tenday = tenday.slice(tenday.indexOf('</head>'), tenday.indexOf('</footer>'))
+
+	return today + tenday
 }
 
 interface WeatherComLocationSearch {
