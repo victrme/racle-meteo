@@ -140,7 +140,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	lang = lang.replace('-', '_').toLocaleLowerCase()
 
 	if (ACCUWEATHER_LANGS.includes(lang) === false) {
-		throw new Error('Language is not valid')
+		lang = 'en'
 	}
 
 	let path = 'https://www.accuweather.com/'

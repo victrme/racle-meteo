@@ -132,7 +132,7 @@ export function transformToJson(html: string): ForecaContent {
 
 export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryParams): Promise<string> {
 	if (FORECA_LANGS.includes(lang) === false) {
-		throw new Error('Language is not valid')
+		lang = 'en'
 	}
 
 	const { id, defaultName, countryId } = await getForecaLocation({

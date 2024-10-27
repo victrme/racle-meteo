@@ -55,15 +55,15 @@ Define a weather provider to start using the API.
 
 ### Parameters
 
-| Parameter | Type                      | Required   | Description                                                                                                                                   |
-| --------- | ------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| provider  | accuweather, foreca, auto | required   | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                        |
-| provider  | string                    | optional   | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
-| lat       | string                    | optional\* | Location latitude. \* Required when migrating from CF workers                                                                                 |
-| lon       | string                    | optional\* | Location longitude. \* Required when migrating from CF workers                                                                                |
-| lang      | string                    | optional   | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` does not fallback to english. |
-| unit      | C, F                      | optional   | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
-| data      | all, simple               | optional   | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
+| Parameter | Type                                  | Required | Description                                                                                                                                   |
+| --------- | ------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| provider  | accuweather, foreca, weathercom, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                        |
+| query, q  | string                                | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
+| lat       | string                                | optional | Location latitude.                                                                                                                            |
+| lon       | string                                | optional | Location longitude.                                                                                                                           |
+| lang      | string                                | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.          |
+| unit      | C, F                                  | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
+| data      | all, simple                           | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
 
 ## Response examples
 
