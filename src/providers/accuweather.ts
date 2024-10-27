@@ -84,8 +84,8 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 		geo: {
 			lat: parseFloat(params.lat),
 			lon: parseFloat(params.lon),
-			city: city.replaceAll('-', ' '),
-			country: country.toUpperCase(),
+			city: decodeURIComponent(city.replaceAll('-', ' ')),
+			country: decodeURIComponent(country.toUpperCase()),
 		},
 		now: {
 			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
@@ -154,7 +154,8 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	}
 
 	if (query) {
-		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us`
+		const q = encodeURIComponent(query)
+		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${q}&language=en-us`
 		const autocompleteHeaders = {
 			...headers,
 			cookie: `awx_user=tp:C|lang:en-US;`,
@@ -162,6 +163,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 		const autocompleteResponse = await fetch(autocompleteURL, {
 			headers: autocompleteHeaders,
 		})
+
 		const autocompleteResult = await autocompleteResponse?.json()
 		const key = autocompleteResult[0]?.key
 
