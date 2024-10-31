@@ -11,8 +11,8 @@ export default async function weathercom(params: QueryParams) {
 }
 
 function validateJson(json: unknown, params: QueryParams): undefined {
-	console.log(json)
 	// ...
+	console.log(json)
 }
 
 function transformToJson(html: string): unknown {
@@ -20,11 +20,11 @@ function transformToJson(html: string): unknown {
 
 	return {
 		meta: {
-			url: 'https://weather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
+			url: $('a.styles--weatherData--Tl3Lx').attr('href') ?? '',
 		},
 		now: {
 			icon: $('.CurrentConditions--wxIcon--BOjPq')?.attr('skycode') ?? '',
-			temp: $('.CurrentConditions--tempValue--zUBSz')?.text(),
+			temp: $('.current-temp')?.text(),
 			feels: $('.TodayDetailsCard--feelsLikeTempValue--8WgHV')?.text(),
 			description: $('.CurrentConditions--phraseValue---VS-k')?.text(),
 		},
@@ -69,24 +69,19 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 
 	const json = (await locationResp.json()) as WeatherComLocationSearch
 	const data = Object.values(json.dal.getSunV3LocationSearchUrlConfig)[0].data
-	const placeId = data.location.placeId[0]
+	const countryCode = data.location.countryCode[0].toLowerCase()
+	const city = data.location.city[0].toLowerCase()
 
 	const headers = {
-		'User-Agent': 'Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/124.0 Firefox/124.0',
+		'Content-Security-Policy': 'sandbox',
+		'User-Agent': 'Opera/9.80 (J2ME/MIDP; Opera Mini/SymbianOS/22.478; U; en) Presto/2.5.25 Version/10.54',
 	}
 
-	const responses = await Promise.all([
-		fetch(`https://weather.com/${params.lang}/weather/today/l/${placeId}?unit=${params.unit}`, { headers }),
-		fetch(`https://weather.com/${params.lang}/weather/tenday/l/${placeId}?unit=${params.unit}`, { headers }),
-	])
+	const url = `https://www.wunderground.com/weather/${countryCode}/${city}`
+	const resp = await fetch(url, { headers })
+	const html = await resp.text()
 
-	let today = await responses[0].text()
-	let tenday = await responses[1].text()
-
-	today = today.slice(today.indexOf('</head>'), today.indexOf('</footer>'))
-	tenday = tenday.slice(tenday.indexOf('</head>'), tenday.indexOf('</footer>'))
-
-	return today + tenday
+	return html.slice(html.indexOf('<app-root'), html.indexOf('</app-root>') + 11)
 }
 
 interface WeatherComLocationSearch {
