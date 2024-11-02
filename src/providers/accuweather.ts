@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio/slim'
+import { Parser } from 'htmlparser2'
 
 import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 
@@ -103,9 +104,14 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 }
 
 function transformToJson(html: string): AccuweatherContent {
-	const $ = cheerio.load(html)
+	let $: cheerio.CheerioAPI
 
-	return {
+	const start = performance.now()
+	$ = cheerio.load(html)
+	const end = performance.now()
+	console.log(end - start)
+
+	const result = {
 		meta: {
 			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
 		},
@@ -133,6 +139,8 @@ function transformToJson(html: string): AccuweatherContent {
 			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
 		})),
 	}
+
+	return result
 }
 
 async function fetchPageContent(params: QueryParams): Promise<string> {
@@ -172,13 +180,56 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
 
-	let text = await (await fetch(path, { headers }))?.text()
+	let html = await (await fetch(path, { headers }))?.text()
 
-	if (text === undefined) {
+	if (html === undefined) {
 		throw new Error('Could not connect to accuweather.com')
 	}
 
-	text = text.replaceAll('\n', '').replaceAll('\t', '')
+	html = html.replaceAll('\n', '').replaceAll('\t', '')
+	html = html.slice(html.indexOf('template-root'), html.indexOf('neighbors-wrapper'))
 
-	return text
+	// const res = await flatNodes(html)
+
+	return html
+}
+
+async function flatNodes(html: string) {
+	return await new Promise((r) => {
+		const result: { tag: string; class: string; text: string }[] = []
+		let textContent = ''
+		let className = ''
+		let tagName = ''
+
+		const parser = new Parser({
+			onopentag(name, attributes) {
+				if (name !== 'script' && name !== 'style') {
+					tagName = name
+					className = attributes.class
+				}
+			},
+			ontext(text) {
+				textContent += text
+			},
+			onclosetag(_) {
+				if (className && textContent) {
+					result.push({
+						tag: tagName,
+						class: className,
+						text: textContent,
+					})
+
+					tagName = ''
+					className = ''
+					textContent = ''
+				}
+			},
+			onend() {
+				r(result)
+			},
+		})
+
+		parser.write(html)
+		parser.end()
+	})
 }
