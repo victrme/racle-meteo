@@ -1,4 +1,4 @@
-import * as cheerio from 'cheerio/slim'
+import parser from '../parser.ts'
 
 import type { QueryParams } from '../types.ts'
 

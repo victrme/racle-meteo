@@ -1,4 +1,5 @@
-import * as cheerio from 'cheerio/slim'
+import parser from '../parser.ts'
+
 import type { Foreca, ForecaContent, ForecaGeo, QueryParams } from '../types.ts'
 
 const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'

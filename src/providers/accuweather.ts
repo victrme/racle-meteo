@@ -1,4 +1,4 @@
-import parser from '../parser.ts'
+import parser, { find, findAll } from '../parser.ts'
 
 import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 
@@ -104,24 +104,20 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 
 async function transformToJson(html: string): Promise<AccuweatherContent> {
 	const start = performance.now()
-	const flatNodes = await parser(html)
 
-	const findAll = (cl: string) => flatNodes.filter((node) => node.class.includes(cl))
-	const find = (cl: string) => findAll(cl)[0]
+	await parser(html)
 
 	const daily = {
-		time: findAll(`.hourly-list__list__item-time`),
-		temp: findAll(`.hourly-list__list__item-temp`),
-		rain: findAll(`.hourly-list__list__item-precip`),
+		temp: findAll(`hourly-list__list__item-temp`),
+		rain: findAll(`hourly-list__list__item-time`),
 	}
 
 	const hourly = {
-		time: findAll(`.daily-list-item .date p:last-child`),
-		high: findAll(`.daily-list-item .temp-hi`),
-		low: findAll(`.daily-list-item .temp-lo`),
-		day: findAll(`.daily-list-item .phrase p:first-child`),
-		night: findAll(`.daily-list-item .phrase p:last-child`),
-		rain: findAll(`.daily-list-item .precip`),
+		high: findAll(`temp-hi`),
+		low: findAll(`temp-lo`),
+		day: findAll(`no-wrap`),
+		night: findAll(`no-wrap`),
+		rain: findAll(`precip`),
 	}
 
 	const result = {
@@ -139,12 +135,10 @@ async function transformToJson(html: string): Promise<AccuweatherContent> {
 			set: find('.sunrise-sunset__times-value:nth(1)')?.text,
 		},
 		hourly: new Array(12).fill('').map((_, i) => ({
-			time: daily.time[i]?.text,
 			temp: daily.temp[i]?.text,
 			rain: daily.rain[i]?.text,
 		})),
 		daily: new Array(10).fill('').map((_, i) => ({
-			time: hourly.time[i]?.text,
 			high: hourly.high[i]?.text,
 			low: hourly.low[i]?.text,
 			day: hourly.day[i]?.text,

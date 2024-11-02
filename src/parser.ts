@@ -3,18 +3,27 @@ import { Parser } from 'htmlparser2'
 interface FlatNode {
 	tag: string
 	text: string
-	class: string
+	class?: string
 	src?: string
 	href?: string
 }
 
-export default async function flatNodes(html: string): Promise<FlatNode[]> {
-	return await new Promise((r) => {
-		const result: FlatNode[] = []
+const flatNodes: FlatNode[] = []
+
+export function findAll(className: string): FlatNode[] {
+	return flatNodes.filter((node) => node.class?.includes(className))
+}
+
+export function find(className: string): FlatNode {
+	return findAll(className)[0]
+}
+
+export default async function parseToFlatNodes(html: string): Promise<FlatNode[]> {
+	await new Promise((r) => {
 		let href: undefined | string
 		let src: undefined | string
+		let className: undefined | string
 		let textContent = ''
-		let className = ''
 		let tagName = ''
 
 		const parser = new Parser({
@@ -35,31 +44,33 @@ export default async function flatNodes(html: string): Promise<FlatNode[]> {
 				}
 			},
 			onclosetag(_) {
-				if (className && textContent) {
+				if (tagName && textContent) {
 					const node: FlatNode = {
 						tag: tagName,
-						class: className,
 						text: textContent,
 					}
 
+					if (className) node.class = className
 					if (tagName === 'a' && href) node.href = href
 					if (tagName === 'img' && src) node.src = src
 
-					result.push(node)
+					flatNodes.push(node)
 
 					href = undefined
 					src = undefined
+					className = undefined
 					tagName = ''
-					className = ''
 					textContent = ''
 				}
 			},
 			onend() {
-				r(result)
+				r(true)
 			},
 		})
 
 		parser.write(html)
 		parser.end()
 	})
+
+	return flatNodes
 }
