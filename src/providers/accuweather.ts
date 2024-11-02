@@ -1,5 +1,4 @@
-import * as cheerio from 'cheerio/slim'
-import { Parser } from 'htmlparser2'
+import parser from '../parser.ts'
 
 import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 
@@ -8,7 +7,7 @@ const ACCUWEATHER_LANGS =
 
 export default async function accuweather(params: QueryParams): Promise<AccuWeather> {
 	const html = await fetchPageContent(params)
-	const json = transformToJson(html)
+	const json = await transformToJson(html)
 	const api = validateJson(json, params)
 
 	return api
@@ -103,42 +102,60 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 	}
 }
 
-function transformToJson(html: string): AccuweatherContent {
-	let $: cheerio.CheerioAPI
-
+async function transformToJson(html: string): Promise<AccuweatherContent> {
 	const start = performance.now()
-	$ = cheerio.load(html)
-	const end = performance.now()
-	console.log(end - start)
+	const flatNodes = await parser(html)
+
+	const findAll = (cl: string) => flatNodes.filter((node) => node.class.includes(cl))
+	const find = (cl: string) => findAll(cl)[0]
+
+	const daily = {
+		time: findAll(`.hourly-list__list__item-time`),
+		temp: findAll(`.hourly-list__list__item-temp`),
+		rain: findAll(`.hourly-list__list__item-precip`),
+	}
+
+	const hourly = {
+		time: findAll(`.daily-list-item .date p:last-child`),
+		high: findAll(`.daily-list-item .temp-hi`),
+		low: findAll(`.daily-list-item .temp-lo`),
+		day: findAll(`.daily-list-item .phrase p:first-child`),
+		night: findAll(`.daily-list-item .phrase p:last-child`),
+		rain: findAll(`.daily-list-item .precip`),
+	}
 
 	const result = {
 		meta: {
-			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
+			url: 'https://accuweather.com' + encodeURI(find('.header-city-link')?.href ?? ''),
 		},
 		now: {
-			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src') ?? '',
-			temp: $('.cur-con-weather-card .temp-container')?.text(),
-			feels: $('.cur-con-weather-card .real-feel')?.text(),
-			description: $('.cur-con-weather-card .phrase')?.text(),
+			icon: find('.cur-con-weather-card .weather-icon')?.src ?? '',
+			temp: find('after-temp')?.text,
+			feels: find('.cur-con-weather-card .real-feel')?.text,
+			description: find('.cur-con-weather-card .phrase')?.text,
 		},
 		sun: {
-			rise: $('.sunrise-sunset__times-value:nth(0)')?.text(),
-			set: $('.sunrise-sunset__times-value:nth(1)')?.text(),
+			rise: find('.sunrise-sunset__times-value:nth(0)')?.text,
+			set: find('.sunrise-sunset__times-value:nth(1)')?.text,
 		},
 		hourly: new Array(12).fill('').map((_, i) => ({
-			time: $(`.hourly-list__list__item-time:nth(${i})`)?.text(),
-			temp: $(`.hourly-list__list__item-temp:nth(${i})`)?.text(),
-			rain: $(`.hourly-list__list__item-precip:nth(${i})`)?.text(),
+			time: daily.time[i]?.text,
+			temp: daily.temp[i]?.text,
+			rain: daily.rain[i]?.text,
 		})),
 		daily: new Array(10).fill('').map((_, i) => ({
-			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
-			high: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
-			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
-			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
-			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
-			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
+			time: hourly.time[i]?.text,
+			high: hourly.high[i]?.text,
+			low: hourly.low[i]?.text,
+			day: hourly.day[i]?.text,
+			night: hourly.night[i]?.text,
+			rain: hourly.rain[i]?.text,
 		})),
 	}
+
+	const end = performance.now()
+
+	console.log(end - start)
 
 	return result
 }
@@ -187,49 +204,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	}
 
 	html = html.replaceAll('\n', '').replaceAll('\t', '')
-	html = html.slice(html.indexOf('template-root'), html.indexOf('neighbors-wrapper'))
-
-	// const res = await flatNodes(html)
+	html = html.slice(html.indexOf('</head>'))
 
 	return html
-}
-
-async function flatNodes(html: string) {
-	return await new Promise((r) => {
-		const result: { tag: string; class: string; text: string }[] = []
-		let textContent = ''
-		let className = ''
-		let tagName = ''
-
-		const parser = new Parser({
-			onopentag(name, attributes) {
-				if (name !== 'script' && name !== 'style') {
-					tagName = name
-					className = attributes.class
-				}
-			},
-			ontext(text) {
-				textContent += text
-			},
-			onclosetag(_) {
-				if (className && textContent) {
-					result.push({
-						tag: tagName,
-						class: className,
-						text: textContent,
-					})
-
-					tagName = ''
-					className = ''
-					textContent = ''
-				}
-			},
-			onend() {
-				r(result)
-			},
-		})
-
-		parser.write(html)
-		parser.end()
-	})
 }
