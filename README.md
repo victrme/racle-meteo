@@ -146,7 +146,7 @@ Define a weather provider to start using the API.
 
 #### Response
 
-```json
+```jsonc
 {
   "meta": {
     "url": "https://www.foreca.com/en/102988507/Paris",
@@ -201,7 +201,7 @@ Define a weather provider to start using the API.
 
 #### Response
 
-```json
+```jsonc
 {
   "meta": {
     "url": "https://www.foreca.com/en/102988507/Paris",
@@ -253,7 +253,7 @@ clearsky | fewclouds | brokenclouds | overcastclouds | sunnyrain | lightrain | r
 
 Equivalence between other providers:
 
-```json
+```jsonc
 {
   "clearsky": {
     "accuweather": "1, 2, 33, 34",

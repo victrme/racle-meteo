@@ -1,5 +1,6 @@
-import parser from '../parser.ts'
+import parser, { find, findAll } from '../parser.ts'
 
+import type { FlatNode } from '../parser.ts'
 import type { Foreca, ForecaContent, ForecaGeo, QueryParams } from '../types.ts'
 
 const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
@@ -10,11 +11,34 @@ let foundCountry = ''
 
 export default async function foreca(params: QueryParams): Promise<Foreca> {
 	const html = await fetchPageContent(params)
-	const json = transformToJson(html)
+	const _ = await parser(html)
+	const json = transformToJson()
 	const api = validateJson(json, params)
 
 	return api
 }
+
+export async function debugContent(params: QueryParams): Promise<ForecaContent> {
+	const html = await fetchPageContent(params)
+	const _ = await parser(html)
+	const json = transformToJson()
+
+	return json
+}
+
+export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
+	const html = await fetchPageContent(params)
+
+	const start = performance.now()
+	const nodes = await parser(html)
+	const end = performance.now()
+
+	console.log(end - start)
+
+	return nodes
+}
+
+// fn
 
 function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 	const [riseHour, riseMinutes] = json.sun.rise?.split(':')
@@ -85,47 +109,45 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 	}
 }
 
-export function transformToJson(html: string): ForecaContent {
-	const $ = cheerio.load(html)
-
+function transformToJson(): ForecaContent {
 	return {
 		now: {
 			temp: {
-				c: $('.nowcast .temp p:nth(0) .temp_c').text(),
-				f: $('.nowcast .temp p:nth(0) .temp_f').text(),
+				c: find('.nowcast .temp p .temp_c')?.text,
+				f: find('.nowcast .temp p .temp_f')?.text,
 			},
 			feels: {
-				c: $('.nowcast .temp p:nth(1) .temp_c').text(),
-				f: $('.nowcast .temp p:nth(1) .temp_f').text(),
+				c: find('.nowcast .temp p .temp_c')?.text,
+				f: find('.nowcast .temp p .temp_f')?.text,
 			},
 			wind: {
-				kmh: $('.nowcast .wind .wind_kmh').text(),
-				mph: $('.nowcast .wind .wind_mph').text(),
+				kmh: find('.nowcast .wind .wind_kmh')?.text,
+				mph: find('.nowcast .wind .wind_mph')?.text,
 			},
-			icon: $('.nowcast .symb img').attr('src') ?? '',
-			description: $('.nowcast .wx').text(),
-			humid: $('.nowcast .rhum em').text(),
+			icon: find('.nowcast .symb img').attr?.src ?? '',
+			description: find('.nowcast .wx')?.text,
+			humid: find('.nowcast .rhum em')?.text,
 		},
 		sun: {
-			rise: $('.nowcast .sun .time_24h:nth(0)').text(),
-			set: $('.nowcast .sun .time_24h:nth(1)').text(),
+			rise: find('.nowcast .sun .time_24h')?.text,
+			set: find('.nowcast .sun .time_24h')?.text,
 		},
 		daily: new Array(5).fill('').map((_, i) => ({
 			high: {
-				c: $(`.daycontainer:nth(${i}) .tempmax .temp_c`).text(),
-				f: $(`.daycontainer:nth(${i}) .tempmax .temp_f`).text(),
+				c: find(`.daycontainer .tempmax .temp_c`)?.text,
+				f: find(`.daycontainer .tempmax .temp_f`)?.text,
 			},
 			low: {
-				c: $(`.daycontainer:nth(${i}) .tempmin .temp_c`).text(),
-				f: $(`.daycontainer:nth(${i}) .tempmin .temp_f`).text(),
+				c: find(`.daycontainer .tempmin .temp_c`)?.text,
+				f: find(`.daycontainer .tempmin .temp_f`)?.text,
 			},
 			wind: {
-				mph: $(`.daycontainer:nth(${i}) .wind_mph`).text(),
-				kmh: $(`.daycontainer:nth(${i}) .wind_kmh`).text(),
+				mph: find(`.daycontainer .wind_mph`)?.text,
+				kmh: find(`.daycontainer .wind_kmh`)?.text,
 			},
 			rain: {
-				in: $(`.daycontainer:nth(${i}) .rain_in`).text(),
-				mm: $(`.daycontainer:nth(${i}) .rain_mm`).text(),
+				in: find(`.daycontainer .rain_in`)?.text,
+				mm: find(`.daycontainer .rain_mm`)?.text,
 			},
 		})),
 	}
@@ -164,7 +186,9 @@ export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryPar
 	})
 
 	let html = await resp.text()
-	html = html.replaceAll('\n', '').replaceAll('\t', '')
+
+	html = html.slice(html.indexOf('</head>'))
+	// html = html.replaceAll('\n', '').replaceAll('\t', '')
 
 	return html
 }

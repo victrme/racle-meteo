@@ -26,15 +26,17 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 		let id = ''
 		let attr: Record<string, string> = {}
 
+		const skippedtags = 'script, style, iframe, path, rect, circle, head, meta'
+
 		const parser = new Parser({
 			onopentag(name, attributes) {
-				if (name === 'script' || name === 'style') {
+				if (attributes['data-src']) attr['data-src'] = attributes['data-src']
+				if (attributes['href']) attr.href = attributes.href
+				if (attributes['src']) attr.src = attributes.src
+
+				if (skippedtags.includes(name)) {
 					return
 				}
-
-				if (attributes['data-src']) attr['data-src'] = attributes['data-src']
-				if (name === 'a') attr.href = attributes.href
-				if (name === 'img') attr.src = attributes.src
 
 				tagName = name
 				id = attributes.id
@@ -46,7 +48,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 				}
 			},
 			onclosetag(_) {
-				if (tagName && textContent) {
+				if (tagName) {
 					const node: FlatNode = {
 						tag: tagName,
 						text: textContent,

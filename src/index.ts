@@ -1,9 +1,10 @@
-import foreca from './providers/foreca.ts'
-import weathercom from './providers/weathercom.ts'
+import './parser.ts'
+import * as foreca from './providers/foreca.ts'
+import * as weathercom from './providers/weathercom.ts'
 import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
-
 import { isAccuweather, isForeca } from './types.ts'
+
 import type { AccuWeather, Foreca, QueryParams } from './types.ts'
 
 /**
@@ -48,13 +49,27 @@ async function main(request: Request) {
 	let json: AccuWeather | Foreca | undefined = undefined
 
 	if (params.debug === 'content') {
-		const response = await accuweather.debugContent(params)
-		return new Response(JSON.stringify(response))
+		if (params.provider === 'accuweather') {
+			const response = await accuweather.debugContent(params)
+			return new Response(JSON.stringify(response))
+		}
+
+		if (params.provider === 'foreca') {
+			const response = await foreca.debugContent(params)
+			return new Response(JSON.stringify(response))
+		}
 	}
 
 	if (params.debug === 'nodes') {
-		const response = await accuweather.debugNodes(params)
-		return new Response(JSON.stringify(response))
+		if (params.provider === 'accuweather') {
+			const response = await accuweather.debugNodes(params)
+			return new Response(JSON.stringify(response))
+		}
+
+		if (params.provider === 'foreca') {
+			const response = await foreca.debugNodes(params)
+			return new Response(JSON.stringify(response))
+		}
 	}
 
 	try {
@@ -72,7 +87,7 @@ async function main(request: Request) {
 		//
 		else if (params.provider === 'auto') {
 			if (json === undefined) json = await tryNoCatch(accuweather.default, params)
-			if (json === undefined) json = await tryNoCatch(foreca, params)
+			if (json === undefined) json = await tryNoCatch(foreca.default, params)
 		}
 		//
 		else if (params.provider === 'accuweather') {
@@ -80,11 +95,11 @@ async function main(request: Request) {
 		}
 		//
 		else if (params.provider === 'foreca') {
-			json = await foreca(params)
+			json = await foreca.default(params)
 		}
 		//
 		else if (params.provider === 'weathercom') {
-			json = await weathercom(params)
+			json = await weathercom.default(params)
 		}
 	} catch (err) {
 		const { message } = err as Error

@@ -108,7 +108,7 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 		geo: {
 			lat: parseFloat(params.lat),
 			lon: parseFloat(params.lon),
-			city: decodeURIComponent(city.replaceAll('-', ' ')),
+			city: decodeURIComponent(city?.replaceAll('-', ' ')),
 			country: decodeURIComponent(country.toUpperCase()),
 		},
 		now: {
@@ -147,7 +147,7 @@ function transformToJson(): AccuweatherContent {
 			url: 'https://accuweather.com' + (find('header-loc')?.attr?.href ?? ''),
 		},
 		now: {
-			icon: find('after-temp')?.attr?.['data-src'] ?? '',
+			icon: find('weather-icon')?.attr?.['data-src'] ?? '',
 			temp: find('after-temp')?.text,
 			feels: find('real-feel')?.text,
 			description: find('phrase')?.text,
