@@ -5,12 +5,24 @@ import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
-export default async function accuweather(params: QueryParams): Promise<AccuWeather> {
+export default async function accuweather(params: QueryParams) {
 	const html = await fetchPageContent(params)
-	const json = await transformToJson(html)
-	const api = validateJson(json, params)
+	const start = performance.now()
+	const nodes = await parser(html)
 
-	return api
+	const end = performance.now()
+	console.log(end - start)
+
+	if (params.debug === 'nodes') {
+		return nodes
+	} else if (params.debug === 'content') {
+		const json = transformToJson()
+		return json
+	} else {
+		const json = transformToJson()
+		const api = validateJson(json, params)
+		return api
+	}
 }
 
 function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeather {
@@ -102,14 +114,12 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 	}
 }
 
-async function transformToJson(html: string): Promise<AccuweatherContent> {
-	const start = performance.now()
-
-	await parser(html)
+function transformToJson(): AccuweatherContent {
+	const sun = findAll('sunrise-sunset__times-value')
 
 	const daily = {
 		temp: findAll(`hourly-list__list__item-temp`),
-		rain: findAll(`hourly-list__list__item-time`),
+		rain: findAll(`hourly-list__list__item-temp`),
 	}
 
 	const hourly = {
@@ -117,39 +127,35 @@ async function transformToJson(html: string): Promise<AccuweatherContent> {
 		low: findAll(`temp-lo`),
 		day: findAll(`no-wrap`),
 		night: findAll(`no-wrap`),
-		rain: findAll(`precip`),
+		rain: findAll(``),
 	}
 
 	const result = {
 		meta: {
-			url: 'https://accuweather.com' + encodeURI(find('.header-city-link')?.href ?? ''),
+			url: 'https://accuweather.com' + (find('header-loc')?.attr?.href ?? ''),
 		},
 		now: {
-			icon: find('.cur-con-weather-card .weather-icon')?.src ?? '',
+			icon: find('after-temp')?.attr?.['data-src'] ?? '',
 			temp: find('after-temp')?.text,
-			feels: find('.cur-con-weather-card .real-feel')?.text,
-			description: find('.cur-con-weather-card .phrase')?.text,
+			feels: find('real-feel')?.text,
+			description: find('phrase')?.text,
 		},
 		sun: {
-			rise: find('.sunrise-sunset__times-value:nth(0)')?.text,
-			set: find('.sunrise-sunset__times-value:nth(1)')?.text,
+			rise: sun[0]?.text,
+			set: sun[1]?.text,
 		},
 		hourly: new Array(12).fill('').map((_, i) => ({
 			temp: daily.temp[i]?.text,
-			rain: daily.rain[i]?.text,
+			rain: '0%',
 		})),
 		daily: new Array(10).fill('').map((_, i) => ({
 			high: hourly.high[i]?.text,
 			low: hourly.low[i]?.text,
 			day: hourly.day[i]?.text,
 			night: hourly.night[i]?.text,
-			rain: hourly.rain[i]?.text,
+			rain: '0%',
 		})),
 	}
-
-	const end = performance.now()
-
-	console.log(end - start)
 
 	return result
 }

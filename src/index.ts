@@ -30,6 +30,7 @@ async function main(request: Request) {
 	const cf_longitude = (request as CFRequest)?.cf?.longitude
 
 	const url = new URL(request.url)
+	const debug = url.searchParams.get('debug') ?? ''
 	const unit = url.searchParams.get('unit') ?? 'C'
 	const lang = url.searchParams.get('lang') ?? 'en'
 	const data = url.searchParams.get('data') ?? 'all'
@@ -38,45 +39,42 @@ async function main(request: Request) {
 	const lon = url.searchParams.get('lon') ?? cf_longitude ?? '0'
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const params = sanitizeParams({
-		lat,
-		lon,
-		lang,
-		unit,
-		provider,
-		data,
-		query,
-	})
+	const params = sanitizeParams({ lat, lon, lang, unit, provider, data, query, debug })
 
 	let body = ''
 	let status = 200
 	let contentType = 'application/json'
 	let cacheControl = 'public, max-age=1800'
-	let json: AccuWeather | Foreca | undefined = undefined
+	let json: unknown = {}
 
 	try {
 		if (url.pathname !== '/' && url.pathname !== '/weather') {
 			status = 404
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
-		} //
-		else if (params.provider === 'auto') {
-			if (json === undefined) json = await tryNoCatch(accuweather, params)
-			if (json === undefined) json = await tryNoCatch(foreca, params)
-		} //
-		else if (params.provider === 'accuweather') {
-			json = await accuweather(params)
-		} //
-		else if (params.provider === 'foreca') {
-			json = await foreca(params)
-		} //
-		else if (params.provider === 'weathercom') {
-			json = await weathercom(params)
-		} //
-		else {
+		}
+		//
+		else if (params.provider === '') {
 			const html = await import('./index.html' as string)
 			body = html.default
 			contentType = 'text/html'
+		}
+		//
+		else if (params.provider === 'auto') {
+			if (json === undefined) json = await tryNoCatch(accuweather, params)
+			if (json === undefined) json = await tryNoCatch(foreca, params)
+		}
+		//
+		else if (params.provider === 'accuweather') {
+			json = await accuweather(params)
+		}
+		//
+		else if (params.provider === 'foreca') {
+			json = await foreca(params)
+		}
+		//
+		else if (params.provider === 'weathercom') {
+			json = await weathercom(params)
 		}
 	} catch (err) {
 		const { message } = err as Error
@@ -131,6 +129,11 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		}
 	}
 
+	let debug: QueryParams['debug'] = ''
+	if (params.debug) {
+		debug = params.debug === 'nodes' ? 'nodes' : params.debug === 'content' ? 'content' : ''
+	}
+
 	return {
 		query: params.query,
 		lat: params.lat,
@@ -138,6 +141,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		lang: params.lang,
 		data: params.data === 'simple' ? 'simple' : 'all',
 		unit: params.unit === 'F' ? 'F' : 'C',
+		debug: debug,
 		provider: provider,
 	}
 }

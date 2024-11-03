@@ -1,11 +1,11 @@
 import { Parser } from 'htmlparser2'
 
-interface FlatNode {
+export interface FlatNode {
 	tag: string
 	text: string
+	id?: string
 	class?: string
-	src?: string
-	href?: string
+	attr?: Record<string, string>
 }
 
 const flatNodes: FlatNode[] = []
@@ -20,11 +20,11 @@ export function find(className: string): FlatNode {
 
 export default async function parseToFlatNodes(html: string): Promise<FlatNode[]> {
 	await new Promise((r) => {
-		let href: undefined | string
-		let src: undefined | string
-		let className: undefined | string
 		let textContent = ''
+		let className = ''
 		let tagName = ''
+		let id = ''
+		let attr: Record<string, string> = {}
 
 		const parser = new Parser({
 			onopentag(name, attributes) {
@@ -32,10 +32,12 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 					return
 				}
 
-				if (name === 'a') href = attributes.href
-				if (name === 'img') src = attributes.src
+				if (attributes['data-src']) attr['data-src'] = attributes['data-src']
+				if (name === 'a') attr.href = attributes.href
+				if (name === 'img') attr.src = attributes.src
 
 				tagName = name
+				id = attributes.id
 				className = attributes.class
 			},
 			ontext(text) {
@@ -50,16 +52,18 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 						text: textContent,
 					}
 
+					if (id) node.id = id
 					if (className) node.class = className
-					if (tagName === 'a' && href) node.href = href
-					if (tagName === 'img' && src) node.src = src
+
+					if (Object.keys(attr).length > 0) {
+						node.attr = attr
+					}
 
 					flatNodes.push(node)
 
-					href = undefined
-					src = undefined
-					className = undefined
+					attr = {}
 					tagName = ''
+					className = ''
 					textContent = ''
 				}
 			},

@@ -1,13 +1,14 @@
-export function isAccuweather(json: AccuWeather | Foreca): json is AccuWeather {
+export function isAccuweather(json: AccuWeather | Record<string, unknown>): json is AccuWeather {
 	return json?.meta?.provider === 'accuweather'
 }
 
-export function isForeca(json: AccuWeather | Foreca): json is Foreca {
+export function isForeca(json: Foreca | Record<string, unknown>): json is Foreca {
 	return json?.meta?.provider === 'foreca'
 }
 
 export interface QueryParams {
 	provider: 'accuweather' | 'foreca' | 'weathercom' | 'auto' | ''
+	debug: 'nodes' | 'content' | ''
 	data: 'all' | 'simple'
 	unit: 'C' | 'F'
 	query: string
@@ -105,12 +106,10 @@ export interface AccuweatherContent {
 		set: string
 	}
 	hourly: {
-		time: string
 		temp: string
 		rain: string
 	}[]
 	daily: {
-		time: string
 		high: string
 		low: string
 		day: string
