@@ -1,29 +1,41 @@
 import parser, { find, findAll } from '../parser.ts'
 
+import type { FlatNode } from '../parser.ts'
 import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
-export default async function accuweather(params: QueryParams) {
+export default async function accuweather(params: QueryParams): Promise<AccuWeather> {
 	const html = await fetchPageContent(params)
+	const _ = await parser(html)
+	const json = transformToJson()
+	const api = validateJson(json, params)
+
+	return api
+}
+
+export async function debugContent(params: QueryParams): Promise<AccuweatherContent> {
+	const html = await fetchPageContent(params)
+	const _ = await parser(html)
+	const json = transformToJson()
+
+	return json
+}
+
+export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
+	const html = await fetchPageContent(params)
+
 	const start = performance.now()
 	const nodes = await parser(html)
-
 	const end = performance.now()
+
 	console.log(end - start)
 
-	if (params.debug === 'nodes') {
-		return nodes
-	} else if (params.debug === 'content') {
-		const json = transformToJson()
-		return json
-	} else {
-		const json = transformToJson()
-		const api = validateJson(json, params)
-		return api
-	}
+	return nodes
 }
+
+// Fn
 
 function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeather {
 	let date = new Date()

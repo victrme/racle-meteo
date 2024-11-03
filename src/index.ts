@@ -1,6 +1,6 @@
 import foreca from './providers/foreca.ts'
 import weathercom from './providers/weathercom.ts'
-import accuweather from './providers/accuweather.ts'
+import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
 
 import { isAccuweather, isForeca } from './types.ts'
@@ -45,7 +45,17 @@ async function main(request: Request) {
 	let status = 200
 	let contentType = 'application/json'
 	let cacheControl = 'public, max-age=1800'
-	let json: unknown = {}
+	let json: AccuWeather | Foreca | undefined = undefined
+
+	if (params.debug === 'content') {
+		const response = await accuweather.debugContent(params)
+		return new Response(JSON.stringify(response))
+	}
+
+	if (params.debug === 'nodes') {
+		const response = await accuweather.debugNodes(params)
+		return new Response(JSON.stringify(response))
+	}
 
 	try {
 		if (url.pathname !== '/' && url.pathname !== '/weather') {
@@ -61,12 +71,12 @@ async function main(request: Request) {
 		}
 		//
 		else if (params.provider === 'auto') {
-			if (json === undefined) json = await tryNoCatch(accuweather, params)
+			if (json === undefined) json = await tryNoCatch(accuweather.default, params)
 			if (json === undefined) json = await tryNoCatch(foreca, params)
 		}
 		//
 		else if (params.provider === 'accuweather') {
-			json = await accuweather(params)
+			json = await accuweather.default(params)
 		}
 		//
 		else if (params.provider === 'foreca') {

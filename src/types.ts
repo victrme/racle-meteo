@@ -1,8 +1,8 @@
-export function isAccuweather(json: AccuWeather | Record<string, unknown>): json is AccuWeather {
+export function isAccuweather(json: AccuWeather | Foreca): json is AccuWeather {
 	return json?.meta?.provider === 'accuweather'
 }
 
-export function isForeca(json: Foreca | Record<string, unknown>): json is Foreca {
+export function isForeca(json: Foreca | Foreca): json is Foreca {
 	return json?.meta?.provider === 'foreca'
 }
 
