@@ -4,7 +4,7 @@ This service cleverly transforms weather web pages into a usable (and free!) res
 [foreca](https://foreca.com) under the hood.
 
 -   Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
--   Flexible: Easy to update with cheerio as HTML parser
+-   Flexible: Easy to update with strong typing and htmlparser2 as basic parser 
 -   Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
 
 ## Install
@@ -55,15 +55,16 @@ Define a weather provider to start using the API.
 
 ### Parameters
 
-| Parameter | Type                                  | Required | Description                                                                                                                                   |
-| --------- | ------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| provider  | accuweather, foreca, weathercom, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                        |
-| query, q  | string                                | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                 |
-| lat       | string                                | optional | Location latitude.                                                                                                                            |
-| lon       | string                                | optional | Location longitude.                                                                                                                           |
-| lang      | string                                | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.          |
-| unit      | C, F                                  | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                              |
-| data      | all, simple                           | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default.  |
+| Parameter | Type                                  | Required | Description                                                                                                                                  |
+| --------- | ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| provider  | accuweather, foreca, weathercom, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                       |
+| query, q  | string                                | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                |
+| lat       | string                                | optional | Location latitude.                                                                                                                           |
+| lon       | string                                | optional | Location longitude.                                                                                                                          |
+| lang      | string                                | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.         |
+| unit      | C, F                                  | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                             |
+| data      | all, simple                           | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default. |
+| debug     | nodes, content                        | optional | Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated                              |
 
 ## Response examples
 
