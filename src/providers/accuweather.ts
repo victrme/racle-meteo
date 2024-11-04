@@ -147,7 +147,7 @@ function transformToJson(): AccuweatherContent {
 			url: 'https://accuweather.com' + (find('header-loc')?.attr?.href ?? ''),
 		},
 		now: {
-			icon: find('weather-icon')?.attr?.['data-src'] ?? '',
+			icon: find('header-weather-icon')?.attr?.['data-src'] ?? '',
 			temp: find('after-temp')?.text,
 			feels: find('real-feel')?.text,
 			description: find('phrase')?.text,

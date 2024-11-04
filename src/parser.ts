@@ -9,6 +9,7 @@ export interface FlatNode {
 }
 
 const flatNodes: FlatNode[] = []
+const flatNodesSet: Set<FlatNode> = new Set()
 
 export function findAll(className: string): FlatNode[] {
 	return flatNodes.filter((node) => node.class?.includes(className))
@@ -18,6 +19,10 @@ export function find(className: string): FlatNode {
 	return findAll(className)[0]
 }
 
+// export function next(className: string): FlatNode {
+// 	return
+// }
+
 export default async function parseToFlatNodes(html: string): Promise<FlatNode[]> {
 	await new Promise((r) => {
 		let textContent = ''
@@ -26,7 +31,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 		let id = ''
 		let attr: Record<string, string> = {}
 
-		const skippedtags = 'script, style, iframe, path, rect, circle, head, meta'
+		const skippedtags = 'script, style, iframe, path, g, rect, circle, head, meta'
 
 		const parser = new Parser({
 			onopentag(name, attributes) {
@@ -62,6 +67,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 					}
 
 					flatNodes.push(node)
+					flatNodesSet.add(node)
 
 					attr = {}
 					tagName = ''
