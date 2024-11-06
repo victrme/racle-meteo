@@ -51,24 +51,24 @@ async function main(request: Request) {
 	if (params.debug === 'content') {
 		if (params.provider === 'accuweather') {
 			const response = await accuweather.debugContent(params)
-			return new Response(JSON.stringify(response))
+			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
 		}
 
 		if (params.provider === 'foreca') {
 			const response = await foreca.debugContent(params)
-			return new Response(JSON.stringify(response))
+			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
 		}
 	}
 
 	if (params.debug === 'nodes') {
 		if (params.provider === 'accuweather') {
 			const response = await accuweather.debugNodes(params)
-			return new Response(JSON.stringify(response))
+			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
 		}
 
 		if (params.provider === 'foreca') {
 			const response = await foreca.debugNodes(params)
-			return new Response(JSON.stringify(response))
+			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
 		}
 	}
 
@@ -101,21 +101,21 @@ async function main(request: Request) {
 		else if (params.provider === 'weathercom') {
 			json = await weathercom.default(params)
 		}
+
+		if (params.data === 'all' && json) {
+			body = JSON.stringify(json)
+		}
+
+		if (params.data === 'simple' && json) {
+			if (isAccuweather(json) || isForeca(json)) {
+				body = JSON.stringify(toSimpleWeather(json, params))
+			}
+		}
 	} catch (err) {
 		const { message } = err as Error
 		status = message === 'Language is not valid' ? 400 : 503
 		body = `{"status": ${status}, "error": "${message}"}`
 		console.error(err)
-	}
-
-	if (params.data === 'all' && json) {
-		body = JSON.stringify(json)
-	}
-
-	if (params.data === 'simple' && json) {
-		if (isAccuweather(json) || isForeca(json)) {
-			body = JSON.stringify(toSimpleWeather(json, params))
-		}
 	}
 
 	return new Response(body, {

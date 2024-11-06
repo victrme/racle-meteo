@@ -113,8 +113,8 @@ function transformToJson(): ForecaContent {
 	return {
 		now: {
 			temp: {
-				c: find('.nowcast .temp p .temp_c')?.text,
-				f: find('.nowcast .temp p .temp_f')?.text,
+				c: find('value temp temp_c')?.text,
+				f: find('value temp temp_f')?.text,
 			},
 			feels: {
 				c: find('.nowcast .temp p .temp_c')?.text,
