@@ -108,7 +108,7 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 		geo: {
 			lat: parseFloat(params.lat),
 			lon: parseFloat(params.lon),
-			city: decodeURIComponent(city?.replaceAll('-', ' ')),
+			city: decodeURIComponent(city),
 			country: decodeURIComponent(country.toUpperCase()),
 		},
 		now: {
