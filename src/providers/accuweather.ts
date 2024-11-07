@@ -1,7 +1,7 @@
 import parser, { find, findAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
-import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
+import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
@@ -33,6 +33,10 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 	console.log(end - start)
 
 	return nodes
+}
+
+export async function debugGeo(params: QueryParams): Promise<AccuWeatherGeolocation[]> {
+	return await geolocationFromQuery(params.query)
 }
 
 // Fn
@@ -191,20 +195,8 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	}
 
 	if (query) {
-		const q = encodeURIComponent(query)
-		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${q}&language=en-us`
-		const autocompleteHeaders = {
-			...headers,
-			cookie: `awx_user=tp:C|lang:en-US;`,
-		}
-		const autocompleteResponse = await fetch(autocompleteURL, {
-			headers: autocompleteHeaders,
-		})
-
-		const autocompleteResult = await autocompleteResponse?.json()
-		const key = autocompleteResult[0]?.key
-
-		path += `web-api/three-day-redirect?key=${key}`
+		const geo = await geolocationFromQuery(params.query)
+		path += `web-api/three-day-redirect?key=${geo[0].key}`
 	} else {
 		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
@@ -219,4 +211,31 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	html = html.slice(html.indexOf('</head>'))
 
 	return html
+}
+
+async function geolocationFromQuery(query: string): Promise<AccuWeatherGeolocation[]> {
+	query = encodeURIComponent(query)
+
+	const headers = {
+		Accept: 'application/xml',
+		'Accept-Encoding': 'gzip, deflate, br, zstd',
+		'Accept-Language': 'en-US',
+		cookie: `lang:en-US;`,
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
+	}
+
+	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}`
+	const resp = await fetch(path, { headers })
+
+	const result = (await resp?.json()) as AccuWeatherGeolocation[]
+
+	if (result.length > 1) {
+		return result.map((item) => ({
+			key: item.key,
+			name: item.name,
+			longName: item.longName,
+		}))
+	} else {
+		throw new Error('Location is empty')
+	}
 }

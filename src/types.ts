@@ -8,7 +8,7 @@ export function isForeca(json: Foreca | Foreca): json is Foreca {
 
 export interface QueryParams {
 	provider: 'accuweather' | 'foreca' | 'weathercom' | 'auto' | ''
-	debug: 'nodes' | 'content' | ''
+	debug: 'nodes' | 'content' | 'geo' | ''
 	data: 'all' | 'simple'
 	unit: 'C' | 'F'
 	query: string
@@ -116,6 +116,12 @@ export interface AccuweatherContent {
 		night: string
 		rain: string
 	}[]
+}
+
+export interface AccuWeatherGeolocation {
+	key: string
+	name: string
+	longName: string
 }
 
 /*************

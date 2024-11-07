@@ -72,6 +72,18 @@ async function main(request: Request) {
 		}
 	}
 
+	if (params.debug === 'geo') {
+		if (params.provider === 'accuweather') {
+			const response = await accuweather.debugGeo(params)
+			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
+		}
+
+		// if (params.provider === 'foreca') {
+		// 	const response = await foreca.debugNodes(params)
+		// 	return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
+		// }
+	}
+
 	try {
 		if (url.pathname !== '/' && url.pathname !== '/weather') {
 			status = 404
@@ -155,9 +167,10 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	}
 
 	let debug: QueryParams['debug'] = ''
-	if (params.debug) {
-		debug = params.debug === 'nodes' ? 'nodes' : params.debug === 'content' ? 'content' : ''
-	}
+
+	if (params.debug === 'nodes') debug = 'nodes'
+	else if (params.debug === 'geo') debug = 'geo'
+	else if (params.debug === 'content') debug = 'content'
 
 	return {
 		query: params.query,
