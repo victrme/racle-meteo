@@ -98,9 +98,16 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 		setHourInt = parseInt(setHour) + 12
 	}
 
-	// 4.
+	// 4. Geo
 	const { pathname } = new URL(json.meta.url)
 	const [_, __, country, city] = pathname.split('/')
+	const geo: AccuWeather['geo'] = {
+		city: decodeURIComponent(city),
+		country: decodeURIComponent(country.toUpperCase()),
+	}
+
+	if (params.lat) geo.lat = parseFloat(params.lat)
+	if (params.lon) geo.lon = parseFloat(params.lon)
 
 	// 5.
 	return {
@@ -109,12 +116,7 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 			lang: params.lang,
 			provider: 'accuweather',
 		},
-		geo: {
-			lat: parseFloat(params.lat),
-			lon: parseFloat(params.lon),
-			city: decodeURIComponent(city),
-			country: decodeURIComponent(country.toUpperCase()),
-		},
+		geo: geo,
 		now: {
 			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
 			temp: parseInt(json.now.temp),

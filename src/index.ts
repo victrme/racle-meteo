@@ -148,6 +148,10 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	params.data = params.data.toLowerCase()
 
 	let provider: QueryParams['provider'] = ''
+	let debug: QueryParams['debug'] = ''
+	let lat: QueryParams['lat'] = params.lat
+	let lon: QueryParams['lon'] = params.lon
+
 	if (params.provider === 'accuweather') provider = 'accuweather'
 	if (params.provider === 'weathercom') provider = 'weathercom'
 	if (params.provider === 'foreca') provider = 'foreca'
@@ -166,21 +170,24 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		}
 	}
 
-	let debug: QueryParams['debug'] = ''
-
 	if (params.debug === 'nodes') debug = 'nodes'
 	else if (params.debug === 'geo') debug = 'geo'
 	else if (params.debug === 'content') debug = 'content'
 
+	if (params.query) {
+		lat = undefined
+		lon = undefined
+	}
+
 	return {
 		query: params.query,
-		lat: params.lat,
-		lon: params.lon,
 		lang: params.lang,
 		data: params.data === 'simple' ? 'simple' : 'all',
 		unit: params.unit === 'F' ? 'F' : 'C',
-		debug: debug,
 		provider: provider,
+		debug: debug,
+		lat: lat,
+		lon: lon,
 	}
 }
 

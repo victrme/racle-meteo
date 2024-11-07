@@ -4,13 +4,13 @@ This service cleverly transforms weather web pages into a usable (and free!) res
 [foreca](https://foreca.com) under the hood.
 
 -   Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
--   Flexible: Easy to update with strong typing and htmlparser2 as basic parser 
+-   Flexible: Easy to update with strong typing and htmlparser2 as basic parser
 -   Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
 
 ## Install
 
 Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key. Migrating to another
-cloud provider or your own server will remove the automatic location, meaning the `lat` and `lon` will be required.
+cloud provider or your own server will remove the automatic location.
 
 ### Using Node
 
@@ -55,16 +55,16 @@ Define a weather provider to start using the API.
 
 ### Parameters
 
-| Parameter | Type                                  | Required | Description                                                                                                                                  |
-| --------- | ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| provider  | accuweather, foreca, weathercom, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                       |
-| query, q  | string                                | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                |
-| lat       | string                                | optional | Location latitude.                                                                                                                           |
-| lon       | string                                | optional | Location longitude.                                                                                                                          |
-| lang      | string                                | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.         |
-| unit      | C, F                                  | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                             |
-| data      | all, simple                           | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default. |
-| debug     | nodes, content                        | optional | Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated                              |
+| Parameter | Type                                      | Required | Description                                                                                                                                  |
+| --------- | ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| provider  | accuweather, foreca, ~~weathercom~~, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                       |
+| query, q  | string                                    | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                |
+| lat       | string                                    | optional | Location latitude.                                                                                                                           |
+| lon       | string                                    | optional | Location longitude.                                                                                                                          |
+| lang      | string                                    | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.         |
+| unit      | C, F                                      | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                             |
+| data      | all, simple                               | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default. |
+| debug     | nodes, content, geo                       | optional | Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated.                             |
 
 ## Response examples
 
@@ -80,59 +80,59 @@ Define a weather provider to start using the API.
 
 ```jsonc
 {
-  "meta": {
-    "url": "https://accuweather.com/en/fr/paris/2608456/weather-forecast/2608456",
-    "lang": "en",
-    "provider": "accuweather",
-  },
-  "geo": {
-    "lat": 48.853,
-    "lon": 2.348,
-    "city": "paris",
-    "country": "FR",
-  },
-  "now": {
-    "icon": "12",
-    "temp": 14,
-    "feels": 11,
-    "description": "Light rain",
-  },
-  "sun": {
-    "rise": [8, 7],
-    "set": [19, 6],
-  },
-  "hourly": [
-    {
-      "time": "2024-10-12T11:00:00.000Z",
-      "temp": 14,
-      "rain": "40%",
-    },
-    {
-      "time": "2024-10-12T12:00:00.000Z",
-      "temp": 14,
-      "rain": "37%",
-    },
-    // ...
-  ],
-  "daily": [
-    {
-      "time": "2024-10-12T11:00:00.000Z",
-      "high": 16,
-      "low": 9,
-      "day": "Brief showers this morning",
-      "night": "Night: Cloudy",
-      "rain": "80%",
-    },
-    {
-      "time": "2024-10-13T11:00:00.000Z",
-      "high": 15,
-      "low": 9,
-      "day": "Sun through high clouds",
-      "night": "Mostly cloudy",
-      "rain": "1%",
-    },
-    // ...
-  ],
+	"meta": {
+		"url": "https://accuweather.com/en/fr/paris/2608456/weather-forecast/2608456",
+		"lang": "en",
+		"provider": "accuweather"
+	},
+	"geo": {
+		"lat": 48.853,
+		"lon": 2.348,
+		"city": "paris",
+		"country": "FR"
+	},
+	"now": {
+		"icon": "12",
+		"temp": 14,
+		"feels": 11,
+		"description": "Light rain"
+	},
+	"sun": {
+		"rise": [8, 7],
+		"set": [19, 6]
+	},
+	"hourly": [
+		{
+			"time": "2024-10-12T11:00:00.000Z",
+			"temp": 14,
+			"rain": "40%"
+		},
+		{
+			"time": "2024-10-12T12:00:00.000Z",
+			"temp": 14,
+			"rain": "37%"
+		}
+		// ...
+	],
+	"daily": [
+		{
+			"time": "2024-10-12T11:00:00.000Z",
+			"high": 16,
+			"low": 9,
+			"day": "Brief showers this morning",
+			"night": "Night: Cloudy",
+			"rain": "80%"
+		},
+		{
+			"time": "2024-10-13T11:00:00.000Z",
+			"high": 15,
+			"low": 9,
+			"day": "Sun through high clouds",
+			"night": "Mostly cloudy",
+			"rain": "1%"
+		}
+		// ...
+	]
 }
 ```
 
@@ -148,46 +148,46 @@ Define a weather provider to start using the API.
 
 ```jsonc
 {
-  "meta": {
-    "url": "https://www.foreca.com/en/102988507/Paris",
-    "lang": "en",
-    "provider": "foreca"
-  },
-  "geo": {
-    "lat": 48.853,
-    "lon": 2.348,
-    "city": "Paris",
-    "country": "FR"
-  },
-  "now": {
-    "icon": "d430",
-    "description": "Overcast and rain",
-    "temp": { "c": 14, "f": 57 },
-    "feels": { "c": 14, "f": 57 },
-    "wind": { "kmh": 11, "mph": 7 },
-    "humid": "78%"
-  },
-  "sun": {
-    "rise": [8, 7],
-    "set": [19, 5]
-  },
-  "daily": [
-    {
-      "time": "2024-10-12T11:00:00.000Z",
-      "low": { "c": 14, "f": 57 },
-      "high": { "c": 16, "f": 61 },
-      "wind": { "kmh": 11, "mph": 7 },
-      "rain": { "in": 0.16, "mm": 4 }
-    },
-    {
-      "time": "2024-10-13T11:00:00.000Z",
-      "low": { "c": 10, "f": 50 },
-      "high": { "c": 14, "f": 57 },
-      "wind": { "kmh": 7, "mph": 4 },
-      "rain": { "in": 0, "mm": 0 }
-    }
-    // ...
-  ]
+	"meta": {
+		"url": "https://www.foreca.com/en/102988507/Paris",
+		"lang": "en",
+		"provider": "foreca"
+	},
+	"geo": {
+		"lat": 48.853,
+		"lon": 2.348,
+		"city": "Paris",
+		"country": "FR"
+	},
+	"now": {
+		"icon": "d430",
+		"description": "Overcast and rain",
+		"temp": { "c": 14, "f": 57 },
+		"feels": { "c": 14, "f": 57 },
+		"wind": { "kmh": 11, "mph": 7 },
+		"humid": "78%"
+	},
+	"sun": {
+		"rise": [8, 7],
+		"set": [19, 5]
+	},
+	"daily": [
+		{
+			"time": "2024-10-12T11:00:00.000Z",
+			"low": { "c": 14, "f": 57 },
+			"high": { "c": 16, "f": 61 },
+			"wind": { "kmh": 11, "mph": 7 },
+			"rain": { "in": 0.16, "mm": 4 }
+		},
+		{
+			"time": "2024-10-13T11:00:00.000Z",
+			"low": { "c": 10, "f": 50 },
+			"high": { "c": 14, "f": 57 },
+			"wind": { "kmh": 7, "mph": 4 },
+			"rain": { "in": 0, "mm": 0 }
+		}
+		// ...
+	]
 }
 ```
 
@@ -203,40 +203,40 @@ Define a weather provider to start using the API.
 
 ```jsonc
 {
-  "meta": {
-    "url": "https://www.foreca.com/en/102988507/Paris",
-    "lang": "en",
-    "provider": "foreca"
-  },
-  "geo": {
-    "lat": 48.853,
-    "lon": 2.348,
-    "city": "Paris",
-    "country": "FR"
-  },
-  "now": {
-    "icon": "rain",
-    "description": "Overcast and rain",
-    "temp": 13,
-    "feels": 13
-  },
-  "sun": {
-    "rise": [8, 7],
-    "set": [19, 5]
-  },
-  "daily": [
-    {
-      "time": "2024-10-12T11:00:00.000Z",
-      "high": 16,
-      "low": 13
-    },
-    {
-      "time": "2024-10-13T11:00:00.000Z",
-      "high": 14,
-      "low": 10
-    }
-    // ...
-  ]
+	"meta": {
+		"url": "https://www.foreca.com/en/102988507/Paris",
+		"lang": "en",
+		"provider": "foreca"
+	},
+	"geo": {
+		"lat": 48.853,
+		"lon": 2.348,
+		"city": "Paris",
+		"country": "FR"
+	},
+	"now": {
+		"icon": "rain",
+		"description": "Overcast and rain",
+		"temp": 13,
+		"feels": 13
+	},
+	"sun": {
+		"rise": [8, 7],
+		"set": [19, 5]
+	},
+	"daily": [
+		{
+			"time": "2024-10-12T11:00:00.000Z",
+			"high": 16,
+			"low": 13
+		},
+		{
+			"time": "2024-10-13T11:00:00.000Z",
+			"high": 14,
+			"low": 10
+		}
+		// ...
+	]
 }
 ```
 
@@ -255,46 +255,46 @@ Equivalence between other providers:
 
 ```jsonc
 {
-  "clearsky": {
-    "accuweather": "1, 2, 33, 34",
-    "foreca": "d000, d100, n000, n100"
-  },
-  "fewclouds": {
-    "accuweather": "3, 4, 5, 35, 36, 37",
-    "foreca": "d200, d500, n200, n500"
-  },
-  "brokenclouds": {
-    "accuweather": "6, 7, 38",
-    "foreca": "d300, n300"
-  },
-  "overcastclouds": {
-    "accuweather": "8",
-    "foreca": "d400, n400"
-  },
-  "sunnyrain": {
-    "accuweather": "14, 17",
-    "foreca": "d210, n210"
-  },
-  "lightrain": {
-    "accuweather": "12, 13, 39",
-    "foreca": "d310, d410, d240, n310, n410, n240"
-  },
-  "rain": {
-    "accuweather": "18, 19, 29, 40",
-    "foreca": "d320, d420, d430, n320, n420, n430"
-  },
-  "thunderstorm": {
-    "accuweather": "15, 16, 41, 42",
-    "foreca": "d340, d440, n340, n440"
-  },
-  "snow": {
-    "accuweather": "20, 21, 22, 23, 24, 25, 26, 43, 44",
-    "foreca": "d221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432"
-  },
-  "mist": {
-    "accuweather": "11",
-    "foreca": "d600, n600"
-  }
+	"clearsky": {
+		"accuweather": "1, 2, 33, 34",
+		"foreca": "d000, d100, n000, n100"
+	},
+	"fewclouds": {
+		"accuweather": "3, 4, 5, 35, 36, 37",
+		"foreca": "d200, d500, n200, n500"
+	},
+	"brokenclouds": {
+		"accuweather": "6, 7, 38",
+		"foreca": "d300, n300"
+	},
+	"overcastclouds": {
+		"accuweather": "8",
+		"foreca": "d400, n400"
+	},
+	"sunnyrain": {
+		"accuweather": "14, 17",
+		"foreca": "d210, n210"
+	},
+	"lightrain": {
+		"accuweather": "12, 13, 39",
+		"foreca": "d310, d410, d240, n310, n410, n240"
+	},
+	"rain": {
+		"accuweather": "18, 19, 29, 40",
+		"foreca": "d320, d420, d430, n320, n420, n430"
+	},
+	"thunderstorm": {
+		"accuweather": "15, 16, 41, 42",
+		"foreca": "d340, d440, n340, n440"
+	},
+	"snow": {
+		"accuweather": "20, 21, 22, 23, 24, 25, 26, 43, 44",
+		"foreca": "d221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432"
+	},
+	"mist": {
+		"accuweather": "11",
+		"foreca": "d600, n600"
+	}
 }
 ```
 

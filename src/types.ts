@@ -13,8 +13,8 @@ export interface QueryParams {
 	unit: 'C' | 'F'
 	query: string
 	lang: string
-	lat: string
-	lon: string
+	lat?: string
+	lon?: string
 }
 
 /*************
@@ -28,8 +28,8 @@ export interface SimpleWeather {
 		provider: 'accuweather' | 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}
@@ -61,8 +61,8 @@ export interface AccuWeather {
 		provider: 'accuweather' | 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}
@@ -135,8 +135,8 @@ export interface Foreca {
 		provider: 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}

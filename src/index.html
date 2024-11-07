@@ -205,14 +205,14 @@
 				<tr>
 					<th scope="row">lat</th>
 					<td>string</td>
-					<td>optional*</td>
-					<td>Location latitude. * Required when migrating from CF workers</td>
+					<td>optional</td>
+					<td>Location latitude.</td>
 				</tr>
 				<tr>
 					<th scope="row">lon</th>
 					<td>string</td>
-					<td>optional*</td>
-					<td>Location longitude. * Required when migrating from CF workers</td>
+					<td>optional</td>
+					<td>Location longitude.</td>
 				</tr>
 				<tr>
 					<th scope="row">lang</th>
@@ -238,6 +238,12 @@
 						Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all
 						providers. "all" by default.
 					</td>
+				</tr>
+				<tr>
+					<th scope="row">debug</th>
+					<td>nodes, content, geo</td>
+					<td>optional</td>
+					<td>Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated.</td>
 				</tr>
 			</tbody>
 		</table>
