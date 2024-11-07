@@ -8,8 +8,8 @@ export interface FlatNode {
 	attr?: Record<string, string>
 }
 
-const flatNodes: FlatNode[] = []
-const flatNodesSet: Set<FlatNode> = new Set()
+let flatNodes: FlatNode[] = []
+// let flatNodesSet: Set<FlatNode> = new Set()
 
 export function findAll(className: string): FlatNode[] {
 	return flatNodes.filter((node) => node.class?.includes(className))
@@ -30,6 +30,8 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 		let tagName = ''
 		let id = ''
 		let attr: Record<string, string> = {}
+
+		flatNodes = []
 
 		const skippedtags = 'script, style, iframe, path, g, rect, circle, head, meta'
 
@@ -67,7 +69,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 					}
 
 					flatNodes.push(node)
-					flatNodesSet.add(node)
+					// flatNodesSet.add(node)
 
 					attr = {}
 					tagName = ''

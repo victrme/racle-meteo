@@ -11,7 +11,8 @@ let foundCountry = ''
 
 export default async function foreca(params: QueryParams): Promise<Foreca> {
 	const html = await fetchPageContent(params)
-	const _ = await parser(html)
+	await parser(html)
+
 	const json = transformToJson()
 	const api = validateJson(json, params)
 
@@ -20,10 +21,9 @@ export default async function foreca(params: QueryParams): Promise<Foreca> {
 
 export async function debugContent(params: QueryParams): Promise<ForecaContent> {
 	const html = await fetchPageContent(params)
-	const _ = await parser(html)
-	const json = transformToJson()
+	await parser(html)
 
-	return json
+	return transformToJson()
 }
 
 export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {

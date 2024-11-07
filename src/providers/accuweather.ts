@@ -8,7 +8,8 @@ const ACCUWEATHER_LANGS =
 
 export default async function accuweather(params: QueryParams): Promise<AccuWeather> {
 	const html = await fetchPageContent(params)
-	const _ = await parser(html)
+	await parser(html)
+
 	const json = transformToJson()
 	const api = validateJson(json, params)
 
@@ -17,10 +18,9 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 
 export async function debugContent(params: QueryParams): Promise<AccuweatherContent> {
 	const html = await fetchPageContent(params)
-	const _ = await parser(html)
-	const json = transformToJson()
+	await parser(html)
 
-	return json
+	return transformToJson()
 }
 
 export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
@@ -219,16 +219,15 @@ async function geolocationFromQuery(query: string): Promise<AccuWeatherGeolocati
 	query = encodeURIComponent(query)
 
 	const headers = {
-		Accept: 'application/xml',
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
+		Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 		'Accept-Encoding': 'gzip, deflate, br, zstd',
 		'Accept-Language': 'en-US',
-		cookie: `lang:en-US;`,
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
+		cookie: '',
 	}
 
-	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}`
+	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${new Date().getTime()}`
 	const resp = await fetch(path, { headers })
-
 	const result = (await resp?.json()) as AccuWeatherGeolocation[]
 
 	if (result.length > 1) {
