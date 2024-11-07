@@ -9,19 +9,65 @@ export interface FlatNode {
 }
 
 let flatNodes: FlatNode[] = []
-// let flatNodesSet: Set<FlatNode> = new Set()
 
 export function findAll(className: string): FlatNode[] {
-	return flatNodes.filter((node) => node.class?.includes(className))
+	const result: FlatNode[] = []
+
+	for (let i = 0; i < flatNodes.length; i++) {
+		if (flatNodes[i].class?.includes(className)) {
+			result.push(flatNodes[i])
+		}
+	}
+
+	return result
 }
 
 export function find(className: string): FlatNode {
-	return findAll(className)[0]
+	for (let i = 0; i < flatNodes.length; i++) {
+		if (flatNodes[i].class?.includes(className)) {
+			return flatNodes[i]
+		}
+	}
+
+	throw new Error(`No node found with class="${className}"`)
 }
 
-// export function next(className: string): FlatNode {
-// 	return
-// }
+export function next(className: string, step = 1): FlatNode {
+	const i = sibling('next', className, step)
+	const node = flatNodes[i]
+
+	if (node) {
+		return node
+	} else {
+		throw new Error(`Element does not exist. Found ${flatNodes.length} nodes, looking for number ${i + step + 1}.`)
+	}
+}
+
+export function prev(className: string, step = 1): FlatNode {
+	const i = sibling('prev', className, step)
+	const node = flatNodes[i]
+
+	if (node) {
+		return node
+	} else {
+		throw new Error(`Element does not exist. Negative index ${(i + step) * -1}`)
+	}
+}
+
+function sibling(is: 'prev' | 'next', className: string, step = 1): number {
+	let i = 0
+
+	for (; i < flatNodes.length; i++) {
+		if (flatNodes[i].class?.includes(className)) {
+			break
+		}
+	}
+
+	const dir = is === 'prev' ? -1 : 1
+	const siblingIndex = i + step * dir
+
+	return siblingIndex
+}
 
 export default async function parseToFlatNodes(html: string): Promise<FlatNode[]> {
 	await new Promise((r) => {
@@ -69,7 +115,6 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 					}
 
 					flatNodes.push(node)
-					// flatNodesSet.add(node)
 
 					attr = {}
 					tagName = ''
