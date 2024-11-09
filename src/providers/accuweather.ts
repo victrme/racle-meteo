@@ -85,17 +85,18 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 	date.setSeconds(0)
 	date.setMilliseconds(0)
 
-	const [riseHour, riseMinute] = json.sun.rise.split(':')
-	const [setHour, setMinute] = json.sun.set.split(':')
+	const splitChar = json.sun.rise.includes('.') ? '.' : ':'
+	const [riseHour, riseMinute] = json.sun.rise.split(splitChar)
+	const [setHour, setMinute] = json.sun.set.split(splitChar)
 
 	let riseHourInt = parseInt(riseHour.replace('AM', '').replace('PM', ''))
 	let setHourInt = parseInt(setHour.replace('AM', '').replace('PM', ''))
 
 	if (json.sun.rise.includes('PM')) {
-		riseHourInt = parseInt(riseHour) + 12
+		riseHourInt = parseInt(riseHour.replace('PM', '')) + 12
 	}
 	if (json.sun.set.includes('PM')) {
-		setHourInt = parseInt(setHour) + 12
+		setHourInt = parseInt(setHour.replace('PM', '')) + 12
 	}
 
 	// 4. Geo
