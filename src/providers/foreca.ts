@@ -1,4 +1,4 @@
-import parser, { find, findAll } from '../parser.ts'
+import parser, { find, findAll, next, prev } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
 import type { Foreca, ForecaContent, ForecaGeo, QueryParams } from '../types.ts'
@@ -56,8 +56,8 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 			provider: 'foreca',
 		},
 		geo: {
-			lat: parseFloat(params.lat),
-			lon: parseFloat(params.lon),
+			lat: params.lat ? parseFloat(params.lat) : undefined,
+			lon: params.lon ? parseFloat(params.lon) : undefined,
 			city: foundCity,
 			country: foundCountry.toUpperCase(),
 		},
@@ -110,6 +110,8 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 }
 
 function transformToJson(): ForecaContent {
+	const [sunrise, sunset] = findAll('value time time_24h')
+
 	return {
 		now: {
 			temp: {
@@ -117,37 +119,37 @@ function transformToJson(): ForecaContent {
 				f: find('value temp temp_f')?.text,
 			},
 			feels: {
-				c: find('.nowcast .temp p .temp_c')?.text,
-				f: find('.nowcast .temp p .temp_f')?.text,
+				c: next('value temp temp_f', 1)?.text,
+				f: next('value temp temp_f', 2)?.text,
 			},
 			wind: {
-				kmh: find('.nowcast .wind .wind_kmh')?.text,
-				mph: find('.nowcast .wind .wind_mph')?.text,
+				kmh: find('value wind wind_kmh')?.text,
+				mph: find('value wind wind_mph')?.text,
 			},
-			icon: find('.nowcast .symb img').attr?.src ?? '',
-			description: find('.nowcast .wx')?.text,
-			humid: find('.nowcast .rhum em')?.text,
+			icon: prev('value wind wind_ms', 2).attr?.src ?? '',
+			description: find('row wx')?.text,
+			humid: next('row wx', 4)?.text,
 		},
 		sun: {
-			rise: find('.nowcast .sun .time_24h')?.text,
-			set: find('.nowcast .sun .time_24h')?.text,
+			rise: sunrise?.text,
+			set: sunset?.text,
 		},
-		daily: new Array(5).fill('').map((_, i) => ({
+		daily: new Array(5).fill('').map((_, __) => ({
 			high: {
-				c: find(`.daycontainer .tempmax .temp_c`)?.text,
-				f: find(`.daycontainer .tempmax .temp_f`)?.text,
+				c: prev('value wind wind_mph', 6)?.text,
+				f: prev('value wind wind_mph', 5)?.text,
 			},
 			low: {
-				c: find(`.daycontainer .tempmin .temp_c`)?.text,
-				f: find(`.daycontainer .tempmin .temp_f`)?.text,
+				c: prev('value wind wind_mph', 4)?.text,
+				f: prev('value wind wind_mph', 3)?.text,
 			},
 			wind: {
-				mph: find(`.daycontainer .wind_mph`)?.text,
-				kmh: find(`.daycontainer .wind_kmh`)?.text,
+				mph: find('value wind wind_mph')?.text,
+				kmh: find('value wind wind_kmh')?.text,
 			},
 			rain: {
-				in: find(`.daycontainer .rain_in`)?.text,
-				mm: find(`.daycontainer .rain_mm`)?.text,
+				in: find('value rain rain_in')?.text,
+				mm: find('value rain rain_mm')?.text,
 			},
 		})),
 	}
