@@ -2,7 +2,7 @@ export function isAccuweather(json: AccuWeather | Foreca): json is AccuWeather {
 	return json?.meta?.provider === 'accuweather'
 }
 
-export function isForeca(json: Foreca | Foreca): json is Foreca {
+export function isForeca(json: AccuWeather | Foreca): json is Foreca {
 	return json?.meta?.provider === 'foreca'
 }
 

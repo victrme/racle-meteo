@@ -89,27 +89,22 @@ async function main(request: Request) {
 			status = 404
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
-		}
-		//
+		} //
 		else if (params.provider === '') {
 			const html = await import('./index.html' as string)
 			body = html.default
 			contentType = 'text/html'
-		}
-		//
+		} //
 		else if (params.provider === 'auto') {
 			if (json === undefined) json = await tryNoCatch(accuweather.default, params)
 			if (json === undefined) json = await tryNoCatch(foreca.default, params)
-		}
-		//
+		} //
 		else if (params.provider === 'accuweather') {
 			json = await accuweather.default(params)
-		}
-		//
+		} //
 		else if (params.provider === 'foreca') {
 			json = await foreca.default(params)
-		}
-		//
+		} //
 		else if (params.provider === 'weathercom') {
 			json = await weathercom.default(params)
 		}
@@ -152,13 +147,14 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	let lat: QueryParams['lat'] = params.lat
 	let lon: QueryParams['lon'] = params.lon
 
-	if (params.provider === 'accuweather') provider = 'accuweather'
-	if (params.provider === 'weathercom') provider = 'weathercom'
-	if (params.provider === 'foreca') provider = 'foreca'
 	if (params.provider === 'auto') {
 		params.data = 'simple'
 		provider = 'auto'
-	}
+	} //
+	else if (params.provider === 'accuweather') provider = 'accuweather'
+	else if (params.provider === 'weathercom') provider = 'weathercom'
+	else if (params.provider === 'foreca') provider = 'foreca'
+	else provider = ''
 
 	if (provider === 'foreca') {
 		params.lang = params.lang.slice(0, 2)
