@@ -1,4 +1,4 @@
-import { Parser } from '@victr/slim-htmlparser2'
+import { Parser } from 'htmlparser2'
 
 export interface FlatNode {
 	tag: string
