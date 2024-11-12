@@ -1,4 +1,4 @@
-import { Parser } from 'htmlparser2'
+import { Parser } from '@victr/slim-htmlparser2'
 
 export interface FlatNode {
 	tag: string
@@ -127,8 +127,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 			},
 		})
 
-		parser.write(html)
-		parser.end()
+		parser.parseComplete(html)
 	})
 
 	return flatNodes
