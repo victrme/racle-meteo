@@ -171,7 +171,8 @@ export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryPar
 	}
 
 	const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0'
-	const cookies = `fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
+	const cookies =
+		`fcaId=${id}; fcai18n=${lang}; fcaSettings-v2={"units":{"temp":"${unit}","wind":"kmh","rain":"mm","pres":"hPa","vis":"km"},"time":"24h","theme":"dark","language":"${lang}"};`
 
 	pageURL = `https://www.foreca.com/${lang}/${id}/${defaultName}`
 	foundCity = defaultName
@@ -187,12 +188,9 @@ export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryPar
 		},
 	})
 
-	let html = await resp.text()
+	const html = await resp.text()
 
-	html = html.slice(html.indexOf('</head>'))
-	// html = html.replaceAll('\n', '').replaceAll('\t', '')
-
-	return html
+	return html.slice(html.indexOf('</head>'))
 }
 
 export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams>): Promise<ForecaGeo> {

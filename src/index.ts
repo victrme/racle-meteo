@@ -173,6 +173,10 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	if (params.query) {
 		lat = undefined
 		lon = undefined
+
+		if (isEncoded(params.query) === false) {
+			params.query = encodeURIComponent(params.query)
+		}
 	}
 
 	return {
@@ -185,6 +189,10 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		lat: lat,
 		lon: lon,
 	}
+}
+
+function isEncoded(str: string) {
+	return typeof str == 'string' && decodeURIComponent(str) !== str
 }
 
 async function tryNoCatch<Result>(fn: (_: QueryParams) => Promise<Result>, args: QueryParams): Promise<Result | undefined> {
