@@ -1,7 +1,4 @@
 {
-	"name": "racle-meteo",
-	"type": "module",
-	"private": true,
 	"dependencies": {
 		"htmlparser2": "^9.1.0"
 	}
