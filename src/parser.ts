@@ -8,14 +8,20 @@ export interface FlatNode {
 	attr?: Record<string, string>
 }
 
-let flatNodes: FlatNode[] = []
+type FlatNodes = Map<number, FlatNode>
+
+const flatNodes: FlatNodes = new Map()
+
+export function getAll(): FlatNode[] {
+	return Array.from(flatNodes.values())
+}
 
 export function findAll(className: string): FlatNode[] {
 	const result: FlatNode[] = []
 
-	for (let i = 0; i < flatNodes.length; i++) {
-		if (flatNodes[i].class?.includes(className)) {
-			result.push(flatNodes[i])
+	for (const node of flatNodes.values()) {
+		if (node.class?.includes(className)) {
+			result.push(node)
 		}
 	}
 
@@ -23,53 +29,86 @@ export function findAll(className: string): FlatNode[] {
 }
 
 export function find(className: string): FlatNode {
-	for (let i = 0; i < flatNodes.length; i++) {
-		if (flatNodes[i].class?.includes(className)) {
-			return flatNodes[i]
+	for (const node of flatNodes.values()) {
+		if (node.class?.includes(className)) {
+			return node
 		}
 	}
 
-	throw new Error(`No node found with class="${className}"`)
+	throw new Error(`${flatNodes.size} nodes. No node found with class="${className}"`)
 }
 
 export function next(className: string, step = 1): FlatNode {
-	const i = sibling('next', className, step)
-	const node = flatNodes[i]
+	const node = sibling('next', className, step)
 
-	if (node) {
-		return node
-	} else {
-		throw new Error(`Element does not exist. Found ${flatNodes.length} nodes, looking for number ${i + step + 1}.`)
+	if (!node) {
+		throw new Error(`Element does not exist. Found ${flatNodes.size} nodes.`)
 	}
+
+	return node
 }
 
-export function prev(className: string, step = 1): FlatNode {
-	const i = sibling('prev', className, step)
-	const node = flatNodes[i]
+export function nextAll(className: string, step = 1): FlatNode[] {
+	const result: FlatNode[] = []
 
-	if (node) {
-		return node
-	} else {
-		throw new Error(`Element does not exist. Negative index ${(i + step) * -1}`)
-	}
-}
-
-function sibling(is: 'prev' | 'next', className: string, step = 1): number {
-	let i = 0
-
-	for (; i < flatNodes.length; i++) {
-		if (flatNodes[i].class?.includes(className)) {
-			break
+	for (const [i, node] of flatNodes.entries()) {
+		if (node.class?.includes(className)) {
+			result.push(sibling('next', i, step))
 		}
 	}
 
-	const dir = is === 'prev' ? -1 : 1
-	const siblingIndex = i + step * dir
-
-	return siblingIndex
+	return result
 }
 
-export default async function parseToFlatNodes(html: string): Promise<FlatNode[]> {
+export function prev(className: string, step = 1): FlatNode {
+	const node = sibling('prev', className, step)
+
+	if (!node) {
+		throw new Error(`Element does not exist. Negative index`)
+	}
+
+	return node
+}
+
+export function prevAll(className: string, step = 1): FlatNode[] {
+	const result: FlatNode[] = []
+
+	for (const [i, node] of flatNodes.entries()) {
+		if (node.class?.includes(className)) {
+			result.push(sibling('prev', i, step))
+		}
+	}
+
+	return result
+}
+
+function sibling(is: 'prev' | 'next', selector: string | number, step = 1): FlatNode {
+	const dir = is === 'prev' ? -1 : 1
+	let nodeFound: FlatNode | undefined = undefined
+
+	if (typeof selector === 'string') {
+		for (const [pos, node] of flatNodes.entries()) {
+			if (node.class?.includes(selector)) {
+				nodeFound = flatNodes.get(pos + step * dir)
+				break
+			}
+		}
+	}
+
+	if (typeof selector === 'number') {
+		if (flatNodes.has(selector)) {
+			nodeFound = flatNodes.get(selector + step * dir)
+		}
+	}
+
+	if (!nodeFound) {
+		throw new Error(`${flatNodes.size} nodes. No "${selector}" node found`)
+	}
+
+	return nodeFound
+}
+
+export default async function parseToFlatNodes(html: string): Promise<void> {
 	await new Promise((r) => {
 		let textContent = ''
 		let className = ''
@@ -77,7 +116,8 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 		let id = ''
 		let attr: Record<string, string> = {}
 
-		flatNodes = []
+		let i = 0
+		flatNodes.clear()
 
 		const skippedtags = 'script, style, iframe, path, g, rect, circle, head, meta'
 
@@ -114,7 +154,7 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 						node.attr = attr
 					}
 
-					flatNodes.push(node)
+					flatNodes.set(i++, node)
 
 					attr = {}
 					tagName = ''
@@ -129,6 +169,4 @@ export default async function parseToFlatNodes(html: string): Promise<FlatNode[]
 
 		parser.parseComplete(html)
 	})
-
-	return flatNodes
 }
