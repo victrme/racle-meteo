@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -86,6 +86,29 @@
 			</p>
 
 			<p>
+				Debug <br />
+				<label>
+					<input type="radio" name="debug" value="" checked />
+					Off
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="debug" value="nodes" />
+					Nodes
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="debug" value="content" />
+					Content
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="debug" value="geo" />
+					Geo
+				</label>
+			</p>
+
+			<p>
 				Data <br />
 				<label>
 					<input type="radio" name="data" value="all" checked />
@@ -114,14 +137,14 @@
 			<p>
 				<label>
 					Latitude <br />
-					<input type="number" name="lat" value="48.853" />
+					<input type="number" name="lat" placeholder="48.853" />
 				</label>
 			</p>
 
 			<p>
 				<label>
 					Longitude <br />
-					<input type="number" name="lon" value="2.348" />
+					<input type="number" name="lon" placeholder="2.348" />
 				</label>
 			</p>
 
@@ -182,14 +205,14 @@
 				<tr>
 					<th scope="row">lat</th>
 					<td>string</td>
-					<td>optional*</td>
-					<td>Location latitude. * Required when migrating from CF workers</td>
+					<td>optional</td>
+					<td>Location latitude.</td>
 				</tr>
 				<tr>
 					<th scope="row">lon</th>
 					<td>string</td>
-					<td>optional*</td>
-					<td>Location longitude. * Required when migrating from CF workers</td>
+					<td>optional</td>
+					<td>Location longitude.</td>
 				</tr>
 				<tr>
 					<th scope="row">lang</th>
@@ -215,6 +238,12 @@
 						Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all
 						providers. "all" by default.
 					</td>
+				</tr>
+				<tr>
+					<th scope="row">debug</th>
+					<td>nodes, content, geo</td>
+					<td>optional</td>
+					<td>Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated.</td>
 				</tr>
 			</tbody>
 		</table>

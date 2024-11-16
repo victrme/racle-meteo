@@ -1,17 +1,45 @@
-import * as cheerio from 'cheerio/slim'
+import parser, { find, findAll, getAll } from '../parser.ts'
 
-import type { AccuWeather, AccuweatherContent, QueryParams } from '../types.ts'
+import type { FlatNode } from '../parser.ts'
+import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
 
 export default async function accuweather(params: QueryParams): Promise<AccuWeather> {
 	const html = await fetchPageContent(params)
-	const json = transformToJson(html)
+	await parser(html)
+
+	const json = transformToJson()
 	const api = validateJson(json, params)
 
 	return api
 }
+
+export async function debugContent(params: QueryParams): Promise<AccuweatherContent> {
+	const html = await fetchPageContent(params)
+	await parser(html)
+
+	return transformToJson()
+}
+
+export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
+	const html = await fetchPageContent(params)
+
+	const start = performance.now()
+	await parser(html)
+	const end = performance.now()
+
+	console.log(end - start)
+
+	return getAll()
+}
+
+export async function debugGeo(params: QueryParams): Promise<AccuWeatherGeolocation[]> {
+	return await geolocationFromQuery(params.query)
+}
+
+// Fn
 
 function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeather {
 	let date = new Date()
@@ -57,22 +85,30 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 	date.setSeconds(0)
 	date.setMilliseconds(0)
 
-	const [riseHour, riseMinute] = json.sun.rise.split(':')
-	const [setHour, setMinute] = json.sun.set.split(':')
+	const splitChar = json.sun.rise.includes('.') ? '.' : ':'
+	const [riseHour, riseMinute] = json.sun.rise.split(splitChar)
+	const [setHour, setMinute] = json.sun.set.split(splitChar)
 
 	let riseHourInt = parseInt(riseHour.replace('AM', '').replace('PM', ''))
 	let setHourInt = parseInt(setHour.replace('AM', '').replace('PM', ''))
 
 	if (json.sun.rise.includes('PM')) {
-		riseHourInt = parseInt(riseHour) + 12
+		riseHourInt = parseInt(riseHour.replace('PM', '')) + 12
 	}
 	if (json.sun.set.includes('PM')) {
-		setHourInt = parseInt(setHour) + 12
+		setHourInt = parseInt(setHour.replace('PM', '')) + 12
 	}
 
-	// 4.
+	// 4. Geo
 	const { pathname } = new URL(json.meta.url)
 	const [_, __, country, city] = pathname.split('/')
+	const geo: AccuWeather['geo'] = {
+		city: decodeURIComponent(city),
+		country: decodeURIComponent(country.toUpperCase()),
+	}
+
+	if (params.lat) geo.lat = parseFloat(params.lat)
+	if (params.lon) geo.lon = parseFloat(params.lon)
 
 	// 5.
 	return {
@@ -81,12 +117,7 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 			lang: params.lang,
 			provider: 'accuweather',
 		},
-		geo: {
-			lat: parseFloat(params.lat),
-			lon: parseFloat(params.lon),
-			city: decodeURIComponent(city.replaceAll('-', ' ')),
-			country: decodeURIComponent(country.toUpperCase()),
-		},
+		geo: geo,
 		now: {
 			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
 			temp: parseInt(json.now.temp),
@@ -102,37 +133,50 @@ function validateJson(json: AccuweatherContent, params: QueryParams): AccuWeathe
 	}
 }
 
-function transformToJson(html: string): AccuweatherContent {
-	const $ = cheerio.load(html)
+function transformToJson(): AccuweatherContent {
+	const sun = findAll('sunrise-sunset__times-value')
 
-	return {
+	const daily = {
+		temp: findAll(`hourly-list__list__item-temp`),
+		rain: findAll(`hourly-list__list__item-temp`),
+	}
+
+	const hourly = {
+		high: findAll(`temp-hi`),
+		low: findAll(`temp-lo`),
+		day: findAll(`no-wrap`),
+		night: findAll(`no-wrap`),
+		rain: findAll(``),
+	}
+
+	const result = {
 		meta: {
-			url: 'https://accuweather.com' + encodeURI($('.header-city-link').attr('href') ?? ''),
+			url: 'https://accuweather.com' + (find('header-loc')?.attr?.href ?? ''),
 		},
 		now: {
-			icon: $('.cur-con-weather-card .weather-icon')?.attr('data-src') ?? '',
-			temp: $('.cur-con-weather-card .temp-container')?.text(),
-			feels: $('.cur-con-weather-card .real-feel')?.text(),
-			description: $('.cur-con-weather-card .phrase')?.text(),
+			icon: find('header-weather-icon')?.attr?.['data-src'] ?? '',
+			temp: find('after-temp')?.text,
+			feels: find('real-feel')?.text,
+			description: find('phrase')?.text,
 		},
 		sun: {
-			rise: $('.sunrise-sunset__times-value:nth(0)')?.text(),
-			set: $('.sunrise-sunset__times-value:nth(1)')?.text(),
+			rise: sun[0]?.text,
+			set: sun[1]?.text,
 		},
 		hourly: new Array(12).fill('').map((_, i) => ({
-			time: $(`.hourly-list__list__item-time:nth(${i})`)?.text(),
-			temp: $(`.hourly-list__list__item-temp:nth(${i})`)?.text(),
-			rain: $(`.hourly-list__list__item-precip:nth(${i})`)?.text(),
+			temp: daily.temp[i]?.text,
+			rain: '0%',
 		})),
 		daily: new Array(10).fill('').map((_, i) => ({
-			time: $(`.daily-list-item:nth(${i}) .date p:last-child`)?.text(),
-			high: $(`.daily-list-item:nth(${i}) .temp-hi`)?.text(),
-			low: $(`.daily-list-item:nth(${i}) .temp-lo`)?.text(),
-			day: $(`.daily-list-item:nth(${i}) .phrase p:first-child`)?.text(),
-			night: $(`.daily-list-item:nth(${i}) .phrase p:last-child`)?.text(),
-			rain: $(`.daily-list-item:nth(${i}) .precip`)?.text(),
+			high: hourly.high[i]?.text,
+			low: hourly.low[i]?.text,
+			day: hourly.day[i]?.text,
+			night: hourly.night[i]?.text,
+			rain: '0%',
 		})),
 	}
+
+	return result
 }
 
 async function fetchPageContent(params: QueryParams): Promise<string> {
@@ -154,31 +198,44 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	}
 
 	if (query) {
-		const q = encodeURIComponent(query)
-		const autocompleteURL = `https://www.accuweather.com/web-api/autocomplete?query=${q}&language=en-us`
-		const autocompleteHeaders = {
-			...headers,
-			cookie: `awx_user=tp:C|lang:en-US;`,
-		}
-		const autocompleteResponse = await fetch(autocompleteURL, {
-			headers: autocompleteHeaders,
-		})
-
-		const autocompleteResult = await autocompleteResponse?.json()
-		const key = autocompleteResult[0]?.key
-
-		path += `web-api/three-day-redirect?key=${key}`
+		const geo = await geolocationFromQuery(params.query)
+		path += `web-api/three-day-redirect?key=${geo[0].key}`
 	} else {
 		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
 
-	let text = await (await fetch(path, { headers }))?.text()
+	let html = await (await fetch(path, { headers }))?.text()
 
-	if (text === undefined) {
+	if (html === undefined) {
 		throw new Error('Could not connect to accuweather.com')
 	}
 
-	text = text.replaceAll('\n', '').replaceAll('\t', '')
+	html = html.replaceAll('\n', '').replaceAll('\t', '')
+	html = html.slice(html.indexOf('</head>'))
 
-	return text
+	return html
+}
+
+async function geolocationFromQuery(query: string): Promise<AccuWeatherGeolocation[]> {
+	const headers = {
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
+		Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+		'Accept-Encoding': 'gzip, deflate, br, zstd',
+		'Accept-Language': 'en-US',
+		cookie: '',
+	}
+
+	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${new Date().getTime()}`
+	const resp = await fetch(path, { headers })
+	const result = (await resp?.json()) as AccuWeatherGeolocation[]
+
+	if (result.length > 1) {
+		return result.map((item) => ({
+			key: item.key,
+			name: item.name,
+			longName: item.longName,
+		}))
+	} else {
+		throw new Error('Location is empty')
+	}
 }

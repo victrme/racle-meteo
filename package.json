@@ -1,19 +1,5 @@
 {
-	"name": "racle-meteo",
-	"type": "module",
-	"private": true,
-	"scripts": {
-		"dev": "npx wrangler dev",
-		"deploy": "npx wrangler deploy"
-	},
 	"dependencies": {
-		"cheerio": "^1.0.0"
-	},
-	"prettier": {
-		"tabWidth": 4,
-		"useTabs": true,
-		"semi": false,
-		"singleQuote": true,
-		"printWidth": 144
+		"htmlparser2": "^9.1.0"
 	}
 }

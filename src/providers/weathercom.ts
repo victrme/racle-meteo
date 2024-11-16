@@ -1,9 +1,10 @@
-import * as cheerio from 'cheerio/slim'
-
+import parser, { find } from '../parser.ts'
 import type { QueryParams } from '../types.ts'
 
 export default async function weathercom(params: QueryParams) {
 	const html = await fetchPageContent(params)
+	await parser(html)
+
 	const json = transformToJson(html)
 	const api = validateJson(json, params)
 
@@ -16,27 +17,25 @@ function validateJson(json: unknown, params: QueryParams): undefined {
 }
 
 function transformToJson(html: string): unknown {
-	const $ = cheerio.load(html)
-
 	return {
 		meta: {
-			url: $('a.styles--weatherData--Tl3Lx').attr('href') ?? '',
+			url: find('a.styles--weatherData--Tl3Lx').attr?.href ?? '',
 		},
 		now: {
-			icon: $('.CurrentConditions--wxIcon--BOjPq')?.attr('skycode') ?? '',
-			temp: $('.current-temp')?.text(),
-			feels: $('.TodayDetailsCard--feelsLikeTempValue--8WgHV')?.text(),
-			description: $('.CurrentConditions--phraseValue---VS-k')?.text(),
+			icon: find('.CurrentConditions--wxIcon--BOjPq').attr?.skycode ?? '',
+			temp: find('.current-temp')?.text,
+			feels: find('.TodayDetailsCard--feelsLikeTempValue--8WgHV')?.text,
+			description: find('.CurrentConditions--phraseValue---VS-k')?.text,
 		},
 		sun: {
-			rise: $('.TwcSunChart--sunriseDateItem--Os-KL')?.text(),
-			set: $('.TwcSunChart--sunsetDateItem--y9wq2')?.text(),
+			rise: find('.TwcSunChart--sunriseDateItem--Os-KL')?.text,
+			set: find('.TwcSunChart--sunsetDateItem--y9wq2')?.text,
 		},
-		daily: new Array(10).fill('').map((_, i) => ({
-			description: $(`.DailyForecast--CardContent--y6e2w .DailyContent--narrative--jqi6P:nth(${i})`)?.text(),
-			high: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--highTempValue--VHKaO:nth(${i})`)?.text(),
-			low: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--lowTempValue--ogrzb:nth(${i})`)?.text(),
-			rain: $(`.DailyForecast--CardContent--y6e2w .DetailsSummary--precip--YXw9t:nth(${i})`)?.text(),
+		daily: new Array(10).fill('').map((_, __) => ({
+			description: find(`.DailyForecast--CardContent--y6e2w .DailyContent--narrative--jqi6P:nth(find{i})`)?.text,
+			high: find(`.DailyForecast--CardContent--y6e2w .DetailsSummary--highTempValue--VHKaO:nth(find{i})`)?.text,
+			low: find(`.DailyForecast--CardContent--y6e2w .DetailsSummary--lowTempValue--ogrzb:nth(find{i})`)?.text,
+			rain: find(`.DailyForecast--CardContent--y6e2w .DetailsSummary--precip--YXw9t:nth(find{i})`)?.text,
 		})),
 	}
 }

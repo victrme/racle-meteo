@@ -8,12 +8,13 @@ export function isForeca(json: AccuWeather | Foreca): json is Foreca {
 
 export interface QueryParams {
 	provider: 'accuweather' | 'foreca' | 'weathercom' | 'auto' | ''
+	debug: 'nodes' | 'content' | 'geo' | ''
 	data: 'all' | 'simple'
 	unit: 'C' | 'F'
 	query: string
 	lang: string
-	lat: string
-	lon: string
+	lat?: string
+	lon?: string
 }
 
 /*************
@@ -27,8 +28,8 @@ export interface SimpleWeather {
 		provider: 'accuweather' | 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}
@@ -60,8 +61,8 @@ export interface AccuWeather {
 		provider: 'accuweather' | 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}
@@ -105,18 +106,22 @@ export interface AccuweatherContent {
 		set: string
 	}
 	hourly: {
-		time: string
 		temp: string
 		rain: string
 	}[]
 	daily: {
-		time: string
 		high: string
 		low: string
 		day: string
 		night: string
 		rain: string
 	}[]
+}
+
+export interface AccuWeatherGeolocation {
+	key: string
+	name: string
+	longName: string
 }
 
 /*************
@@ -130,8 +135,8 @@ export interface Foreca {
 		provider: 'foreca'
 	}
 	geo: {
-		lat: number
-		lon: number
+		lat?: number
+		lon?: number
 		city: string
 		country: string
 	}

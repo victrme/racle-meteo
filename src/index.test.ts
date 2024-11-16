@@ -1,42 +1,167 @@
 import { ACCUWEATHER_STRUCT, FORECA_STRUCT, SIMPLE_STRUCT } from './structs.ts'
+import { QueryParams } from './types.ts'
 import main from './index.ts'
 
-Deno.test('Basic Accuweather', async function () {
-	const json = await getData('?lat=48.8582&lon=2.2944&provider=accuweather')
-	compareTypes(json, ACCUWEATHER_STRUCT)
-})
+type OptionalParams = Partial<Record<keyof QueryParams, string>>
+type SomeJson = Record<string, unknown>
 
-Deno.test('Basic Foreca', async function () {
-	const json = await getData('?lat=48.8582&lon=2.2944&provider=foreca')
-	compareTypes(json, FORECA_STRUCT)
-})
+const LAT = '48.8582'
+const LON = '2.2944'
 
-Deno.test('Simple data with Accuweather', async function () {
-	const json = await getData(
-		'?lat=48.8582&lon=2.2944&provider=accuweather&data=simple',
+// Providers
+
+Deno.test('Provider: Accuweather', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'accuweather',
+			lat: LAT,
+			lon: LON,
+		}),
+		FORECA_STRUCT,
 	)
-	compareTypes(json, SIMPLE_STRUCT)
 })
 
-Deno.test('Simple data with Foreca', async function () {
-	const json = await getData(
-		'?lat=48.8582&lon=2.2944&provider=foreca&data=simple',
+Deno.test('Provider: Foreca', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'foreca',
+			lat: LAT,
+			lon: LON,
+		}),
+		FORECA_STRUCT,
 	)
-	compareTypes(json, SIMPLE_STRUCT)
 })
 
-async function getData(query: string): Promise<Record<string, unknown>> {
-	const resp = await main.fetch(new Request('https://example.com/' + query))
+Deno.test('Provider: Auto', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'auto',
+			lat: LAT,
+			lon: LON,
+		}),
+		SIMPLE_STRUCT,
+	)
+})
+
+Deno.test.ignore('Provider: Wunderground', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'wunderground',
+			lat: LAT,
+			lon: LON,
+		}),
+		ACCUWEATHER_STRUCT,
+	)
+})
+
+// Simple data
+
+Deno.test('Simple data: Accuweather', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'accuweather',
+			data: 'simple',
+			lat: LAT,
+			lon: LON,
+		}),
+		SIMPLE_STRUCT,
+	)
+})
+
+Deno.test('Simple data: Foreca', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'foreca',
+			data: 'simple',
+			lat: LAT,
+			lon: LON,
+		}),
+		SIMPLE_STRUCT,
+	)
+})
+
+Deno.test('Simple data: Auto overrides "all" data', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'auto',
+			data: 'all',
+			lat: LAT,
+			lon: LON,
+		}),
+		SIMPLE_STRUCT,
+	)
+})
+
+// Params
+
+Deno.test.ignore('Params: Wrong provider falls back to landing', async function () {
+	await getResp({
+		provider: 'what',
+		lat: LAT,
+		lon: LON,
+	})
+})
+
+Deno.test('Params: Wrong lang falls back to english', async function () {
+	const json = await getJson({
+		provider: 'accuweather',
+		lang: 'dlja',
+		lat: LAT,
+		lon: LON,
+	})
+
+	//@ts-expect-error: unknown json
+	assert(json.meta.url.includes('/en/'))
+})
+
+Deno.test('Params: Wrong unit falls back to C', async function () {
+	const json = await getJson({
+		provider: 'accuweather',
+		unit: 'fahrennbeit',
+		lat: LAT,
+		lon: LON,
+	})
+
+	//@ts-expect-error: unknown json
+	assert(json.now.temp < 50)
+})
+
+Deno.test('Params: Has provider & no query/coords', async function () {
+	const req = new Request(`https://example.com?provider=accuweather`)
+	const resp = await main.fetch(req)
+
+	assert(resp.status === 503)
+})
+
+// Helpers
+
+function assert(condition: boolean): void {
+	if (!condition) {
+		throw new Error('Assertion failed')
+	}
+}
+
+function paramsStringify(params: OptionalParams) {
+	return Object.entries(params).map(([key, value]) => `&${key}=${value}`).join('').replace('&', '?')
+}
+
+async function getJson(params: OptionalParams): Promise<SomeJson> {
+	const resp = await main.fetch(new Request('https://example.com/' + paramsStringify(params)))
 	const json = await resp.json()
 	return json
 }
 
-function compareTypes(obj: Record<string, unknown>, struct: Record<string, unknown>) {
+async function getResp(params: OptionalParams): Promise<Response> {
+	const resp = await main.fetch(new Request('https://example.com/' + paramsStringify(params)))
+	return resp
+}
+
+function compareTypes(obj: SomeJson, struct: SomeJson): true {
 	for (const [key, type] of Object.entries(struct)) {
 		if (typeof type === 'object') {
 			compareTypes(
-				obj[key] as Record<string, unknown>,
-				type as Record<string, unknown>,
+				obj[key] as SomeJson,
+				type as SomeJson,
 			)
 			continue
 		}
@@ -47,4 +172,6 @@ function compareTypes(obj: Record<string, unknown>, struct: Record<string, unkno
 			]}"`
 		}
 	}
+
+	return true
 }
