@@ -1,4 +1,4 @@
-import parser, { find, findAll } from '../parser.ts'
+import parser, { find, findAll, getAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
 import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams } from '../types.ts'
@@ -27,12 +27,12 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 	const html = await fetchPageContent(params)
 
 	const start = performance.now()
-	const nodes = await parser(html)
+	await parser(html)
 	const end = performance.now()
 
 	console.log(end - start)
 
-	return nodes
+	return getAll()
 }
 
 export async function debugGeo(params: QueryParams): Promise<AccuWeatherGeolocation[]> {

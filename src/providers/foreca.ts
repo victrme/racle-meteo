@@ -1,4 +1,4 @@
-import parser, { find, findAll, next, prev } from '../parser.ts'
+import parser, { find, findAll, getAll, next, prev, prevAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
 import type { Foreca, ForecaContent, ForecaGeo, QueryParams } from '../types.ts'
@@ -30,12 +30,12 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 	const html = await fetchPageContent(params)
 
 	const start = performance.now()
-	const nodes = await parser(html)
+	await parser(html)
 	const end = performance.now()
 
 	console.log(end - start)
 
-	return nodes
+	return getAll()
 }
 
 // fn
@@ -112,6 +112,17 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 function transformToJson(): ForecaContent {
 	const [sunrise, sunset] = findAll('value time time_24h')
 
+	const daily = {
+		high_c: prevAll('value wind wind_mph', 6),
+		high_f: prevAll('value wind wind_mph', 5),
+		low_c: prevAll('value wind wind_mph', 4),
+		low_f: prevAll('value wind wind_mph', 3),
+		wind_mph: prevAll('value wind wind_mph', 1),
+		wind_kmh: prevAll('value wind wind_kmh', 1),
+		rain_in: findAll('value rain rain_in'),
+		rain_mm: findAll('value rain rain_mm'),
+	}
+
 	return {
 		now: {
 			temp: {
@@ -134,22 +145,22 @@ function transformToJson(): ForecaContent {
 			rise: sunrise?.text,
 			set: sunset?.text,
 		},
-		daily: new Array(5).fill('').map((_, __) => ({
+		daily: new Array(5).fill('').map((_, i) => ({
 			high: {
-				c: prev('value wind wind_mph', 6)?.text,
-				f: prev('value wind wind_mph', 5)?.text,
+				c: daily.high_c[i + 1]?.text,
+				f: daily.high_f[i + 1]?.text,
 			},
 			low: {
-				c: prev('value wind wind_mph', 4)?.text,
-				f: prev('value wind wind_mph', 3)?.text,
+				c: daily.low_c[i + 1]?.text,
+				f: daily.low_f[i + 1]?.text,
 			},
 			wind: {
-				mph: find('value wind wind_mph')?.text,
-				kmh: find('value wind wind_kmh')?.text,
+				mph: daily.wind_mph[i + 1]?.text,
+				kmh: daily.wind_kmh[i + 1]?.text,
 			},
 			rain: {
-				in: find('value rain rain_in')?.text,
-				mm: find('value rain rain_mm')?.text,
+				in: daily.rain_in[i]?.text,
+				mm: daily.rain_mm[i]?.text,
 			},
 		})),
 	}
