@@ -1,7 +1,7 @@
 import parser, { find, findAll, getAll, next, prev, prevAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
-import type { Foreca, ForecaContent, ForecaGeo, QueryParams } from '../types.ts'
+import type { Foreca, ForecaContent, ForecaGeo, QueryParams, SimpleLocations } from '../types.ts'
 
 const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
 
@@ -17,6 +17,16 @@ export default async function foreca(params: QueryParams): Promise<Foreca> {
 	const api = validateJson(json, params)
 
 	return api
+}
+
+export async function geo(params: QueryParams): Promise<SimpleLocations> {
+	const res = await getForecaLocation({
+		lat: params.lat,
+		lon: params.lon,
+		query: params.query,
+	})
+
+	return res
 }
 
 export async function debugContent(params: QueryParams): Promise<ForecaContent> {

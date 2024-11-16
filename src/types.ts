@@ -15,6 +15,7 @@ export interface QueryParams {
 	lang: string
 	lat?: string
 	lon?: string
+	geo?: unknown
 }
 
 /*************
@@ -49,6 +50,11 @@ export interface SimpleWeather {
 		low: number
 	}[]
 }
+
+export type SimpleLocations = {
+	name: string
+	longName: string
+}[]
 
 /*****************
 	Accuweather

@@ -3,9 +3,9 @@
 This service cleverly transforms weather web pages into a usable (and free!) rest API. It uses [accuweather](https://accuweather.com) and/or
 [foreca](https://foreca.com) under the hood.
 
-- Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
-- Flexible: Easy to update with strong typing and htmlparser2 as basic parser
-- Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
+-   Sturdy: Uses other providers as fallback to guarentee a response if a provider becomes invalid
+-   Flexible: Easy to update with strong typing and htmlparser2 as basic parser
+-   Compatible: Pure typescript using deno and small dependencies means you can install it almost anywhere
 
 ## Install
 
@@ -58,6 +58,7 @@ Define a weather provider to start using the API.
 | Parameter | Type                                      | Required | Description                                                                                                                                  |
 | --------- | ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | provider  | accuweather, foreca, ~~weathercom~~, auto | required | Choose the weather provider. "Auto" returns "simple" data, specific providers returns all, see "data".                                       |
+| geo       | any                                       | optional | Geo returns a list of found locations.                                                                                                        |
 | query, q  | string                                    | optional | Matches a location based on your query. Best to use as "City,CountryCode". Adding "query" overrides "lat" & "lon" parameters.                |
 | lat       | string                                    | optional | Location latitude.                                                                                                                           |
 | lon       | string                                    | optional | Location longitude.                                                                                                                          |
@@ -109,8 +110,8 @@ Define a weather provider to start using the API.
 
 ## Simple icon equivalences
 
-- Accuweather: https://developer.accuweather.com/weather-icons
-- Foreca: https://developer.foreca.com/resources
+-   Accuweather: https://developer.accuweather.com/weather-icons
+-   Foreca: https://developer.foreca.com/resources
 
 As a union:
 
@@ -169,10 +170,10 @@ Equivalence between other providers:
 
 Language codes are following the ISO-639 standard. A wrong language throws an error. Sanitized so that:
 
-- `lang` is case insensitive
-- `-` or `_` works
-- `pt` resolves to `pt-pt`
-- localization (-XX) is removed with `foreca`
+-   `lang` is case insensitive
+-   `-` or `_` works
+-   `pt` resolves to `pt-pt`
+-   localization (-XX) is removed with `foreca`
 
 | code  | name                    | foreca | accuweather |
 | ----- | ----------------------- | ------ | ----------- |
@@ -199,7 +200,7 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | pl    | Polski                  | true   | true        |
 | ca    | Català                  |        | true        |
 | pt-br | Português (Brazil)      |        | true        |
-| hi    | हिन्दी                   |        | true        |
+| hi    | हिन्दी                  |        | true        |
 | ru    | русский                 | true   | true        |
 | ar    | عربي                    |        | true        |
 | el    | Ελληνικά                | true   | true        |
@@ -225,18 +226,18 @@ Language codes are following the ISO-639 standard. A wrong language throws an er
 | th    | ไทย                     |        | true        |
 | vi    | Tiếng Việt              |        | true        |
 | fa    | فارسی                   |        | true        |
-| bn    | বাংলা                     |        | true        |
+| bn    | বাংলা                   |        | true        |
 | bs    | bosanski                |        | true        |
 | is    | íslenska                |        | true        |
 | sw    | Kiswahili               |        | true        |
-| ur    | اُردُو                    |        | true        |
+| ur    | اُردُو                  |        | true        |
 | sr-me | Crnogorski              |        | true        |
 | uz    | Oʻzbekcha               |        | true        |
 | az    | Azərbaycanca            |        | true        |
-| ta    | தமிழ்                    |        | true        |
-| gu    | ગુજરાતી                  |        | true        |
-| kn    | ಕನ್ನಡ                    |        | true        |
-| te    | తెలుగు                   |        | true        |
+| ta    | தமிழ்                   |        | true        |
+| gu    | ગુજરાતી                 |        | true        |
+| kn    | ಕನ್ನಡ                   |        | true        |
+| te    | తెలుగు                  |        | true        |
 | mr    | मराठी                   |        | true        |
-| pa    | ਪੰਜਾਬੀ                   |        | true        |
-| my    | မြန်မာဘာသာ               |        | true        |
+| pa    | ਪੰਜਾਬੀ                  |        | true        |
+| my    | မြန်မာဘာသာ              |        | true        |

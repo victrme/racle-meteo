@@ -5,7 +5,7 @@ import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
 import { isAccuweather, isForeca } from './types.ts'
 
-import type { AccuWeather, Foreca, QueryParams } from './types.ts'
+import type { AccuWeather, Foreca, QueryParams, SimpleLocations } from './types.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -31,6 +31,7 @@ async function main(request: Request) {
 	const cf_longitude = (request as CFRequest)?.cf?.longitude
 
 	const url = new URL(request.url)
+	const geo = url.searchParams.get('geo') ?? ''
 	const debug = url.searchParams.get('debug') ?? ''
 	const unit = url.searchParams.get('unit') ?? 'C'
 	const lang = url.searchParams.get('lang') ?? 'en'
@@ -40,7 +41,7 @@ async function main(request: Request) {
 	const lon = url.searchParams.get('lon') ?? cf_longitude ?? '0'
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const params = sanitizeParams({ lat, lon, lang, unit, provider, data, query, debug })
+	const params = sanitizeParams({ lat, lon, lang, unit, provider, data, query, debug, geo })
 
 	let body = ''
 	let status = 200
@@ -82,6 +83,28 @@ async function main(request: Request) {
 		// 	const response = await foreca.debugNodes(params)
 		// 	return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
 		// }
+	}
+
+	if (params.geo && params.provider) {
+		let list: SimpleLocations = []
+
+		if (params.provider === 'accuweather') {
+			list = await accuweather.geo(params)
+		}
+
+		if (params.provider === 'foreca') {
+			list = await foreca.geo(params)
+		}
+
+		return new Response(JSON.stringify(list), {
+			status,
+			headers: {
+				'access-control-allow-methods': 'GET',
+				'access-control-allow-origin': '*',
+				'content-type': contentType,
+				'cache-control': cacheControl,
+			},
+		})
 	}
 
 	try {
@@ -146,6 +169,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	let debug: QueryParams['debug'] = ''
 	let lat: QueryParams['lat'] = params.lat
 	let lon: QueryParams['lon'] = params.lon
+	let geo: QueryParams['geo'] = params.geo || undefined
 
 	if (params.provider === 'auto') {
 		params.data = 'simple'
@@ -188,6 +212,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		debug: debug,
 		lat: lat,
 		lon: lon,
+		geo: geo,
 	}
 }
 

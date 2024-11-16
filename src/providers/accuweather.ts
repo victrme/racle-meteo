@@ -1,7 +1,7 @@
 import parser, { find, findAll, getAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
-import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams } from '../types.ts'
+import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams, SimpleLocations } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
@@ -14,6 +14,10 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 	const api = validateJson(json, params)
 
 	return api
+}
+
+export async function geo(params: QueryParams): Promise<SimpleLocations> {
+	return await geolocationFromQuery(params.query)
 }
 
 export async function debugContent(params: QueryParams): Promise<AccuweatherContent> {
