@@ -5,7 +5,7 @@ import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
 import { isAccuweather, isForeca } from './types.ts'
 
-import type { AccuWeather, Foreca, QueryParams, SimpleLocations } from './types.ts'
+import type { AccuWeather, AccuweatherGeolocation, Foreca, ForecaGeo, QueryParams, SimpleLocations } from './types.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -41,7 +41,17 @@ async function main(request: Request) {
 	const lon = url.searchParams.get('lon') ?? cf_longitude ?? '0'
 	const provider = url.searchParams.get('provider') ?? ''
 
-	const params = sanitizeParams({ lat, lon, lang, unit, provider, data, query, debug, geo })
+	const params = sanitizeParams({
+		lat,
+		lon,
+		geo,
+		lang,
+		unit,
+		data,
+		query,
+		debug,
+		provider,
+	})
 
 	let body = ''
 	let status = 200
@@ -73,20 +83,8 @@ async function main(request: Request) {
 		}
 	}
 
-	if (params.debug === 'geo') {
-		if (params.provider === 'accuweather') {
-			const response = await accuweather.debugGeo(params)
-			return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
-		}
-
-		// if (params.provider === 'foreca') {
-		// 	const response = await foreca.debugNodes(params)
-		// 	return new Response(JSON.stringify(response), { headers: { 'content-type': 'application/json' } })
-		// }
-	}
-
 	if (params.geo && params.provider) {
-		let list: SimpleLocations = []
+		let list: AccuweatherGeolocation | ForecaGeo = []
 
 		if (params.provider === 'accuweather') {
 			list = await accuweather.geo(params)

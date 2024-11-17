@@ -19,14 +19,12 @@ export default async function foreca(params: QueryParams): Promise<Foreca> {
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<SimpleLocations> {
-	const res = await getForecaLocation({
+export async function geo(params: QueryParams): Promise<ForecaGeo> {
+	return await getForecaLocation({
 		lat: params.lat,
 		lon: params.lon,
 		query: params.query,
 	})
-
-	return res
 }
 
 export async function debugContent(params: QueryParams): Promise<ForecaContent> {

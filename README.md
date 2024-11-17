@@ -65,7 +65,7 @@ Define a weather provider to start using the API.
 | lang      | string                                    | optional | English by default. Some languages are only available on accuweather, see language list below. Incorrect `lang` fallback to english.         |
 | unit      | C, F                                      | optional | Useful for accuweather or when using "simple" data. Foreca always returns celsius and farenheit.                                             |
 | data      | all, simple                               | optional | Select "all" to retrieve all the data from the provider's webpage. "simple" returns only data available for all providers. "all" by default. |
-| debug     | nodes, content, geo                       | optional | Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated.                             |
+| debug     | nodes, content                            | optional | Debugging "nodes" returns a list of found html tags. "content" shows strings collected before being manipulated.                             |
 
 ## Response example
 

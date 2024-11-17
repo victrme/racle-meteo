@@ -124,11 +124,30 @@ export interface AccuweatherContent {
 	}[]
 }
 
-export interface AccuWeatherGeolocation {
-	key: string
-	name: string
-	longName: string
-}
+export type AccuweatherGeolocation = {
+	'key': string
+	'name': string
+	'longName': string
+	// Unused, mostly null
+	'englishName': string | null
+	'gmtOffset': number
+	'hasAlerts': boolean
+	'hasForecastConfidence': boolean
+	'hasPollen': boolean
+	'hasMinuteCast': boolean
+	'hasFutureRadar': boolean
+	'lat': number
+	'lon': number
+	'mediaRegion': string | null
+	'region': string | null
+	'timeZone': string | null
+	'timeZoneCode': string | null
+	'zoom': string | null
+	'administrativeArea': string | null
+	'country': string | null
+	'localizedName': string | null
+	'primaryPostalCode': string | null
+}[]
 
 /*************
 	Foreca

@@ -1,7 +1,7 @@
 import parser, { find, findAll, getAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
-import type { AccuWeather, AccuweatherContent, AccuWeatherGeolocation, QueryParams, SimpleLocations } from '../types.ts'
+import type { AccuWeather, AccuweatherContent, AccuweatherGeolocation, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
@@ -16,14 +16,13 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<SimpleLocations> {
+export async function geo(params: QueryParams): Promise<AccuweatherGeolocation> {
 	return await geolocationFromQuery(params.query)
 }
 
 export async function debugContent(params: QueryParams): Promise<AccuweatherContent> {
 	const html = await fetchPageContent(params)
 	await parser(html)
-
 	return transformToJson()
 }
 
@@ -37,10 +36,6 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 	console.log(end - start)
 
 	return getAll()
-}
-
-export async function debugGeo(params: QueryParams): Promise<AccuWeatherGeolocation[]> {
-	return await geolocationFromQuery(params.query)
 }
 
 // Fn
@@ -220,7 +215,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	return html
 }
 
-async function geolocationFromQuery(query: string): Promise<AccuWeatherGeolocation[]> {
+async function geolocationFromQuery(query: string): Promise<AccuweatherGeolocation> {
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
 		Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -231,14 +226,10 @@ async function geolocationFromQuery(query: string): Promise<AccuWeatherGeolocati
 
 	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${new Date().getTime()}`
 	const resp = await fetch(path, { headers })
-	const result = (await resp?.json()) as AccuWeatherGeolocation[]
+	const result = (await resp?.json()) as AccuweatherGeolocation
 
 	if (result.length > 1) {
-		return result.map((item) => ({
-			key: item.key,
-			name: item.name,
-			longName: item.longName,
-		}))
+		return result
 	} else {
 		throw new Error('Location is empty')
 	}
