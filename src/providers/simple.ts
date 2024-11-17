@@ -1,10 +1,10 @@
-import type { AccuWeather, Foreca, QueryParams, SimpleWeather } from '../types.ts'
+import type { AccuWeather, Foreca, QueryParams, Simple } from '../types.ts'
 import { isAccuweather, isForeca } from '../types.ts'
 
-export default function toSimpleWeather(json: AccuWeather | Foreca, params: QueryParams): SimpleWeather {
+export default function toSimpleWeather(json: AccuWeather.Weather | Foreca.Weather, params: QueryParams): Simple.Weather {
 	const { provider, unit } = params
 
-	const simple: SimpleWeather = {
+	const simple: Simple.Weather = {
 		meta: { ...json.meta },
 		geo: { ...json.geo },
 		now: {
@@ -17,7 +17,7 @@ export default function toSimpleWeather(json: AccuWeather | Foreca, params: Quer
 			rise: json.sun.rise,
 			set: json.sun.set,
 		},
-		daily: [] as SimpleWeather['daily'],
+		daily: [] as Simple.Weather['daily'],
 	}
 
 	if ((provider === 'auto' || provider === 'foreca') && isForeca(json)) {
@@ -117,7 +117,8 @@ export const SIMPLE_ICONS = Object.freeze({
 	},
 	snow: {
 		accuweather: '20, 21, 22, 23, 24, 25, 26, 43, 44',
-		foreca: 'd221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432',
+		foreca:
+			'd221, d311, d411, d221, d321, d431, d212, d312, d412, d222, d322, d422, d432, n221, n311, n411, n221, n321, n431, n212, n312, n412, n222, n322, n422, n432',
 	},
 	mist: {
 		accuweather: '11',

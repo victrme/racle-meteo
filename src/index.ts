@@ -5,7 +5,7 @@ import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather from './providers/simple.ts'
 import { isAccuweather, isForeca } from './types.ts'
 
-import type { AccuWeather, AccuweatherGeolocation, Foreca, ForecaGeo, QueryParams, SimpleLocations } from './types.ts'
+import type { AccuWeather, Foreca, QueryParams } from './types.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -57,7 +57,7 @@ async function main(request: Request) {
 	let status = 200
 	let contentType = 'application/json'
 	let cacheControl = 'public, max-age=1800'
-	let json: AccuWeather | Foreca | undefined = undefined
+	let json: AccuWeather.Weather | Foreca.Weather | undefined = undefined
 
 	if (params.debug === 'content') {
 		if (params.provider === 'accuweather') {
@@ -84,7 +84,7 @@ async function main(request: Request) {
 	}
 
 	if (params.geo && params.provider) {
-		let list: AccuweatherGeolocation | ForecaGeo = []
+		let list: AccuWeather.Locations | Foreca.Location = []
 
 		if (params.provider === 'accuweather') {
 			list = await accuweather.geo(params)
@@ -167,7 +167,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	let debug: QueryParams['debug'] = ''
 	let lat: QueryParams['lat'] = params.lat
 	let lon: QueryParams['lon'] = params.lon
-	let geo: QueryParams['geo'] = params.geo || undefined
+	const geo: QueryParams['geo'] = params.geo || undefined
 
 	if (params.provider === 'auto') {
 		params.data = 'simple'

@@ -1,7 +1,7 @@
 import parser, { find, findAll, getAll, next, prev, prevAll } from '../parser.ts'
 
 import type { FlatNode } from '../parser.ts'
-import type { Foreca, ForecaContent, ForecaGeo, QueryParams, SimpleLocations } from '../types.ts'
+import type { Foreca, QueryParams } from '../types.ts'
 
 const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
 
@@ -9,7 +9,7 @@ let pageURL = ''
 let foundCity = ''
 let foundCountry = ''
 
-export default async function foreca(params: QueryParams): Promise<Foreca> {
+export default async function foreca(params: QueryParams): Promise<Foreca.Weather> {
 	const html = await fetchPageContent(params)
 	await parser(html)
 
@@ -19,7 +19,7 @@ export default async function foreca(params: QueryParams): Promise<Foreca> {
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<ForecaGeo> {
+export async function geo(params: QueryParams): Promise<Foreca.Location> {
 	return await getForecaLocation({
 		lat: params.lat,
 		lon: params.lon,
@@ -27,7 +27,7 @@ export async function geo(params: QueryParams): Promise<ForecaGeo> {
 	})
 }
 
-export async function debugContent(params: QueryParams): Promise<ForecaContent> {
+export async function debugContent(params: QueryParams): Promise<Foreca.Content> {
 	const html = await fetchPageContent(params)
 	await parser(html)
 
@@ -48,7 +48,7 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 
 // fn
 
-function validateJson(json: ForecaContent, params: QueryParams): Foreca {
+function validateJson(json: Foreca.Content, params: QueryParams): Foreca.Weather {
 	const [riseHour, riseMinutes] = json.sun.rise?.split(':')
 	const [setHour, setMinutes] = json.sun.set?.split(':')
 
@@ -117,7 +117,7 @@ function validateJson(json: ForecaContent, params: QueryParams): Foreca {
 	}
 }
 
-function transformToJson(): ForecaContent {
+function transformToJson(): Foreca.Content {
 	const [sunrise, sunset] = findAll('value time time_24h')
 
 	const daily = {
@@ -212,7 +212,7 @@ export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryPar
 	return html.slice(html.indexOf('</head>'))
 }
 
-export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams>): Promise<ForecaGeo> {
+export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams>): Promise<Foreca.Location> {
 	if (query) {
 		const path = `https://api.foreca.net/locations/search/${query}.json`
 		const resp = await fetch(path)
