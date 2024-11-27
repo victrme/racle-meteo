@@ -1,4 +1,4 @@
-export const SIMPLE_STRUCT = {
+const SIMPLE_STRUCT = {
 	meta: {
 		url: 'string',
 		lang: 'string',
@@ -29,7 +29,14 @@ export const SIMPLE_STRUCT = {
 	],
 }
 
-export const ACCUWEATHER_STRUCT = {
+const SIMPLE_GEO_STRUCT = [
+	{
+		name: 'string',
+		details: 'string',
+	},
+]
+
+const ACCUWEATHER_STRUCT = {
 	meta: {
 		url: 'string',
 		lang: 'string',
@@ -69,7 +76,14 @@ export const ACCUWEATHER_STRUCT = {
 	],
 }
 
-export const FORECA_STRUCT = {
+const ACCUWEATHER_GEO_STRUCT = [
+	{
+		name: 'string',
+		details: 'string',
+	},
+]
+
+const FORECA_STRUCT = {
 	meta: {
 		url: 'string',
 		lang: 'string',
@@ -101,4 +115,26 @@ export const FORECA_STRUCT = {
 			rain: { in: 'number', mm: 'number' },
 		},
 	],
+}
+
+const FORECA_GEO_STRUCT = [
+	{
+		name: 'string',
+		details: 'string',
+	},
+]
+
+export const STRUCTS = {
+	ACCUWEATHER: {
+		WEATHER: ACCUWEATHER_STRUCT,
+		GEO: ACCUWEATHER_GEO_STRUCT,
+	},
+	FORECA: {
+		WEATHER: FORECA_STRUCT,
+		GEO: FORECA_GEO_STRUCT,
+	},
+	SIMPLE: {
+		WEATHER: SIMPLE_STRUCT,
+		GEO: SIMPLE_GEO_STRUCT,
+	},
 }

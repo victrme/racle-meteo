@@ -16,7 +16,7 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<AccuWeather.Locations> {
+export async function geo(params: QueryParams): Promise<AccuWeather.Location[]> {
 	return await geolocationFromQuery(params.query)
 }
 
@@ -215,7 +215,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	return html
 }
 
-async function geolocationFromQuery(query: string): Promise<AccuWeather.Locations> {
+async function geolocationFromQuery(query: string): Promise<AccuWeather.Location[]> {
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
 		Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -226,7 +226,7 @@ async function geolocationFromQuery(query: string): Promise<AccuWeather.Location
 
 	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${new Date().getTime()}`
 	const resp = await fetch(path, { headers })
-	const result = (await resp?.json()) as AccuWeather.Locations
+	const result = (await resp?.json()) as AccuWeather.Location[]
 
 	if (result.length > 1) {
 		return result

@@ -2,10 +2,10 @@ import './parser.ts'
 import * as foreca from './providers/foreca.ts'
 import * as weathercom from './providers/weathercom.ts'
 import * as accuweather from './providers/accuweather.ts'
-import toSimpleWeather from './providers/simple.ts'
-import { isAccuweather, isForeca } from './types.ts'
+import toSimpleWeather, { toSimpleLocations } from './providers/simple.ts'
+import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from './types.ts'
 
-import type { AccuWeather, Foreca, QueryParams } from './types.ts'
+import type { AccuWeather, Foreca, QueryParams, Simple } from './types.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -84,14 +84,19 @@ async function main(request: Request) {
 	}
 
 	if (params.geo && params.provider) {
-		let list: AccuWeather.Locations | Foreca.Location = []
+		let list: unknown[] = []
 
-		if (params.provider === 'accuweather') {
+		if (params.provider === 'accuweather' || params.provider === 'auto') {
 			list = await accuweather.geo(params)
 		}
-
-		if (params.provider === 'foreca') {
+		if (params.provider === 'foreca' || (params.provider === 'auto' && list.length === 0)) {
 			list = await foreca.geo(params)
+		}
+
+		if (params.provider === 'auto' || params.data === 'simple') {
+			if (isAccuweatherLocation(list) || isForecaLocation(list)) {
+				list = toSimpleLocations(list)
+			}
 		}
 
 		return new Response(JSON.stringify(list), {

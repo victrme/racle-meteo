@@ -6,6 +6,14 @@ export function isForeca(json: AccuWeather.Weather | Foreca.Weather): json is Fo
 	return json?.meta?.provider === 'foreca'
 }
 
+export function isAccuweatherLocation(json: unknown[]): json is AccuWeather.Location[] {
+	return !!(json[0] as AccuWeather.Location)?.key
+}
+
+export function isForecaLocation(json: unknown[]): json is Foreca.Location[] {
+	return !!(json[0] as Foreca.Location)?.id
+}
+
 export interface QueryParams {
 	provider: 'accuweather' | 'foreca' | 'weathercom' | 'auto' | ''
 	debug: 'nodes' | 'content' | 'geo' | ''
@@ -17,10 +25,6 @@ export interface QueryParams {
 	lon?: string
 	geo?: unknown
 }
-
-/*************
-	Simple
-**************/
 
 export declare namespace Simple {
 	interface Weather {
@@ -54,13 +58,9 @@ export declare namespace Simple {
 
 	type Locations = {
 		name: string
-		longName: string
+		detail: string
 	}[]
 }
-
-/*****************
-	Accuweather
-******************/
 
 export declare namespace AccuWeather {
 	interface Weather {
@@ -127,7 +127,7 @@ export declare namespace AccuWeather {
 		}[]
 	}
 
-	type Locations = {
+	interface Location {
 		'key': string
 		'name': string
 		'longName': string
@@ -150,12 +150,8 @@ export declare namespace AccuWeather {
 		'country': string | null
 		'localizedName': string | null
 		'primaryPostalCode': string | null
-	}[]
+	}
 }
-
-/*************
-	Foreca
-**************/
 
 export declare namespace Foreca {
 	interface Weather {

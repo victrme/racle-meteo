@@ -1,5 +1,5 @@
-import { ACCUWEATHER_STRUCT, FORECA_STRUCT, SIMPLE_STRUCT } from './structs.ts'
 import { QueryParams } from './types.ts'
+import { STRUCTS } from './structs.ts'
 import main from './index.ts'
 
 type OptionalParams = Partial<Record<keyof QueryParams, string>>
@@ -17,7 +17,7 @@ Deno.test('Provider: Accuweather', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		FORECA_STRUCT,
+		STRUCTS.FORECA.WEATHER,
 	)
 })
 
@@ -28,7 +28,7 @@ Deno.test('Provider: Foreca', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		FORECA_STRUCT,
+		STRUCTS.FORECA.WEATHER,
 	)
 })
 
@@ -39,7 +39,7 @@ Deno.test('Provider: Auto', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		SIMPLE_STRUCT,
+		STRUCTS.SIMPLE.WEATHER,
 	)
 })
 
@@ -50,7 +50,7 @@ Deno.test.ignore('Provider: Wunderground', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		ACCUWEATHER_STRUCT,
+		STRUCTS.ACCUWEATHER.WEATHER,
 	)
 })
 
@@ -64,7 +64,7 @@ Deno.test('Simple data: Accuweather', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		SIMPLE_STRUCT,
+		STRUCTS.SIMPLE.WEATHER,
 	)
 })
 
@@ -76,7 +76,7 @@ Deno.test('Simple data: Foreca', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		SIMPLE_STRUCT,
+		STRUCTS.SIMPLE.WEATHER,
 	)
 })
 
@@ -88,7 +88,43 @@ Deno.test('Simple data: Auto overrides "all" data', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		SIMPLE_STRUCT,
+		STRUCTS.SIMPLE.WEATHER,
+	)
+})
+
+Deno.test.ignore('Geo: Accuweather', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'accuweather',
+			geo: 'true',
+			lat: LAT,
+			lon: LON,
+		}),
+		STRUCTS.ACCUWEATHER.GEO,
+	)
+})
+
+Deno.test.ignore('Geo: Foreca', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'accuweather',
+			geo: 'true',
+			lat: LAT,
+			lon: LON,
+		}),
+		STRUCTS.ACCUWEATHER.GEO,
+	)
+})
+
+Deno.test.ignore('Geo: Simple', async function () {
+	compareTypes(
+		await getJson({
+			provider: 'accuweather',
+			geo: 'true',
+			lat: LAT,
+			lon: LON,
+		}),
+		STRUCTS.ACCUWEATHER.GEO,
 	)
 })
 
@@ -129,8 +165,8 @@ Deno.test('Params: Wrong unit falls back to C', async function () {
 Deno.test('Params: Has provider & no query/coords', async function () {
 	const req = new Request(`https://example.com?provider=accuweather`)
 	const resp = await main.fetch(req)
-
 	assert(resp.status === 503)
+	console.clear()
 })
 
 // Helpers

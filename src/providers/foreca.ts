@@ -19,12 +19,14 @@ export default async function foreca(params: QueryParams): Promise<Foreca.Weathe
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<Foreca.Location> {
-	return await getForecaLocation({
-		lat: params.lat,
-		lon: params.lon,
-		query: params.query,
-	})
+export async function geo(params: QueryParams): Promise<Foreca.Location[]> {
+	return [
+		await getForecaLocation({
+			lat: params.lat,
+			lon: params.lon,
+			query: params.query,
+		}),
+	]
 }
 
 export async function debugContent(params: QueryParams): Promise<Foreca.Content> {
@@ -213,11 +215,18 @@ export async function fetchPageContent({ lat, lon, query, lang, unit }: QueryPar
 }
 
 export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams>): Promise<Foreca.Location> {
+	type LocationSearch = {
+		query: string
+		language: string
+		results: Foreca.Location[]
+	}
+
 	if (query) {
 		const path = `https://api.foreca.net/locations/search/${query}.json`
 		const resp = await fetch(path)
-		const json = await resp.json()
-		return json.results[0]
+		const json = await resp.json() as LocationSearch
+		const location = json.results[0]
+		return location
 	} else {
 		const path = `https://api.foreca.net/locations/${lon},${lat}.json`
 		const resp = await fetch(path)
@@ -226,8 +235,8 @@ export async function getForecaLocation({ lat, lon, query }: Partial<QueryParams
 	}
 }
 
-// export async function getForecaData(lat, lon) {
-// 	const { id } = await getForecaLocation(lat, lon)
-// 	const resp = await fetch(`https://api.foreca.net/data/favorites/${id}.json`)
-// 	return await resp.json()
-// }
+async function _getForecaData(lat: string, lon: string) {
+	const { id } = await getForecaLocation({ lat, lon })
+	const resp = await fetch(`https://api.foreca.net/data/favorites/${id}.json`)
+	return await resp.json()
+}

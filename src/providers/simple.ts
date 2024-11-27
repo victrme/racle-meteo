@@ -1,5 +1,5 @@
 import type { AccuWeather, Foreca, QueryParams, Simple } from '../types.ts'
-import { isAccuweather, isForeca } from '../types.ts'
+import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from '../types.ts'
 
 export default function toSimpleWeather(json: AccuWeather.Weather | Foreca.Weather, params: QueryParams): Simple.Weather {
 	const { provider, unit } = params
@@ -55,6 +55,18 @@ export default function toSimpleWeather(json: AccuWeather.Weather | Foreca.Weath
 	}
 
 	return simple
+}
+
+export function toSimpleLocations(json: AccuWeather.Location[] | Foreca.Location[]): Simple.Locations {
+	if (isAccuweatherLocation(json)) {
+		return json.map((loc) => ({ name: loc.name, detail: loc.longName }))
+	}
+
+	if (isForecaLocation(json)) {
+		return json.map((loc) => ({ name: loc.name, detail: loc.defaultName }))
+	}
+
+	throw new Error('Cannot get a valid location')
 }
 
 function transformToSimpleIcon(id: string, provider: 'accuweather' | 'foreca'): string {
