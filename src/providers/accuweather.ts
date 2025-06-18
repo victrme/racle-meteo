@@ -4,7 +4,7 @@ import type { FlatNode } from '../parser.ts'
 import type { AccuWeather, QueryParams } from '../types.ts'
 
 const ACCUWEATHER_LANGS =
-	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my'
+	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my, he'
 
 export default async function accuweather(params: QueryParams): Promise<AccuWeather.Weather> {
 	const html = await fetchPageContent(params)
@@ -224,7 +224,7 @@ async function geolocationFromQuery(query: string): Promise<AccuWeather.Location
 		cookie: '',
 	}
 
-	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${new Date().getTime()}`
+	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${Date.now()}`
 	const resp = await fetch(path, { headers })
 	const result = (await resp?.json()) as AccuWeather.Location[]
 
