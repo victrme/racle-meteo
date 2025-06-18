@@ -29,8 +29,6 @@ npm run deploy
 
 ### Using Deno
 
-Wrangler is not yet fully compatible with Deno and requires some npm. Need to come back here when Wrangler supports Deno. Uses `npx` for now.
-
 ```bash
 deno install
 # ...
