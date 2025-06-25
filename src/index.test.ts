@@ -100,7 +100,7 @@ Deno.test.ignore('Geo: Accuweather', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		STRUCTS.ACCUWEATHER.GEO,
+		STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson,
 	)
 })
 
@@ -112,7 +112,7 @@ Deno.test.ignore('Geo: Foreca', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		STRUCTS.ACCUWEATHER.GEO,
+		STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson,
 	)
 })
 
@@ -124,7 +124,7 @@ Deno.test.ignore('Geo: Simple', async function () {
 			lat: LAT,
 			lon: LON,
 		}),
-		STRUCTS.ACCUWEATHER.GEO,
+		STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson,
 	)
 })
 
