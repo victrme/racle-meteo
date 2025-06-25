@@ -5,7 +5,7 @@ import * as accuweather from './providers/accuweather.ts'
 import toSimpleWeather, { toSimpleLocations } from './providers/simple.ts'
 import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from './types.ts'
 
-import type { AccuWeather, Foreca, QueryParams, Simple } from './types.ts'
+import type { AccuWeather, Foreca, QueryParams } from './types.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -190,6 +190,9 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	if (provider === 'accuweather') {
 		if (params.lang === 'pt') {
 			params.lang = 'pt_pt'
+		}
+		if (params.lang === 'nb') {
+			params.lang = 'no'
 		}
 	}
 
