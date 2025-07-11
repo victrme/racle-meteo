@@ -194,9 +194,13 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 		params.lang = params.lang.slice(0, 2)
 	}
 
-	if (params.debug === 'nodes') debug = 'nodes'
-	else if (params.debug === 'geo') debug = 'geo'
-	else if (params.debug === 'content') debug = 'content'
+	if (params.debug === 'nodes') {
+		debug = 'nodes'
+	} else if (params.debug === 'geo') {
+		debug = 'geo'
+	} else if (params.debug === 'content') {
+		debug = 'content'
+	}
 
 	if (params.query) {
 		lat = undefined

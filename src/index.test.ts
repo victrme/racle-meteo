@@ -92,25 +92,26 @@ Deno.test('Simple data: Auto overrides "all" data', async function () {
 	)
 })
 
-Deno.test.ignore('Geo: Accuweather', async function () {
-	compareTypes(
-		await getJson({
-			provider: 'accuweather',
-			geo: 'true',
-			lat: LAT,
-			lon: LON,
-		}),
-		STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson,
-	)
+Deno.test('Geo: Accuweather', async function () {
+	const resp = await getJson({
+		provider: 'accuweather',
+		geo: 'true',
+		query: 'Paris',
+		// lat: LAT,
+		// lon: LON,
+	})
+
+	compareTypes(resp, STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson)
 })
 
-Deno.test.ignore('Geo: Foreca', async function () {
+Deno.test('Geo: Foreca', async function () {
 	compareTypes(
 		await getJson({
 			provider: 'accuweather',
 			geo: 'true',
-			lat: LAT,
-			lon: LON,
+			query: 'Paris',
+			// lat: LAT,
+			// lon: LON,
 		}),
 		STRUCTS.ACCUWEATHER.GEO as unknown as SomeJson,
 	)
