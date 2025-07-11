@@ -116,6 +116,9 @@ async function main(request: Request) {
 			contentType = 'text/plain'
 			cacheControl = 'no-cache'
 		} //
+		else if (!params.query && !params.lat && !params.lon) {
+			status = 400
+		} //
 		else if (params.provider === '') {
 			const html = await import('./index.html' as string)
 			body = html.default

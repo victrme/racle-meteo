@@ -17,6 +17,12 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 }
 
 export async function geo(params: QueryParams): Promise<AccuWeather.Location[]> {
+	if (!params.query) {
+		if (params.lat && params.lon) {
+			throw new Error('Can only get locations from queries')
+		}
+	}
+
 	return await geolocationFromQuery(params.query)
 }
 
