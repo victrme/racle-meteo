@@ -183,17 +183,15 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 	else if (params.provider === 'foreca') provider = 'foreca'
 	else provider = ''
 
-	if (provider === 'foreca') {
-		params.lang = params.lang.slice(0, 2)
+	if (params.lang === 'pt') {
+		params.lang = 'pt_pt'
+	}
+	if (params.lang === 'nb') {
+		params.lang = 'no'
 	}
 
-	if (provider === 'accuweather') {
-		if (params.lang === 'pt') {
-			params.lang = 'pt_pt'
-		}
-		if (params.lang === 'nb') {
-			params.lang = 'no'
-		}
+	if (provider === 'foreca') {
+		params.lang = params.lang.slice(0, 2)
 	}
 
 	if (params.debug === 'nodes') debug = 'nodes'
