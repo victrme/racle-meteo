@@ -3,7 +3,7 @@
     "tasks": {
         "dev": "npx wrangler dev",
         "deploy": "npx wrangler deploy",
-        "test": "deno test --allow-net --no-check"
+        "test": "deno test --allow-net"
     },
     "fmt": {
         "indentWidth": 4,

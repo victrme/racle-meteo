@@ -11,12 +11,12 @@ export default async function weathercom(params: QueryParams) {
 	return api
 }
 
-function validateJson(json: unknown, params: QueryParams): undefined {
+function validateJson(json: unknown, _params: QueryParams): undefined {
 	// ...
 	console.log(json)
 }
 
-function transformToJson(html: string): unknown {
+function transformToJson(_html: string): unknown {
 	return {
 		meta: {
 			url: find('a.styles--weatherData--Tl3Lx').attr?.href ?? '',
