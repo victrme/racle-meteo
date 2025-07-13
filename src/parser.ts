@@ -1,4 +1,4 @@
-import { Parser } from 'htmlparser2'
+import { Parser } from '../htmlparser2/Parser.ts'
 
 export interface FlatNode {
 	tag: string

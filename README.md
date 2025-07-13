@@ -12,12 +12,9 @@ This service cleverly transforms weather web pages into a usable (and free!) res
 Deploy a [Cloudflare Worker](https://developers.cloudflare.com/workers/) to start using your own racle-meteo. You do not need any API key.
 Migrating to another cloud provider or your own server will remove the automatic location.
 
-### Using Deno
+A slimmed-down version of [htmlparser2 10.0.0](https://github.com/fb55/htmlparser2/) is included. No dependency installation is needed.
 
 ```bash
-deno install
-# ...
-
 deno task dev
 # Task dev npx wrangler dev
 # ⎔ Starting local server...

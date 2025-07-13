@@ -1,15 +1,20 @@
 {
-    "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
-    "tasks": {
-        "dev": "npx wrangler dev",
-        "deploy": "npx wrangler deploy",
-        "test": "deno test --allow-net"
-    },
-    "fmt": {
-        "indentWidth": 4,
-        "useTabs": true,
-        "semiColons": false,
-        "singleQuote": true,
-        "lineWidth": 144
-    }
+	"$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+	"tasks": {
+		"dev": "npx wrangler dev",
+		"deploy": "npx wrangler deploy",
+		"test": "deno test --allow-net"
+	},
+	"fmt": {
+		"indentWidth": 4,
+		"useTabs": true,
+		"semiColons": false,
+		"singleQuote": true,
+		"lineWidth": 144
+	},
+	"lint": {
+		"rules": {
+			"tags": ["recommended"]
+		}
+	}
 }
