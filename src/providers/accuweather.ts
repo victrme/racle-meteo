@@ -209,6 +209,8 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
 
+	console.log(path)
+
 	let html = await (await fetch(path, { headers }))?.text()
 
 	if (html === undefined) {
@@ -234,7 +236,7 @@ async function geolocationFromQuery(query: string): Promise<AccuWeather.Location
 	const resp = await fetch(path, { headers })
 	const result = (await resp?.json()) as AccuWeather.Location[]
 
-	if (result.length > 1) {
+	if (result.length > 0) {
 		return result
 	} else {
 		throw new Error('Location is empty')
