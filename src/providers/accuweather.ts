@@ -124,7 +124,7 @@ function validateJson(json: AccuWeather.Content, params: QueryParams): AccuWeath
 		},
 		geo: geo,
 		now: {
-			icon: json.now.icon.replace('/images/weathericons/', '').replace('.svg', ''),
+			icon: json.now.icon.replace('/images/weathericons/v2a/', '').replace('.svg', ''),
 			temp: parseInt(json.now.temp),
 			feels: parseInt(json.now.feels.replace('RealFeel®', '')),
 			description: json.now.description,
