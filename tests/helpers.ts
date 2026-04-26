@@ -14,6 +14,10 @@ export function paramsStringify(params: OptionalParams) {
 	return Object.entries(params).map(([key, value]) => `&${key}=${value}`).join('').replace('&', '?')
 }
 
+export function getResp(params: OptionalParams, path = '/'): Promise<Response> {
+	return main.fetch(new Request('https://example.com' + path + paramsStringify(params)))
+}
+
 export async function getJson(params: OptionalParams): Promise<SomeJson> {
 	const resp = await main.fetch(new Request('https://example.com/' + paramsStringify(params)))
 	const json = await resp.json()

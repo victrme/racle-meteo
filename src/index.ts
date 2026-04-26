@@ -120,9 +120,14 @@ async function main(request: Request) {
 			status = 400
 		} //
 		else if (params.provider === '') {
-			const html = await import('./index.html' as string)
-			body = html.default
-			contentType = 'text/html'
+			try {
+				const html = await import('./index.html' as string)
+				body = html.default
+				contentType = 'text/html'
+			} catch (_) {
+				body = 'This is racle-meteo'
+				contentType = 'text/plain'
+			}
 		} //
 		else if (params.provider === 'auto') {
 			if (json === undefined) json = await tryNoCatch(accuweather.default, params)
