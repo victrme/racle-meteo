@@ -155,7 +155,7 @@ async function main(request: Request) {
 	} catch (err) {
 		const { message } = err as Error
 		status = message === 'Language is not valid' ? 400 : 503
-		body = `{"status": ${status}, "error": "${message}"}`
+		body = JSON.stringify({ status, error: message })
 		console.error(err)
 	}
 
