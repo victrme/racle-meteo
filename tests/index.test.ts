@@ -1,9 +1,5 @@
-import { QueryParams } from './types.ts'
-import { STRUCTS } from './structs.ts'
-import main from './index.ts'
-
-type OptionalParams = Partial<Record<keyof QueryParams, string>>
-type SomeJson = Record<string, unknown>
+import { assert, compareTypes, getJson, SomeJson } from './helpers.ts'
+import { STRUCTS } from '../src/structs.ts'
 
 const LAT = '48.8582'
 const LON = '2.2944'
@@ -199,41 +195,3 @@ Deno.test('Wrong parameters', async function (test) {
 		// )
 	})
 })
-
-// Helpers
-
-function assert(condition: boolean): void {
-	if (!condition) {
-		throw new Error('Assertion failed')
-	}
-}
-
-function paramsStringify(params: OptionalParams) {
-	return Object.entries(params).map(([key, value]) => `&${key}=${value}`).join('').replace('&', '?')
-}
-
-async function getJson(params: OptionalParams): Promise<SomeJson> {
-	const resp = await main.fetch(new Request('https://example.com/' + paramsStringify(params)))
-	const json = await resp.json()
-	return json
-}
-
-function compareTypes(obj: SomeJson, struct: SomeJson): true {
-	for (const [key, type] of Object.entries(struct)) {
-		if (typeof type === 'object') {
-			compareTypes(
-				obj[key] as SomeJson,
-				type as SomeJson,
-			)
-			continue
-		}
-
-		if (typeof type !== 'string' && typeof obj[key] !== type) {
-			throw `"${key}" should be of type "${type}", but got "${typeof obj[
-				key
-			]}"`
-		}
-	}
-
-	return true
-}
