@@ -106,14 +106,10 @@ export interface Callbacks {
 	onattribentity(codepoint: number): void
 	onattribend(quote: QuoteType, endIndex: number): void
 	onattribname(start: number, endIndex: number): void
-	oncdata(start: number, endIndex: number, endOffset: number): void
 	onclosetag(start: number, endIndex: number): void
-	oncomment(start: number, endIndex: number, endOffset: number): void
-	ondeclaration(start: number, endIndex: number): void
 	onend(): void
 	onopentagend(endIndex: number): void
 	onopentagname(start: number, endIndex: number): void
-	onprocessinginstruction(start: number, endIndex: number): void
 	onselfclosingtag(endIndex: number): void
 	ontext(start: number, endIndex: number): void
 	ontextentity(codepoint: number, endIndex: number): void
@@ -207,17 +203,6 @@ export default class Tokenizer {
 		if (this.running) this.finish()
 	}
 
-	public pause(): void {
-		this.running = false
-	}
-
-	public resume(): void {
-		this.running = true
-		if (this.index < this.buffer.length + this.offset) {
-			this.parse()
-		}
-	}
-
 	private stateText(c: number): void {
 		if (
 			c === CharCodes.Lt ||
@@ -296,21 +281,6 @@ export default class Tokenizer {
 		}
 	}
 
-	private stateCDATASequence(c: number): void {
-		if (c === Sequences.Cdata[this.sequenceIndex]) {
-			if (++this.sequenceIndex === Sequences.Cdata.length) {
-				this.state = State.InCommentLike
-				this.currentSequence = Sequences.CdataEnd
-				this.sequenceIndex = 0
-				this.sectionStart = this.index + 1
-			}
-		} else {
-			this.sequenceIndex = 0
-			this.state = State.InDeclaration
-			this.stateInDeclaration(c) // Reconsume the character
-		}
-	}
-
 	/**
 	 * When we wait for one specific character, we can speed things up
 	 * by skipping through the buffer until we find it.
@@ -346,12 +316,6 @@ export default class Tokenizer {
 	private stateInCommentLike(c: number): void {
 		if (c === this.currentSequence[this.sequenceIndex]) {
 			if (++this.sequenceIndex === this.currentSequence.length) {
-				if (this.currentSequence === Sequences.CdataEnd) {
-					this.cbs.oncdata(this.sectionStart, this.index, 2)
-				} else {
-					this.cbs.oncomment(this.sectionStart, this.index, 2)
-				}
-
 				this.sequenceIndex = 0
 				this.sectionStart = this.index + 1
 				this.state = State.Text
@@ -387,9 +351,6 @@ export default class Tokenizer {
 	private stateBeforeTagName(c: number): void {
 		if (c === CharCodes.ExclamationMark) {
 			this.state = State.BeforeDeclaration
-			this.sectionStart = this.index + 1
-		} else if (c === CharCodes.Questionmark) {
-			this.state = State.InProcessingInstruction
 			this.sectionStart = this.index + 1
 		} else if (this.isTagStartChar(c)) {
 			const lower = c | 0x20
@@ -427,7 +388,7 @@ export default class Tokenizer {
 		} else if (c === CharCodes.Gt) {
 			this.state = State.Text
 		} else {
-			this.state = this.isTagStartChar(c) ? State.InClosingTagName : State.InSpecialComment
+			this.state = this.isTagStartChar(c) ? State.InClosingTagName : State.Text
 			this.sectionStart = this.index
 		}
 	}
@@ -543,26 +504,7 @@ export default class Tokenizer {
 		}
 	}
 	private stateBeforeDeclaration(c: number): void {
-		if (c === CharCodes.OpeningSquareBracket) {
-			this.state = State.CDATASequence
-			this.sequenceIndex = 0
-		} else {
-			this.state = c === CharCodes.Dash ? State.BeforeComment : State.InDeclaration
-		}
-	}
-	private stateInDeclaration(c: number): void {
-		if (c === CharCodes.Gt || this.fastForwardTo(CharCodes.Gt)) {
-			this.cbs.ondeclaration(this.sectionStart, this.index)
-			this.state = State.Text
-			this.sectionStart = this.index + 1
-		}
-	}
-	private stateInProcessingInstruction(c: number): void {
-		if (c === CharCodes.Gt || this.fastForwardTo(CharCodes.Gt)) {
-			this.cbs.onprocessinginstruction(this.sectionStart, this.index)
-			this.state = State.Text
-			this.sectionStart = this.index + 1
-		}
+		this.state = c === CharCodes.Dash ? State.BeforeComment : State.Text
 	}
 	private stateBeforeComment(c: number): void {
 		if (c === CharCodes.Dash) {
@@ -572,14 +514,7 @@ export default class Tokenizer {
 			this.sequenceIndex = 2
 			this.sectionStart = this.index + 1
 		} else {
-			this.state = State.InDeclaration
-		}
-	}
-	private stateInSpecialComment(c: number): void {
-		if (c === CharCodes.Gt || this.fastForwardTo(CharCodes.Gt)) {
-			this.cbs.oncomment(this.sectionStart, this.index, 0)
 			this.state = State.Text
-			this.sectionStart = this.index + 1
 		}
 	}
 	private stateBeforeSpecialS(c: number): void {
@@ -698,10 +633,6 @@ export default class Tokenizer {
 					this.stateInSpecialTag(c)
 					break
 				}
-				case State.CDATASequence: {
-					this.stateCDATASequence(c)
-					break
-				}
 				case State.InAttributeValueDq: {
 					this.stateInAttributeValueDoubleQuotes(c)
 					break
@@ -712,10 +643,6 @@ export default class Tokenizer {
 				}
 				case State.InCommentLike: {
 					this.stateInCommentLike(c)
-					break
-				}
-				case State.InSpecialComment: {
-					this.stateInSpecialComment(c)
 					break
 				}
 				case State.BeforeAttributeName: {
@@ -770,20 +697,12 @@ export default class Tokenizer {
 					this.stateInSelfClosingTag(c)
 					break
 				}
-				case State.InDeclaration: {
-					this.stateInDeclaration(c)
-					break
-				}
 				case State.BeforeDeclaration: {
 					this.stateBeforeDeclaration(c)
 					break
 				}
 				case State.BeforeComment: {
 					this.stateBeforeComment(c)
-					break
-				}
-				case State.InProcessingInstruction: {
-					this.stateInProcessingInstruction(c)
 					break
 				}
 				case State.InEntity: {
@@ -816,13 +735,8 @@ export default class Tokenizer {
 			return
 		}
 
-		if (this.state === State.InCommentLike) {
-			if (this.currentSequence === Sequences.CdataEnd) {
-				this.cbs.oncdata(this.sectionStart, endIndex, 0)
-			} else {
-				this.cbs.oncomment(this.sectionStart, endIndex, 0)
-			}
-		} else if (
+		if (
+			this.state === State.InCommentLike ||
 			this.state === State.InTagName ||
 			this.state === State.BeforeAttributeName ||
 			this.state === State.BeforeAttributeValue ||

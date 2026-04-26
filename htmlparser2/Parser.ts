@@ -185,14 +185,7 @@ export interface Handler {
 		isImplied: boolean,
 	): void
 	ontext(data: string): void
-	oncomment(data: string): void
-	oncdatastart(): void
-	oncdataend(): void
-	oncommentend(): void
-	onprocessinginstruction(name: string, data: string): void
 }
-
-const reNameEnd = /\s|\//
 
 export class Parser implements Callbacks {
 	/** The start index of the last event. */
@@ -437,74 +430,6 @@ export class Parser implements Callbacks {
 		this.attribvalue = ''
 	}
 
-	private getInstructionName(value: string) {
-		const index = value.search(reNameEnd)
-		let name = index < 0 ? value : value.substr(0, index)
-
-		if (this.lowerCaseTagNames) {
-			name = name.toLowerCase()
-		}
-
-		return name
-	}
-
-	/** @internal */
-	ondeclaration(start: number, endIndex: number): void {
-		this.endIndex = endIndex
-		const value = this.getSlice(start, endIndex)
-
-		if (this.cbs.onprocessinginstruction) {
-			const name = this.getInstructionName(value)
-			this.cbs.onprocessinginstruction(`!${name}`, `!${value}`)
-		}
-
-		// Set `startIndex` for next node
-		this.startIndex = endIndex + 1
-	}
-
-	/** @internal */
-	onprocessinginstruction(start: number, endIndex: number): void {
-		this.endIndex = endIndex
-		const value = this.getSlice(start, endIndex)
-
-		if (this.cbs.onprocessinginstruction) {
-			const name = this.getInstructionName(value)
-			this.cbs.onprocessinginstruction(`?${name}`, `?${value}`)
-		}
-
-		// Set `startIndex` for next node
-		this.startIndex = endIndex + 1
-	}
-
-	/** @internal */
-	oncomment(start: number, endIndex: number, offset: number): void {
-		this.endIndex = endIndex
-
-		this.cbs.oncomment?.(this.getSlice(start, endIndex - offset))
-		this.cbs.oncommentend?.()
-
-		// Set `startIndex` for next node
-		this.startIndex = endIndex + 1
-	}
-
-	/** @internal */
-	oncdata(start: number, endIndex: number, offset: number): void {
-		this.endIndex = endIndex
-		const value = this.getSlice(start, endIndex - offset)
-
-		if (!this.htmlMode || this.options.recognizeCDATA) {
-			this.cbs.oncdatastart?.()
-			this.cbs.ontext?.(value)
-			this.cbs.oncdataend?.()
-		} else {
-			this.cbs.oncomment?.(`[CDATA[${value}]]`)
-			this.cbs.oncommentend?.()
-		}
-
-		// Set `startIndex` for next node
-		this.startIndex = endIndex + 1
-	}
-
 	/** @internal */
 	onend(): void {
 		if (this.cbs.onclosetag) {
@@ -605,47 +530,5 @@ export class Parser implements Callbacks {
 		if (chunk) this.write(chunk)
 		this.ended = true
 		this.tokenizer.end()
-	}
-
-	/**
-	 * Pauses parsing. The parser won't emit events until `resume` is called.
-	 */
-	public pause(): void {
-		this.tokenizer.pause()
-	}
-
-	/**
-	 * Resumes parsing after `pause` was called.
-	 */
-	public resume(): void {
-		this.tokenizer.resume()
-
-		while (
-			this.tokenizer.running &&
-			this.writeIndex < this.buffers.length
-		) {
-			this.tokenizer.write(this.buffers[this.writeIndex++])
-		}
-
-		if (this.ended) this.tokenizer.end()
-	}
-
-	/**
-	 * Alias of `write`, for backwards compatibility.
-	 *
-	 * @param chunk Chunk to parse.
-	 * @deprecated
-	 */
-	public parseChunk(chunk: string): void {
-		this.write(chunk)
-	}
-	/**
-	 * Alias of `end`, for backwards compatibility.
-	 *
-	 * @param chunk Optional final chunk to parse.
-	 * @deprecated
-	 */
-	public done(chunk?: string): void {
-		this.end(chunk)
 	}
 }
