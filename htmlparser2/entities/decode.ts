@@ -1,4 +1,4 @@
-import { fromCodePoint, replaceCodePoint } from './decode-codepoint.ts'
+import { replaceCodePoint } from './decode-codepoint.ts'
 import { htmlDecodeTree } from './decode-data-html.ts'
 import { xmlDecodeTree } from './decode-data-xml.ts'
 
@@ -461,9 +461,10 @@ export class EntityDecoder {
  */
 function getDecoder(decodeTree: Uint16Array) {
 	let returnValue = ''
+
 	const decoder = new EntityDecoder(
 		decodeTree,
-		(data) => (returnValue += fromCodePoint(data)),
+		(data) => (returnValue += String.fromCodePoint(data)),
 	)
 
 	return function decodeWithTrie(

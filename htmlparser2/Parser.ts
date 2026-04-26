@@ -1,5 +1,4 @@
 import Tokenizer, { type Callbacks, QuoteType } from './Tokenizer.ts'
-import { fromCodePoint } from './entities/decode-codepoint.ts'
 
 const formTags = new Set([
 	'input',
@@ -258,7 +257,7 @@ export class Parser implements Callbacks {
 	/** @internal */
 	ontextentity(cp: number, endIndex: number): void {
 		this.endIndex = endIndex - 1
-		this.cbs.ontext?.(fromCodePoint(cp))
+		this.cbs.ontext?.(String.fromCodePoint(cp))
 		this.startIndex = endIndex
 	}
 
@@ -416,7 +415,7 @@ export class Parser implements Callbacks {
 
 	/** @internal */
 	onattribentity(cp: number): void {
-		this.attribvalue += fromCodePoint(cp)
+		this.attribvalue += String.fromCodePoint(cp)
 	}
 
 	/** @internal */
