@@ -4,18 +4,15 @@ import { STRUCTS } from '../src/structs.ts'
 const LAT = '48.8582'
 const LON = '2.2944'
 
-// Simple data
-
-Deno.test('Simple data', async function (test) {
+Deno.test('Providers', async function (test) {
 	await test.step('Accuweather', async function () {
 		compareTypes(
 			await getJson({
 				provider: 'accuweather',
-				data: 'simple',
 				lat: LAT,
 				lon: LON,
 			}),
-			STRUCTS.SIMPLE.WEATHER,
+			STRUCTS.FORECA.WEATHER,
 		)
 	})
 
@@ -23,7 +20,17 @@ Deno.test('Simple data', async function (test) {
 		compareTypes(
 			await getJson({
 				provider: 'foreca',
-				data: 'simple',
+				lat: LAT,
+				lon: LON,
+			}),
+			STRUCTS.FORECA.WEATHER,
+		)
+	})
+
+	await test.step('Auto', async function () {
+		compareTypes(
+			await getJson({
+				provider: 'auto',
 				lat: LAT,
 				lon: LON,
 			}),
@@ -31,15 +38,14 @@ Deno.test('Simple data', async function (test) {
 		)
 	})
 
-	await test.step('Auto (always "simple")', async function () {
-		compareTypes(
-			await getJson({
-				provider: 'auto',
-				data: 'all',
-				lat: LAT,
-				lon: LON,
-			}),
-			STRUCTS.SIMPLE.WEATHER,
-		)
+	await test.step('Wunderground', async function () {
+		// compareTypes(
+		// 	await getJson({
+		// 		provider: 'wunderground',
+		// 		lat: LAT,
+		// 		lon: LON,
+		// 	}),
+		// 	STRUCTS.ACCUWEATHER.WEATHER,
+		// )
 	})
 })

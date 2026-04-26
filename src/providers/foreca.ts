@@ -3,7 +3,7 @@ import parser, { find, findAll, getAll, next, prev, prevAll } from '../parser.ts
 import type { FlatNode } from '../parser.ts'
 import type { Foreca, QueryParams } from '../types.ts'
 
-const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
+export const FORECA_LANGS = 'en, bg, cs, da, de, et, el, es, fr, hr, it, lv, hu, nl, pl, pt, ro, ru, sk, sv, uk'
 
 let pageURL = ''
 let foundCity = ''
