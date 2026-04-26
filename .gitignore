@@ -1,3 +1,4 @@
 .wrangler
 .zed
 node_modules
+coverage
