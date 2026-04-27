@@ -3,7 +3,7 @@
     "tasks": {
         "dev": "npx wrangler dev",
         "deploy": "npx wrangler deploy",
-        "test": "deno test tests/** --allow-net --allow-read --fail-fast --parallel --coverage --reporter=dot"
+        "test": "deno test tests/** --allow-net --fail-fast --parallel --coverage --reporter=dot"
     },
     "fmt": {
         "indentWidth": 4,
