@@ -283,8 +283,8 @@ export class Parser implements Callbacks {
 
 		if (impliesClose) {
 			while (this.stack.length > 0 && impliesClose.has(this.stack[0])) {
-				const element = this.stack.shift()!
-				this.cbs.onclosetag?.(element, true)
+				const element = this.stack.shift()
+				this.cbs.onclosetag?.(element || '', true)
 			}
 		}
 		if (!this.isVoidElement(name)) {
@@ -347,9 +347,9 @@ export class Parser implements Callbacks {
 			const pos = this.stack.indexOf(name)
 			if (pos !== -1) {
 				for (let index = 0; index <= pos; index++) {
-					const element = this.stack.shift()!
+					const element = this.stack.shift()
 					// We know the stack has sufficient elements.
-					this.cbs.onclosetag?.(element, index !== pos)
+					this.cbs.onclosetag?.(element || '', index !== pos)
 				}
 			} else if (this.htmlMode && name === 'p') {
 				// Implicit open before close

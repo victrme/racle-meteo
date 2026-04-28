@@ -1,12 +1,12 @@
 import parser, { find, findAll, getAll } from '../parser.ts'
 
+import type { Accuweather, QueryParams } from '../types/index.ts'
 import type { FlatNode } from '../parser.ts'
-import type { AccuWeather, QueryParams } from '../types.ts'
 
 export const ACCUWEATHER_LANGS =
 	'en_us, es, fr, da, pt_pt, nl, no, it, de, sv, fi, zh_hk, zh_cn, zh_tw, es_ar, es_mx, sk, ro, cs, hu, pl, ca, pt_br, hi, ru, ar, el, en_gb, ja, ko, tr, fr_ca, hr, sl, uk, id, bg, et, kk, lt, lv, mk, ms, tl, sr, th, vi, fa, bn, bs, is, sw, ur, sr_me, uz, az, ta, gu, kn, te, mr, pa, my, he'
 
-export default async function accuweather(params: QueryParams): Promise<AccuWeather.Weather> {
+export default async function accuweather(params: QueryParams): Promise<Accuweather.Weather> {
 	const html = await fetchPageContent(params)
 	await parser(html)
 
@@ -16,7 +16,7 @@ export default async function accuweather(params: QueryParams): Promise<AccuWeat
 	return api
 }
 
-export async function geo(params: QueryParams): Promise<AccuWeather.Location[]> {
+export async function geo(params: QueryParams): Promise<Accuweather.Location[]> {
 	if (!params.query) {
 		if (params.lat && params.lon) {
 			throw new Error('Can only get locations from queries')
@@ -26,7 +26,7 @@ export async function geo(params: QueryParams): Promise<AccuWeather.Location[]> 
 	return await geolocationFromQuery(params.query)
 }
 
-export async function debugContent(params: QueryParams): Promise<AccuWeather.Content> {
+export async function debugContent(params: QueryParams): Promise<Accuweather.Content> {
 	const html = await fetchPageContent(params)
 	await parser(html)
 	return transformToJson()
@@ -46,11 +46,11 @@ export async function debugNodes(params: QueryParams): Promise<FlatNode[]> {
 
 // Fn
 
-function validateJson(json: AccuWeather.Content, params: QueryParams): AccuWeather.Weather {
+function validateJson(json: Accuweather.Content, params: QueryParams): Accuweather.Weather {
 	let date = new Date()
 
-	const hourly: AccuWeather.Weather['hourly'] = []
-	const daily: AccuWeather.Weather['daily'] = []
+	const hourly: Accuweather.Weather['hourly'] = []
+	const daily: Accuweather.Weather['daily'] = []
 
 	// 1. Hourly
 	date = new Date()
@@ -107,7 +107,7 @@ function validateJson(json: AccuWeather.Content, params: QueryParams): AccuWeath
 	// 4. Geo
 	const { pathname } = new URL(json.meta.url)
 	const [_, __, country, city] = pathname.split('/')
-	const geo: AccuWeather.Weather['geo'] = {
+	const geo: Accuweather.Weather['geo'] = {
 		city: decodeURIComponent(city),
 		country: decodeURIComponent(country.toUpperCase()),
 	}
@@ -138,7 +138,7 @@ function validateJson(json: AccuWeather.Content, params: QueryParams): AccuWeath
 	}
 }
 
-function transformToJson(): AccuWeather.Content {
+function transformToJson(): Accuweather.Content {
 	const sun = findAll('sunrise-sunset__times-value')
 
 	const daily = {
@@ -223,7 +223,7 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	return html
 }
 
-async function geolocationFromQuery(query: string): Promise<AccuWeather.Location[]> {
+async function geolocationFromQuery(query: string): Promise<Accuweather.Location[]> {
 	const headers = {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
 		Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -234,7 +234,7 @@ async function geolocationFromQuery(query: string): Promise<AccuWeather.Location
 
 	const path = `https://www.accuweather.com/web-api/autocomplete?query=${query}&language=en-us&r=${Date.now()}`
 	const resp = await fetch(path, { headers })
-	const result = (await resp?.json()) as AccuWeather.Location[]
+	const result = (await resp?.json()) as Accuweather.Location[]
 
 	if (result.length > 0) {
 		return result

@@ -1,7 +1,7 @@
-import type { AccuWeather, Foreca, QueryParams, Simple } from '../types.ts'
-import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from '../types.ts'
+import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from '../types/assert.ts'
+import type { Accuweather, Foreca, QueryParams, Simple } from '../types/index.ts'
 
-export default function toSimpleWeather(json: AccuWeather.Weather | Foreca.Weather, params: QueryParams): Simple.Weather {
+export function toSimpleWeather(json: Accuweather.Weather | Foreca.Weather, params: QueryParams): Simple.Weather {
 	const { provider, unit } = params
 
 	const simple: Simple.Weather = {
@@ -57,7 +57,7 @@ export default function toSimpleWeather(json: AccuWeather.Weather | Foreca.Weath
 	return simple
 }
 
-export function toSimpleLocations(json: AccuWeather.Location[] | Foreca.Location[]): Simple.Locations {
+export function toSimpleLocations(json: Accuweather.Location[] | Foreca.Location[]): Simple.Locations {
 	if (isAccuweatherLocation(json)) {
 		return json.map((loc) => ({ name: loc.name, detail: loc.longName }))
 	}

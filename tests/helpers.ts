@@ -1,5 +1,5 @@
 import main from '../src/index.ts'
-import type { AccuWeather, Foreca, QueryParams } from '../src/types.ts'
+import type { Accuweather, Foreca, QueryParams } from '../src/types/index.ts'
 
 export type OptionalParams = Partial<Record<keyof QueryParams, string>>
 export type SomeJson = Record<string, unknown>
@@ -48,6 +48,6 @@ export function isReturningForeca(json: unknown): json is Foreca.Weather {
 	return (json as Foreca.Weather)?.meta?.provider === 'foreca'
 }
 
-export function isReturningAccuweather(json: unknown): json is AccuWeather.Weather {
-	return (json as AccuWeather.Weather)?.meta?.provider === 'accuweather'
+export function isReturningAccuweather(json: unknown): json is Accuweather.Weather {
+	return (json as Accuweather.Weather)?.meta?.provider === 'accuweather'
 }

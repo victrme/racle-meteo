@@ -1,11 +1,12 @@
 import './parser.ts'
-import * as foreca from './providers/foreca.ts'
-import * as weathercom from './providers/weathercom.ts'
-import * as accuweather from './providers/accuweather.ts'
-import toSimpleWeather, { toSimpleLocations } from './providers/simple.ts'
-import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from './types.ts'
 
-import type { AccuWeather, Foreca, QueryParams } from './types.ts'
+import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from './types/assert.ts'
+import { toSimpleLocations, toSimpleWeather } from './providers/simple.ts'
+import * as accuweather from './providers/accuweather.ts'
+import * as weathercom from './providers/weathercom.ts'
+import * as foreca from './providers/foreca.ts'
+
+import type { Accuweather, Foreca, QueryParams } from './types/index.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().
@@ -57,7 +58,7 @@ async function main(request: Request) {
 	let status = 200
 	let contentType = 'application/json'
 	let cacheControl = 'public, max-age=1800'
-	let json: AccuWeather.Weather | Foreca.Weather | undefined = undefined
+	let json: Accuweather.Weather | Foreca.Weather | undefined = undefined
 
 	if (params.debug === 'content') {
 		if (params.provider === 'accuweather') {
@@ -233,7 +234,7 @@ function sanitizeParams(params: Record<string, string>): QueryParams {
 }
 
 function isEncoded(str: string) {
-	return typeof str == 'string' && decodeURIComponent(str) !== str
+	return typeof str === 'string' && decodeURIComponent(str) !== str
 }
 
 async function tryNoCatch<Result>(fn: (_: QueryParams) => Promise<Result>, args: QueryParams): Promise<Result | undefined> {
