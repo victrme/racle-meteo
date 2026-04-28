@@ -1,20 +1,42 @@
 {
-    "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
-    "tasks": {
-        "dev": "npx wrangler dev",
-        "deploy": "npx wrangler deploy",
-        "test": "deno test tests/** --allow-net --fail-fast --parallel --coverage --reporter=dot"
-    },
-    "fmt": {
-        "indentWidth": 4,
-        "useTabs": true,
-        "semiColons": false,
-        "singleQuote": true,
-        "lineWidth": 144
-    },
-    "lint": {
-        "rules": {
-            "tags": ["recommended"]
-        }
-    }
+	"$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+	"tasks": {
+		"dev": "npx wrangler dev",
+		"deploy": "npx wrangler deploy",
+		"test": "deno test tests/** --allow-net --fail-fast --parallel --coverage --reporter=dot"
+	},
+	"fmt": {
+		"indentWidth": 4,
+		"useTabs": true,
+		"semiColons": false,
+		"singleQuote": true,
+		"lineWidth": 144
+	},
+	"lint": {
+		"rules": {
+			"tags": ["recommended"],
+			"include": [
+				"default-param-last",
+				"eqeqeq",
+				"no-eval",
+				"no-external-import",
+				"no-implicit-declare-namespace-export",
+				"no-import-prefix",
+				"no-inferrable-types",
+				"no-non-null-asserted-optional-chain",
+				"no-self-compare",
+				"no-slow-types",
+				"no-sparse-arrays",
+				"no-sync-fn-in-async-fn",
+				"no-throw-literal",
+				"no-useless-rename",
+				"single-var-declarator"
+			],
+			"exclude": [
+				"camelcase",
+				"prefer-ascii",
+				"no-non-null-assertion"
+			]
+		}
+	}
 }
