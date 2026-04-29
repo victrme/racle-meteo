@@ -1,5 +1,5 @@
 import { compareTypes, getJson } from './helpers.ts'
-import { STRUCTS } from '../src/structs.ts'
+import { STRUCTS } from '../src/types/structs.ts'
 
 const LAT = '48.8582'
 const LON = '2.2944'

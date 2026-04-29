@@ -1,7 +1,7 @@
 import { assert, compareTypes, getJson, isReturningAccuweather, isReturningForeca } from './helpers.ts'
 import { ACCUWEATHER_LANGS } from '../src/providers/accuweather.ts'
 import { FORECA_LANGS } from '../src/providers/foreca.ts'
-import { STRUCTS } from '../src/structs.ts'
+import { STRUCTS } from '../src/types/structs.ts'
 
 const LAT = '48.8582'
 const LON = '2.2944'

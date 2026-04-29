@@ -6,7 +6,7 @@ import * as accuweather from './providers/accuweather.ts'
 import * as weathercom from './providers/weathercom.ts'
 import * as foreca from './providers/foreca.ts'
 
-import type { Accuweather, Foreca, QueryParams } from './types/index.ts'
+import type { Accuweather, Foreca, QueryParams } from './types/interface.ts'
 
 /**
  * Racle-météo can be called like a Cloudflare Worker, using fetch().

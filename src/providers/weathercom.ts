@@ -1,5 +1,5 @@
 import parser, { find } from '../parser.ts'
-import type { QueryParams } from '../types/index.ts'
+import type { QueryParams } from '../types/interface.ts'
 
 export default async function weathercom(params: QueryParams) {
 	const html = await fetchPageContent(params)

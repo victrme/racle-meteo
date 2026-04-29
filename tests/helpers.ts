@@ -1,5 +1,5 @@
 import main from '../src/index.ts'
-import type { Accuweather, Foreca, QueryParams } from '../src/types/index.ts'
+import type { Accuweather, Foreca, QueryParams } from '../src/types/interface.ts'
 
 export type OptionalParams = Partial<Record<keyof QueryParams, string>>
 export type SomeJson = Record<string, unknown>

@@ -1,5 +1,5 @@
 import { isAccuweather, isAccuweatherLocation, isForeca, isForecaLocation } from '../types/assert.ts'
-import type { Accuweather, Foreca, QueryParams, Simple } from '../types/index.ts'
+import type { Accuweather, Foreca, QueryParams, Simple } from '../types/interface.ts'
 
 export function toSimpleWeather(json: Accuweather.Weather | Foreca.Weather, params: QueryParams): Simple.Weather {
 	const { provider, unit } = params

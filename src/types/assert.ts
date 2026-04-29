@@ -1,4 +1,4 @@
-import type { Accuweather, Foreca } from './index.ts'
+import type { Accuweather, Foreca } from './interface.ts'
 
 export function isAccuweather(json: Accuweather.Weather | Foreca.Weather): json is Accuweather.Weather {
 	return json?.meta?.provider === 'accuweather'

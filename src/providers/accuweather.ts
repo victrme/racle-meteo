@@ -1,6 +1,6 @@
 import parser, { find, findAll, getAll } from '../parser.ts'
 
-import type { Accuweather, QueryParams } from '../types/index.ts'
+import type { Accuweather, QueryParams } from '../types/interface.ts'
 import type { FlatNode } from '../parser.ts'
 
 export const ACCUWEATHER_LANGS =
