@@ -38,5 +38,6 @@
 				"no-non-null-assertion"
 			]
 		}
-	}
+	},
+	"exclude": [".wrangler"]
 }
