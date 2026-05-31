@@ -96,19 +96,19 @@ export const SIMPLE_ICON_NAMES = Object.freeze([
 
 export const SIMPLE_ICONS = Object.freeze({
 	clearsky: {
-		accuweather: '1, 2, 33, 34',
+		accuweather: '01, 02, 33, 34',
 		foreca: 'd000, d100, n000, n100',
 	},
 	fewclouds: {
-		accuweather: '3, 4, 5, 35, 36, 37',
+		accuweather: '03, 04, 05, 35, 36, 37',
 		foreca: 'd200, d500, n200, n500',
 	},
 	brokenclouds: {
-		accuweather: '6, 7, 38',
+		accuweather: '06, 07, 38',
 		foreca: 'd300, n300',
 	},
 	overcastclouds: {
-		accuweather: '8',
+		accuweather: '08',
 		foreca: 'd400, n400',
 	},
 	sunnyrain: {
