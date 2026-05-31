@@ -159,7 +159,7 @@ function transformToJson(): Accuweather.Content {
 			url: 'https://accuweather.com' + (find('header-loc')?.attr?.href ?? ''),
 		},
 		now: {
-			icon: find('header-weather-icon')?.attr?.['data-src'] ?? '',
+			icon: find('header-weather-icon')?.attr?.src ?? '',
 			temp: find('after-temp')?.text,
 			feels: find('real-feel')?.text,
 			description: find('phrase')?.text,
@@ -208,8 +208,6 @@ async function fetchPageContent(params: QueryParams): Promise<string> {
 	} else {
 		path += `${lang}/search-locations?query=${lat},${lon}`
 	}
-
-	console.log(path)
 
 	let html = await (await fetch(path, { headers }))?.text()
 
